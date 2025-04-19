@@ -1,0 +1,222 @@
+---
+title: Three.js Physics Simulation
+description: Interactive 3D physics simulation with Three.js and Cannon.js
+tech: ["Three.js", "Cannon.js", "JavaScript", "WebGL"]
+---
+
+# Three.js Physics Simulation
+
+This project showcases an interactive 3D physics simulation using Three.js for rendering and Cannon.js for physics calculations.
+
+## Project Overview
+
+I built this physics playground to demonstrate how web browsers can run complex 3D simulations with realistic physics. Users can create objects, apply forces, and watch how they interact in a physically accurate environment.
+
+<Demo src="https://threejs-physics-demo.vercel.app" height="400px" />
+
+## Key Features
+
+- Real-time 3D physics simulation
+- Multiple object types (cubes, spheres, cylinders)
+- Adjustable physical properties (mass, friction, restitution)
+- Force application and impulses
+- Collision detection and response
+- Camera controls to view from any angle
+
+## Technical Implementation
+
+### Scene Setup
+
+First, we need to set up both the Three.js scene for rendering and the Cannon.js world for physics:
+
+```javascript
+// Set up Three.js
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Set up Cannon.js
+const world = new CANNON.World();
+world.gravity.set(0, -9.82, 0); // Earth gravity
+world.broadphase = new CANNON.NaiveBroadphase();
+world.solver.iterations = 10;
+```
+
+### Creating Physics Objects
+
+For each visual object, we need both a Three.js mesh and a corresponding Cannon.js body:
+
+```javascript
+function createBox(width, height, depth, position, mass = 1) {
+  // Three.js mesh
+  const geometry = new THREE.BoxGeometry(width, height, depth);
+  const material = new THREE.MeshStandardMaterial({ color: 0x3498db });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.copy(position);
+  scene.add(mesh);
+  
+  // Cannon.js body
+  const shape = new CANNON.Box(new CANNON.Vec3(width/2, height/2, depth/2));
+  const body = new CANNON.Body({ mass, shape });
+  body.position.copy(position);
+  world.addBody(body);
+  
+  return { mesh, body };
+}
+```
+
+### Synchronizing Physics and Rendering
+
+In the animation loop, we update the physics world and then sync the Three.js objects to match:
+
+```javascript
+const objects = [];
+// Add objects to the array...
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  // Step the physics world
+  world.step(1/60);
+  
+  // Update Three.js meshes to match Cannon.js bodies
+  objects.forEach(obj => {
+    obj.mesh.position.copy(obj.body.position);
+    obj.mesh.quaternion.copy(obj.body.quaternion);
+  });
+  
+  renderer.render(scene, camera);
+}
+
+animate();
+```
+
+### Interactive Canvas
+
+Here's a simplified version of the physics engine:
+
+<Canvas id="physicsDemo" height="300px" />
+
+<script>
+{`
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('physicsDemo');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width = canvas.offsetWidth;
+      const height = canvas.height = canvas.offsetHeight;
+      
+      // Simple physics objects
+      const boxes = [];
+      
+      // Create some initial boxes
+      for (let i = 0; i < 10; i++) {
+        boxes.push({
+          x: Math.random() * width,
+          y: Math.random() * height * 0.5,
+          width: 20 + Math.random() * 30,
+          height: 20 + Math.random() * 30,
+          vx: -1 + Math.random() * 2,
+          vy: -1 + Math.random() * 2,
+          color: \`hsl(\${Math.random() * 360}, 70%, 60%)\`
+        });
+      }
+      
+      function update() {
+        ctx.clearRect(0, 0, width, height);
+        
+        // Draw ground
+        ctx.fillStyle = '#333';
+        ctx.fillRect(0, height - 20, width, 20);
+        
+        // Update and draw boxes
+        boxes.forEach(box => {
+          // Apply gravity
+          box.vy += 0.1;
+          
+          // Update position
+          box.x += box.vx;
+          box.y += box.vy;
+          
+          // Bounce off walls
+          if (box.x < 0 || box.x + box.width > width) {
+            box.vx *= -0.8;
+            box.x = box.x < 0 ? 0 : width - box.width;
+          }
+          
+          // Bounce off ground
+          if (box.y + box.height > height - 20) {
+            box.vy *= -0.8;
+            box.y = height - 20 - box.height;
+            
+            // Apply friction
+            box.vx *= 0.95;
+          }
+          
+          // Draw the box
+          ctx.fillStyle = box.color;
+          ctx.fillRect(box.x, box.y, box.width, box.height);
+        });
+        
+        requestAnimationFrame(update);
+      }
+      
+      // Allow adding new boxes by clicking
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        
+        boxes.push({
+          x: clickX - 15,
+          y: clickY - 15,
+          width: 30,
+          height: 30,
+          vx: -2 + Math.random() * 4,
+          vy: -2,
+          color: \`hsl(\${Math.random() * 360}, 70%, 60%)\`
+        });
+      });
+      
+      update();
+    }
+  });
+`}
+</script>
+
+## Performance Optimizations
+
+When dealing with complex physics simulations, performance becomes critical. Here are some techniques I used to optimize the simulation:
+
+1. **Broadphase collision detection** - Using spatial partitioning to reduce the number of potential collisions to check
+
+2. **Sleep states** - Allowing objects at rest to "sleep" and skip physics calculations
+
+3. **Simplified collision shapes** - Using simpler collision geometries than visual geometries
+
+4. **Web Workers** - Moving physics calculations off the main thread for complex scenes
+
+5. **Instancing** - Using THREE.InstancedMesh for rendering many similar objects
+
+## Challenges and Solutions
+
+The biggest challenge was synchronizing the physics world with the rendered world without visual glitches. I solved this with:
+
+- Interpolation between physics steps for smoother visuals
+- Consistent time steps for the physics engine
+- Proper handling of collision events
+
+## Future Enhancements
+
+I plan to extend this project with:
+
+- Soft body physics simulation
+- Fluid dynamics
+- VR interaction support
+- Mobile touch controls
+
+## Conclusion
+
+This project demonstrates how modern web technologies can create engaging, interactive 3D experiences with realistic physics. Feel free to explore the code and experiment with the demo above!

@@ -1,0 +1,47 @@
+---
+title: Canvas Demo
+excerpt: Testing an interactive canvas with built-in animations
+date: 2025-03-17
+category: Testing
+readTime: 1 min read
+---
+
+# Canvas Demo
+
+This is a test of the interactive Canvas component with a built-in animation.
+
+## Bouncing Ball Demo
+
+The following Canvas element shows a simple bouncing ball animation:
+
+<Canvas id="bouncingBall" height="200px" />
+
+This animation is implemented directly in the Canvas component, so it doesn't rely on external script tags.
+
+## Physics Demo
+
+This Canvas shows a more complex physics simulation with boxes that respond to gravity:
+
+<Canvas id="physicsDemo" height="300px" />
+
+You can click on the canvas to add more boxes!
+
+## How It Works
+
+The Canvas component uses React's `useEffect` hook to set up the animation:
+
+```javascript
+useEffect(() => {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext("2d");
+  
+  function draw() {
+    // Drawing code here
+    requestAnimationFrame(draw);
+  }
+  
+  draw();
+}, [id]);
+```
+
+This approach makes the interactive demos more reliable in a React environment.

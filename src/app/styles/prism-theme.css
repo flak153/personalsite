@@ -1,0 +1,225 @@
+/**
+ * Customized theme for Prism.js syntax highlighting
+ * Based on VS Code Dark+ with modifications
+ */
+
+:root {
+  --background: #1e1e1e;
+  --foreground: #d4d4d4;
+  --comment: #6a9955;
+  --string: #ce9178;
+  --number: #b5cea8;
+  --keyword: #569cd6;
+  --function: #dcdcaa;
+  --operator: #d4d4d4;
+  --class: #4ec9b0;
+  --variable: #9cdcfe;
+  --property: #9cdcfe;
+  --punctuation: #d4d4d4;
+  --tag: #569cd6;
+  --selector: #d7ba7d;
+  --attr-name: #9cdcfe;
+  --attr-value: #ce9178;
+  --line-number-color: #858585;
+  --line-number-bg: #1e1e1e;
+  --line-highlight-bg: #343434;
+  --line-highlight-border: #ffcc00;
+}
+
+pre[class*="language-"],
+code[class*="language-"] {
+  color: var(--foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  line-height: 1.5;
+  tab-size: 2;
+  hyphens: none;
+}
+
+pre[class*="language-"] {
+  padding: 1em;
+  margin: 1.5em 0;
+  overflow: auto;
+  background: var(--background);
+  border-radius: 0.5rem;
+  border: 1px solid #444444;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .2em .4em;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #ffcc00;
+  white-space: normal;
+}
+
+/* Token colors */
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--comment);
+}
+
+.token.punctuation {
+  color: var(--punctuation);
+}
+
+.token.namespace,
+.token.deleted {
+  color: #e06c75;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.constant,
+.token.symbol {
+  color: var(--tag);
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: var(--string);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: var(--operator);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: var(--keyword);
+}
+
+.token.function {
+  color: var(--function);
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: var(--variable);
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* Line highlighting */
+.line-highlight {
+  background: var(--line-highlight-bg);
+  border-left: 3px solid var(--line-highlight-border);
+}
+
+/* Line numbers */
+pre[class*="language-"].line-numbers {
+  position: relative;
+  padding-left: 3.8em;
+  counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+  position: relative;
+  white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  font-size: 100%;
+  left: -3.8em;
+  width: 3em; /* works for line-numbers below 1000 lines */
+  letter-spacing: -1px;
+  border-right: 1px solid #444;
+  user-select: none;
+}
+
+.line-numbers-rows > span {
+  display: block;
+  counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+  content: counter(linenumber);
+  color: var(--line-number-color);
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+}
+
+/* Additional language support */
+/* CSS */
+.language-css .token.property {
+  color: var(--property);
+}
+
+/* JavaScript */
+.language-javascript .token.boolean,
+.language-javascript .token.number {
+  color: var(--number);
+}
+
+.language-javascript .token.class-name {
+  color: var(--class);
+}
+
+/* TypeScript */
+.language-typescript .token.boolean,
+.language-typescript .token.number {
+  color: var(--number);
+}
+
+.language-typescript .token.class-name {
+  color: var(--class);
+}
+
+/* JSON */
+.language-json .token.property {
+  color: var(--property);
+}
+
+/* Dark scrollbar for code blocks */
+pre[class*="language-"]::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-track {
+  background: #222;
+  border-radius: 0 0 4px 4px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
