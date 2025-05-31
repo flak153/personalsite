@@ -1,0 +1,39 @@
+---
+title: "Simple PGP Tool"
+description: "A simple tool for PGP encryption and decryption of messages using OpenPGP.js."
+tech: ["Next.js", "TypeScript", "OpenPGP.js", "React"]
+featured: true
+---
+
+import PGPTool from '@/components/PGPTool';
+
+This page hosts an interactive tool for performing PGP (Pretty Good Privacy) operations directly in your browser. It uses the [OpenPGP.js](https://github.com/openpgpjs/openpgpjs) library for all cryptographic functions.
+
+<PGPTool />
+
+## How to Use This Tool
+
+### 1. Generating a New PGP Key Pair (Optional)
+If you don't have a PGP key pair, you can generate one using the "Generate New Key Pair" section:
+- **Your Name & Email:** Enter your name and email address. These will be associated with your new key.
+- **New Key Passphrase:** Create a strong passphrase to protect your new private key. **Remember this passphrase!** You'll need it to use the private key.
+- Click "Generate Keys".
+- Your new armored Public Key and Private Key will be displayed in text areas.
+- **Important:** Securely save your Private Key and its passphrase. The private key is sensitive and should be kept secret. The Public Key can be shared with others so they can encrypt messages for you.
+
+### 2. Encrypting a Message
+To encrypt a message for someone, use the "Encrypt Message" section:
+- **Recipient's PGP Public Key:** Paste the recipient's PGP public key into this field. If you just generated a key pair, you can copy your new public key here.
+- **Plaintext Message to Encrypt:** Type or paste the plaintext message you want to encrypt.
+- Click "Encrypt".
+- The encrypted PGP message (armored text) will appear in the "Result" area at the bottom of the tool. You can copy this and send it to the recipient.
+
+### 3. Decrypting a Message
+To decrypt a message that was encrypted for you, use the "Decrypt Message" section:
+- **Your PGP Private Key:** Paste your PGP private key into this field.
+- **Private Key Passphrase:** If your private key is protected by a passphrase (which it should be!), enter it here.
+- **PGP Encrypted Message:** Paste the full PGP encrypted message (the armored text, usually starting with `-----BEGIN PGP MESSAGE-----`) into this field.
+- Click "Decrypt".
+- The decrypted plaintext message will appear in the "Result" area at the bottom of the tool.
+
+**Note on Security:** While this tool uses a reputable library (OpenPGP.js) and performs operations in your browser (client-side), always be mindful of the environment where you handle private keys and sensitive data. For highly sensitive operations, dedicated PGP software on a secure machine is recommended. This tool is provided for convenience and demonstration purposes.

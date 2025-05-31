@@ -6,6 +6,7 @@ import PlaceholderAnimation from './animations/PlaceholderAnimation';
 import GCEvolutionVisualization from './animations/GCEvolutionVisualization';
 import TricolorAbstractionVisualization from './animations/TricolorAbstractionVisualization';
 import MarkCompactVisualization from './animations/MarkCompactVisualization';
+import PGPTool from './PGPTool'; // Import PGPTool
 import dynamic from 'next/dynamic';
 
 // Dynamically import MermaidDiagram to avoid SSR issues
@@ -247,6 +248,7 @@ export const components = {
   TableOfContents,
   Callout,
   Mermaid: MermaidDiagram, // Added Mermaid component
+  PGPTool, // Add PGPTool to components
   
   ApartmentBuildingMemoryAnalogy,
   PlaceholderAnimation,

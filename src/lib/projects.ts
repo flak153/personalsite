@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 export interface Project {
   slug: string;
   title: string;
@@ -9,47 +12,91 @@ export interface Project {
   featured?: boolean; // To mark projects for the homepage
 }
 
-// Placeholder project data - you can replace this with your actual projects
-const allProjectsData: Project[] = [
-  {
-    slug: "clean-canvas-demo",
-    title: "Clean Canvas Demo",
-    description: "An interactive demonstration of advanced garbage collection concepts, built with Next.js and Framer Motion.",
-    tech: ["Next.js", "TypeScript", "Framer Motion", "Tailwind CSS"],
-    imageUrl: "/project-images/clean-canvas.jpg", // Example path, replace with actual
-    demoUrl: "/blog/clean-canvas-demo", // Or an external link
-    repoUrl: "https://github.com/yourusername/yourprojectrepo", // Example
-    featured: true,
-  },
-  {
-    slug: "holy-grail-c4",
-    title: "C4 Model for GC",
-    description: "Exploring the C4 model for visualizing the architecture of a garbage collection system.",
-    tech: ["Diagrams", "Software Architecture", "C4 Model"],
-    imageUrl: "/project-images/c4-model.jpg", // Example path
-    // demoUrl: "#",
-    // repoUrl: "#",
-    featured: true,
-  },
-  {
-    slug: "portfolio-site-v2",
-    title: "Personal Portfolio v2",
-    description: "The very site you are on! Built with Next.js, Tailwind CSS, and MDX for blog content.",
-    tech: ["Next.js", "TypeScript", "Tailwind CSS", "MDX"],
-    // imageUrl: "/project-images/portfolio.jpg",
-    // demoUrl: "/",
-    // repoUrl: "https://github.com/yourusername/personalsite",
-    featured: false,
-  },
-];
-
 export function getAllProjects(): Project[] {
-  // In a real scenario, this might read from MDX files or a database
-  return allProjectsData.sort((a, b) => (a.featured === b.featured ? 0 : a.featured ? -1 : 1));
+  const projectsDir = path.join(process.cwd(), "src/app/projects");
+  
+  let files: string[];
+  try {
+    files = fs.readdirSync(projectsDir, { withFileTypes: true })
+      .filter(dirent => dirent.isFile() && !dirent.name.startsWith('.') && /\.(mdx|md)$/.test(dirent.name) && dirent.name !== 'page.tsx')
+      .map(dirent => dirent.name);
+  } catch (error) {
+    // If the directory doesn't exist or other error, return empty array
+    console.warn(`Could not read projects directory at ${projectsDir}:`, error);
+    return [];
+  }
+  
+  const projects: Project[] = files.map(file => {
+    const slug = file.replace(/\.(mdx|md)$/, "");
+    const filePath = path.join(projectsDir, file);
+    const content = fs.readFileSync(filePath, "utf-8");
+    
+    const frontmatterRegex = /---\r?\n([\s\S]*?)\r?\n---/;
+    const match = content.match(frontmatterRegex);
+    
+    let title = slug; // Default title
+    let description = "";
+    let tech: string[] = [];
+    let imageUrl: string | undefined;
+    let demoUrl: string | undefined;
+    let repoUrl: string | undefined;
+    let featured: boolean = false;
+    
+    if (match) {
+      const frontmatter = match[1];
+      frontmatter.split("\n").forEach(line => {
+        const [keyRaw, ...valueParts] = line.split(":");
+        const key = keyRaw.trim();
+        const value = valueParts.join(":").trim().replace(/^['"]|['"]$/g, '');
+
+        switch (key) {
+          case "title":
+            title = value;
+            break;
+          case "description":
+            description = value;
+            break;
+          case "tech":
+            try {
+              // Attempt to parse as JSON array string, e.g., tech: '["React", "Node.js"]'
+              // Or handle comma-separated string, e.g., tech: React, Node.js
+              if (value.startsWith('[') && value.endsWith(']')) {
+                tech = JSON.parse(value);
+              } else {
+                tech = value.split(',').map(t => t.trim()).filter(t => t);
+              }
+            } catch (e) {
+              console.error(`Error parsing tech for project ${slug}: ${value}`, e);
+              tech = [];
+            }
+            break;
+          case "imageUrl":
+            imageUrl = value;
+            break;
+          case "demoUrl":
+            demoUrl = value;
+            break;
+          case "repoUrl":
+            repoUrl = value;
+            break;
+          case "featured":
+            featured = value.toLowerCase() === 'true';
+            break;
+        }
+      });
+    }
+    
+    return { slug, title, description, tech, imageUrl, demoUrl, repoUrl, featured };
+  });
+  
+  return projects.sort((a, b) => {
+    if (a.featured === b.featured) return 0;
+    return a.featured ? -1 : 1;
+  });
 }
 
 export function getFeaturedProjects(): Project[] {
-  return getAllProjects().filter(project => project.featured);
+  return getAllProjects().filter(project => project.featured === true);
 }
 
 export function getProjectBySlug(slug: string): Project | undefined {
