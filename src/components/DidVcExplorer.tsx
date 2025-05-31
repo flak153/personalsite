@@ -90,7 +90,7 @@ const vcTemplates: VCTemplate[] = [
 
 const DidVcExplorer: React.FC = () => {
   const [personalDid, setPersonalDid] = useState<string | null>(null);
-  const [personalDidInstance, setPersonalDidInstance] = useState<DID | null>(null);
+  const [, setPersonalDidInstance] = useState<DID | null>(null);
   const [personalDidDocument, setPersonalDidDocument] = useState<Record<string, unknown> | null>(null);
   
   const [institutionDid, setInstitutionDid] = useState<string | null>(null);
@@ -140,6 +140,20 @@ const DidVcExplorer: React.FC = () => {
       (window as { Prism?: { highlightAll: () => void } }).Prism?.highlightAll();
     }
   }, [personalDid, institutionDid, vc, verificationResult]);
+
+  // Expose state globally for sidebar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as { __didVcExplorerState?: unknown }).__didVcExplorerState = {
+        personalDid,
+        institutionDid,
+        vc,
+        verificationResult,
+        recipientDid,
+        resetDemo
+      };
+    }
+  }, [personalDid, institutionDid, vc, verificationResult, recipientDid]);
 
   const educationalSteps: Record<string, EducationalStep[]> = {
     did: [
@@ -484,18 +498,23 @@ const DidVcExplorer: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       <PrismLoader />
-      <style jsx>{`
-        .animation-delay-200 {
-          animation-delay: 200ms;
+      <style jsx global>{`
+        /* Ensure credential displays scroll horizontally */
+        .bg-gray-900 pre {
+          white-space: pre;
+          word-wrap: normal;
+          overflow-x: auto;
         }
-        .animation-delay-400 {
-          animation-delay: 400ms;
+        /* Prevent article from expanding */
+        article.prose {
+          overflow-wrap: break-word;
         }
       `}</style>
+      
       {/* Educational Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-lg text-white relative">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-lg text-white relative mb-6">
         <h2 className="text-3xl font-bold mb-2">DID & VC Explorer</h2>
         <p className="text-lg opacity-90">
           Experience all three roles: Individual, Institution, and Verifier
@@ -514,6 +533,8 @@ const DidVcExplorer: React.FC = () => {
           </button>
         )}
       </div>
+
+      <div className="space-y-6">
 
 
       {/* Error Display */}
@@ -561,7 +582,7 @@ const DidVcExplorer: React.FC = () => {
                   <label className="text-xs font-medium text-gray-400">Your DID:</label>
                   <button
                     onClick={() => copyToClipboard(personalDid, "personal-did")}
-                    className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 animate-pulse"
+                    className="text-xs text-orange-400 hover:text-orange-300 flex items-center gap-1 animate-pulse"
                   >
                     {copied === "personal-did" ? (
                       <>
@@ -627,7 +648,7 @@ const DidVcExplorer: React.FC = () => {
                   <label className="text-xs font-medium text-gray-400">Institution DID:</label>
                   <button
                     onClick={() => copyToClipboard(institutionDid, "institution-did")}
-                    className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                    className="text-xs text-orange-400 hover:text-orange-300 flex items-center gap-1"
                   >
                     {copied === "institution-did" ? (
                       <>
@@ -774,8 +795,8 @@ const DidVcExplorer: React.FC = () => {
             <div className="text-center">
               <div className="relative w-32 h-32 mx-auto mb-4">
                 <div className="absolute inset-0 border-4 border-green-500 rounded-full animate-pulse"></div>
-                <div className="absolute inset-4 border-4 border-green-400 rounded-full animate-pulse animation-delay-200"></div>
-                <div className="absolute inset-8 border-4 border-green-300 rounded-full animate-pulse animation-delay-400"></div>
+                <div className="absolute inset-4 border-4 border-green-400 rounded-full animate-pulse" style={{ animationDelay: "200ms" }}></div>
+                <div className="absolute inset-8 border-4 border-green-300 rounded-full animate-pulse" style={{ animationDelay: "400ms" }}></div>
                 <Shield className="absolute inset-0 m-auto w-12 h-12 text-green-500" />
               </div>
               <p className="text-green-400 font-medium">Cryptographically signing credential...</p>
@@ -790,7 +811,7 @@ const DidVcExplorer: React.FC = () => {
               <label className="text-sm font-medium text-gray-400">Your Cryptographically Signed Credential:</label>
               <button
                 onClick={() => copyToClipboard(vc, "vc")}
-                className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 animate-pulse"
+                className="text-sm text-orange-400 hover:text-orange-300 flex items-center gap-1 animate-pulse"
               >
                 {copied === "vc" ? (
                   <>
@@ -951,80 +972,6 @@ const DidVcExplorer: React.FC = () => {
         )}
       </div>
 
-      {/* Interactive Status Dashboard */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-6">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Info className="w-5 h-5" />
-          Current Status
-        </h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className={`p-4 rounded-lg border-2 transition-all ${
-            personalDid ? "border-blue-500 bg-blue-500/10" : "border-gray-600"
-          }`}>
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              {personalDid ? <CheckCircle className="w-4 h-4 text-blue-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-500" />}
-              Personal DID
-            </h4>
-            <p className="text-xs text-gray-400">
-              {personalDid ? "Generated ✓" : "Not yet generated"}
-            </p>
-          </div>
-          
-          <div className={`p-4 rounded-lg border-2 transition-all ${
-            institutionDid ? "border-green-500 bg-green-500/10" : "border-gray-600"
-          }`}>
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              {institutionDid ? <CheckCircle className="w-4 h-4 text-green-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-500" />}
-              Institution DID
-            </h4>
-            <p className="text-xs text-gray-400">
-              {institutionDid ? "Generated ✓" : "Not yet generated"}
-            </p>
-          </div>
-          
-          <div className={`p-4 rounded-lg border-2 transition-all ${
-            vc ? "border-purple-500 bg-purple-500/10" : "border-gray-600"
-          }`}>
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              {vc ? <CheckCircle className="w-4 h-4 text-purple-500" /> : <div className="w-4 h-4 rounded-full border-2 border-gray-500" />}
-              Credential
-            </h4>
-            <p className="text-xs text-gray-400">
-              {vc ? (verificationResult?.verified ? "Issued & Verified ✓" : "Issued") : "Not yet created"}
-            </p>
-          </div>
-        </div>
-        
-        {/* Show relationships */}
-        {vc && (
-          <div className="mt-4 pt-4 border-t border-gray-700">
-            <h4 className="text-sm font-medium text-gray-400 mb-2">Cryptographic Relationships:</h4>
-            <div className="flex flex-col gap-2 text-xs">
-              {institutionDid && (
-                <div className="flex items-center gap-2">
-                  <span className="text-green-400">Institution DID</span>
-                  <span className="text-gray-500">→ signs →</span>
-                  <span className="text-purple-400">Credential</span>
-                </div>
-              )}
-              {recipientDid && (
-                <div className="flex items-center gap-2">
-                  <span className="text-purple-400">Credential</span>
-                  <span className="text-gray-500">→ issued to →</span>
-                  <span className="text-blue-400">Personal DID</span>
-                </div>
-              )}
-              {verificationResult?.verified && (
-                <div className="flex items-center gap-2">
-                  <span className="text-purple-400">Verification</span>
-                  <span className="text-gray-500">→ confirms →</span>
-                  <span className="text-green-400">Authenticity ✓</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Visual Process Flow */}
       <div className="bg-gray-800 rounded-lg p-6">
@@ -1213,6 +1160,7 @@ const DidVcExplorer: React.FC = () => {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

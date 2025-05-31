@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import fs from "fs";
 import path from "path";
 import { Metadata } from "next";
-import MDXContent from "@/components/MDXContent";
+import ProjectContentWithSidebar from "@/components/ProjectContentWithSidebar";
 
 // Get all project files (except page.tsx)
 export function generateStaticParams() {
@@ -106,7 +106,7 @@ export default async function Project({ params }: ProjectProps) {
     
     return (
       <div className="pt-20 p-8 md:p-16 min-h-screen">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="mb-12 p-6 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white font-[family-name:var(--font-geist-sans)] drop-shadow-[0_0_8px_rgba(0,0,0,0.6)]">
               {title}
@@ -128,9 +128,7 @@ export default async function Project({ params }: ProjectProps) {
             )}
           </div>
           
-          <article className="prose prose-invert prose-lg prose-yellow max-w-none p-6 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10">
-            <MDXContent source={source} />
-          </article>
+          <ProjectContentWithSidebar source={source} slug={slug} />
         </div>
       </div>
     );
