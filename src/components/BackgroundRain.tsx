@@ -17,10 +17,9 @@ const commands = [
   // Python (all open source)
   "python", "python3", "pip install", "pip freeze", "venv", "virtualenv", 
   "pytest", "flask run", "django-admin", "uvicorn", "gunicorn",
-  "import numpy as np", "import pandas as pd", "import tensorflow as tf",
-  "from sklearn import", "async def", "def __init__", "@dataclass",
-  "unittest", "pyenv", "poetry", "black", "mypy", "ruff", "isort",
-  "jupyter notebook", "torch.nn", "with open()", "try: except:",
+  "numpy", "pandas", "tensorflow",
+  "sklearn", "async def", "def __init__", "@dataclass", "pytest", "pyenv", "poetry", "black", "mypy", "ruff", "isort",
+   "with open()", "try: except:",
   
   // Databases (OSS only)
   "SELECT * FROM", "INSERT INTO", "UPDATE", "DELETE FROM", "JOIN",
@@ -32,8 +31,7 @@ const commands = [
   
   // Node/JS
   "npm install", "npm start", "npm run build", "npm test", "yarn add",
-  "node", "npx", "tsc", "eslint", "prettier", "webpack", "babel",
-  
+  "node", "npx", "tsc", "eslint", "prettier", "webpack",
   // Containers & Orchestration (all OSS)
   "docker run", "docker build", "docker push", "docker pull",
   "kubectl", "helm", "k3s", "k9s", "podman", "containerd",
@@ -44,10 +42,9 @@ const commands = [
   "load balancer", "object storage", "functions", "iac", "pubsub",
   
   // Programming languages & build tools (all OSS)
-  "make", "cmake", "gcc", "g++", "clang", "rustc", "cargo",
-  "go build", "javac", "scalac", "ghc", "ocaml", "erlang",
-  "elixir", "ruby", "perl", "lua", "haskell", "crystal", "zig",
-  "nim", "lisp", "scheme", "prolog", "clojure", "racket",
+  "make", "cmake", "gcc", "clang", "rustc", "cargo", "scalac", "ghc", "erlang",
+  "elixir","perl", "lua", "haskell", "zig",
+  "nim", "lisp", "scheme", "racket",
   
   // Editors (only OSS ones)
   "vim", "emacs", "nano", "neovim",
@@ -76,7 +73,7 @@ export default function BackgroundRain() {
   useEffect(() => {
     // Create initial set of commands
     const initialCommands: FallingCommand[] = [];
-    const commandCount = 30; // Reduced count for better performance
+    const commandCount = 21; // Reduced count for better performance
     const usedCommands = new Set<string>(); // Track used commands
     
     for (let i = 0; i < commandCount; i++) {
