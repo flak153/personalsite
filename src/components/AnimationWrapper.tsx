@@ -72,7 +72,7 @@ export default function AnimationWrapper() {
           id="name-text" 
           className="text-4xl md:text-6xl font-bold mb-6 text-white font-[family-name:var(--font-geist-sans)] px-8 py-4 drop-shadow-[0_0_15px_rgba(0,0,0,0.8)] shadow-2xl"
         >
-          Mohammed "Flak" Ali
+          Mohammed &quot;Flak&quot; Ali
         </h1>
         <p 
           id="subtitle-text" 
