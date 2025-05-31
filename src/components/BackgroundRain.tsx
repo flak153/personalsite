@@ -25,8 +25,7 @@ const commands = [
   "SELECT * FROM", "INSERT INTO", "UPDATE", "DELETE FROM", "JOIN",
   "CREATE TABLE", "DROP TABLE", "ALTER TABLE", "ORDER BY",
   "WHERE id =", "GROUP BY", "HAVING", "LIMIT", "OFFSET",
-  "postgres", "mysql", "sqlite3", "redis-cli", "mongo",
-  "liquibase", "flyway", "alembic", "sqlalchemy", "knex",
+  "postgres", "mysql", "sqlite3", "redis-cli", 'valkey',
   "EXPLAIN ANALYZE", "CREATE INDEX", "BEGIN", "COMMIT", "ROLLBACK",
   
   // Node/JS

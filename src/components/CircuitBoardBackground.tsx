@@ -50,7 +50,7 @@ export default function CircuitBoardBackground() {
     const cellSize = 40; // Size of each grid cell
     let grid: Cell[][] = [];
     let mazePaths: PathfindingProcess[] = [];
-    const maxConcurrentPaths = 5; // Maximum number of concurrent pathfinding visualizations
+    const maxConcurrentPaths = 3; // Maximum number of concurrent pathfinding visualizations
     
     // Cell class to represent each grid cell in the maze
     class Cell {
@@ -143,7 +143,7 @@ export default function CircuitBoardBackground() {
       
       // Perform one step of the pathfinding algorithm
       step() {
-        if (!this.active || this.pathFound || this.frontier.length === 0) return;
+        if (!this.active || this.pathFound || this.frontier.length === 0) return; // Reverted to original condition
         
         // Slow down the algorithm - only proceed every few frames
         if (Math.random() > 0.1) return; // 90% chance to skip a step (was 70%)
@@ -461,7 +461,7 @@ export default function CircuitBoardBackground() {
       }
       
       // Create new pathfinding process occasionally
-      if (timestamp - lastPathCreation > 6000 && mazePaths.length < maxConcurrentPaths) { // Increased delay from 3500ms to 6000ms
+      if (timestamp - lastPathCreation > 8000 && mazePaths.length < maxConcurrentPaths) { // Further increased delay to 8000ms for more intermittent spawning
         createNewPathfindingProcess(timestamp);
         lastPathCreation = timestamp;
       }
