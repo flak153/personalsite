@@ -7,6 +7,7 @@ import GCEvolutionVisualization from './animations/GCEvolutionVisualization';
 import TricolorAbstractionVisualization from './animations/TricolorAbstractionVisualization';
 import MarkCompactVisualization from './animations/MarkCompactVisualization';
 import PGPTool from './PGPTool'; // Import PGPTool
+import DidVcExplorer from './DidVcExplorer'; // Import DidVcExplorer
 import dynamic from 'next/dynamic';
 import { bouncingBallAnimation } from "@/app/blog/canvas-demos/bouncingBall";
 import { physicsDemoAnimation } from "@/app/blog/canvas-demos/physicsDemo";
@@ -180,6 +181,7 @@ export const components = {
   Callout,
   Mermaid: MermaidDiagram, // Added Mermaid component
   PGPTool, // Add PGPTool to components
+  DidVcExplorer, // Add DidVcExplorer to components
   
   ApartmentBuildingMemoryAnalogy,
   PlaceholderAnimation,

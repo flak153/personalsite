@@ -1,0 +1,74 @@
+---
+title: "DID & VC Explorer"
+description: "An interactive tool to explore Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs)."
+tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Web Cryptography"]
+featured: true
+# imageUrl: "/images/did-vc-explorer.png" # Placeholder, can be added later
+# demoUrl: "/projects/did-vc-explorer" # The page itself is the demo
+# repoUrl: "link-to-your-repo" # Placeholder
+---
+import DidVcExplorer from '@/components/DidVcExplorer';
+
+# Decentralized Identity (DID) & Verifiable Credential (VC) Explorer
+
+An interactive playground for exploring how digital identity can work without central authorities, using cryptography to ensure trust.
+
+<DidVcExplorer />
+
+## Real-World Scenario: How DIDs & VCs Work
+
+Imagine Sarah is graduating from university and needs to prove her degree to employers:
+
+### 🎓 The Traditional Way (Problems)
+1. Sarah gets a paper diploma (can be forged)
+2. Employers must call the university to verify (time-consuming)
+3. University database could be hacked or go offline
+4. Sarah has no control over her own credentials
+
+### 🔐 The DID & VC Way (Solutions)
+1. **Sarah creates her DID** - Her own cryptographic identity that she controls
+2. **University issues a VC** - They digitally sign her degree with their DID
+3. **Instant verification** - Employers verify the signature mathematically
+4. **Tamper-proof** - Any changes invalidate the signature
+5. **Always available** - No need to contact the university
+
+## Try It Yourself
+
+The explorer above lets you experience this process:
+1. **Generate a DID** - Create your cryptographic identity
+2. **Issue a credential** - Sign it with your DID (in real life, institutions would do this)
+3. **Verify it** - See how the math proves authenticity
+
+## Why This Matters
+
+- **You own your identity** - No company or government controls your DID
+- **Instant verification** - No phone calls, no waiting
+- **Cannot be forged** - Cryptography makes fakes impossible
+- **Privacy-preserving** - Share only what's needed
+- **Works offline** - No central server required
+
+## Learn More
+
+Expand the "Understanding the Cryptography" section below to dive deeper into how public key cryptography makes this system secure and trustworthy.
+
+{/* Technical implementation details for developers */}
+{/* 
+## Technical Stack
+- Ed25519 cryptography for signatures
+- W3C DID and VC specifications
+- React with TypeScript
+- Tailwind CSS for styling
+
+## Security Considerations for Production
+- Store private keys in hardware security modules
+- Implement proper key rotation policies
+- Follow W3C credential schemas
+- Add revocation mechanisms
+- Consider privacy-preserving features like selective disclosure
+
+## Roadmap Ideas
+- Multiple DID methods (did:web, did:ion)
+- Verifiable Presentations
+- Blockchain integration
+- Zero-knowledge proofs
+*/}
