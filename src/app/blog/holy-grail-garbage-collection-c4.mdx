@@ -39,18 +39,68 @@ While these operations sound simple, coordinating them correctly and efficiently
 
 ### 1.3. The Perils of Mismanagement
 When memory isn't managed correctly, a host of problems can arise, often subtle at first but potentially devastating in the long run:
+
 *   **Memory Leaks:** The program allocates memory but fails to deallocate it after it's no longer needed. Over time, available memory dwindles, leading to slowdowns and eventual crashes.
+    {/* CODE_EXAMPLE_IDEA: Simple C/C++ loop: `while(true) { malloc(1024); /* no free */ }` to illustrate a basic memory leak. */}
+    <Mermaid code={`
+    flowchart LR
+        A["Start: 20% Used"] --> B["40% Used"]
+        B --> C["60% Used"]
+        C --> D["80% Used"]
+        D --> E["💥 Out of Memory!"]
+        
+        style A fill:#90EE90,stroke:#228B22
+        style B fill:#FFFF99,stroke:#FFD700
+        style C fill:#FFB347,stroke:#FF8C00
+        style D fill:#FF6B6B,stroke:#DC143C
+        style E fill:#FF0000,color:#FFFFFF,stroke:#8B0000
+    `} />
+
 *   **Dangling Pointers/References:** The program attempts to use memory that has already been deallocated. This can lead to data corruption, crashes, or security vulnerabilities as the program might be reading or writing to memory now used by another part of the system or even another program.
+    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); *ptr = 10; /* undefined behavior */` to show a dangling pointer. */}
+    <Mermaid code={`
+    flowchart LR
+        A["Pointer → Memory"] --> B["Memory Freed 🗑️"]
+        B --> C["Pointer → ???"]
+        C --> D["💥 Crash!"]
+        
+        style A fill:#90EE90,stroke:#228B22
+        style B fill:#FFFF99,stroke:#FFD700
+        style C fill:#FF6B6B,stroke:#DC143C
+        style D fill:#FF0000,color:#FFFFFF,stroke:#8B0000
+    `} />
+
 *   **Double Frees:** The program attempts to deallocate the same block of memory multiple times. This can corrupt the memory manager's internal data structures, leading to unpredictable behavior or crashes.
+    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); free(ptr); /* undefined behavior */` to illustrate a double free. */}
+    <Mermaid code={`
+    flowchart LR
+        A["Memory Block"] --> B["First Free ✅"]
+        B --> C["Second Free ❌"]
+        C --> D["💥 Corrupted!"]
+        
+        style A fill:#90EE90,stroke:#228B22
+        style B fill:#90EE90,stroke:#228B22
+        style C fill:#FF6B6B,stroke:#DC143C
+        style D fill:#FF0000,color:#FFFFFF,stroke:#8B0000
+    `} />
+
 *   **Fragmentation:** Over time, repeated allocation and deallocation can leave memory dotted with many small, unusable free blocks between allocated blocks, even if the total free memory is substantial. This makes it hard to allocate larger contiguous blocks.
+    <Mermaid code={`
+    flowchart LR
+        subgraph Memory["Memory Layout"]
+            A["🟦"] -.-> B["⬜"]
+            B -.-> C["🟦"]
+            C -.-> D["⬜"]
+            D -.-> E["🟦"]
+            E -.-> F["⬜"]
+        end
+        Memory --> Result["❌ Can't allocate<br/>large block!"]
+        
+        style Memory fill:#F0F0F0,stroke:#808080
+        style Result fill:#FFB6C1,stroke:#DC143C
+    `} />
 
 These issues highlight the critical need for robust memory management strategies.
-{/* VISUAL_IDEA: Four small diagrams, one for each peril:
-    1. Memory Leak: Show memory blocks filling up over time, with some old ones never being freed.
-    2. Dangling Pointer: Show a pointer to a memory block, then the block is freed, then the pointer tries to access it (perhaps with a "Crash!" or "Corrupt Data!" annotation).
-    3. Double Free: Show a memory block, it's freed, then an attempt to free it again, leading to a corrupted free list.
-    4. Fragmentation: Show a memory bar with small allocated blocks and small free blocks interspersed, with a note "Cannot allocate large object even if total free space is sufficient."
-*/}
 
 ### 1.4. The Great Divide: Manual vs. Automatic Memory Management
 Historically, two primary approaches to memory management have emerged:
@@ -767,6 +817,15 @@ To achieve its goal of continuous concurrency and avoid disruptive stop-the-worl
     *   Loop back-edges (the point where a loop decides to iterate again or terminate).
     *   Before or after certain complex bytecode instructions or native calls.
     The JIT compiler is responsible for generating code that includes these safe point checks.
+    {/* CODE_EXAMPLE_IDEA: Pseudocode of a JIT-compiled loop:
+        loop_start:
+          // ... loop body ...
+          // Safepoint check at loop back-edge
+          if (GC_yield_requested_flag) {
+            yield_to_GC();
+          }
+          branch_if_condition_met loop_start;
+    This would illustrate where a safepoint check is typically inserted by a JIT. */}
 
 *   **Yielding Mechanism (Cooperative Preemption):** At each safe point, the compiled application code includes a tiny check, often as simple as testing a global or thread-local "GC yield requested" flag.
     *   If the flag is not set, the application thread continues without interruption.
