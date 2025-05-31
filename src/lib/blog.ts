@@ -6,7 +6,8 @@ export interface BlogPost {
   title: string;
   excerpt: string;
   date: string;
-  category: string;
+  category: string; // Keep for backwards compatibility
+  tags: string[]; // New: array of tags
   readTime: string;
 }
 
@@ -32,6 +33,7 @@ export function getBlogPosts(): BlogPost[] {
     let excerpt = "";
     let date = ""; // Initialize date
     let category = "General"; // Default category
+    let tags: string[] = [];
     let readTime = "";
     
     if (match) {
@@ -46,8 +48,23 @@ export function getBlogPosts(): BlogPost[] {
         if (key.trim() === "excerpt") excerpt = value;
         if (key.trim() === "date") date = value;
         if (key.trim() === "category") category = value;
+        if (key.trim() === "tags") {
+          // Parse tags - support both array format and comma-separated
+          if (value.startsWith("[") && value.endsWith("]")) {
+            // Array format: [tag1, tag2, tag3]
+            tags = value.slice(1, -1).split(",").map(t => t.trim().replace(/^['"]|['"]$/g, ''));
+          } else {
+            // Comma-separated format: tag1, tag2, tag3
+            tags = value.split(",").map(t => t.trim());
+          }
+        }
         if (key.trim() === "readTime") readTime = value;
       });
+    }
+    
+    // If no tags but has category, use category as a tag for backwards compatibility
+    if (tags.length === 0 && category !== "General") {
+      tags = [category];
     }
     
     // Ensure date is valid for sorting, provide a fallback if not
@@ -65,6 +82,7 @@ export function getBlogPosts(): BlogPost[] {
       excerpt,
       date: parsedDate.toISOString().split('T')[0], // Store date in YYYY-MM-DD format
       category,
+      tags,
       readTime
     });
   }
