@@ -1,0 +1,225 @@
+---
+title: "Adding Permissions to Auth0 Access Tokens via Actions"
+date: "2025-05-31"
+description: "Learn how to dynamically add user permissions to Auth0 access tokens using post-login Actions."
+tags: ["auth0", "actions", "permissions", "javascript", "authentication", "authorization"]
+---
+
+import { MermaidDiagram } from '@/components/MermaidDiagram';
+import { MDXComponents } from '@/components/MDXComponents';
+
+# Adding Permissions to Auth0 Access Tokens via Actions
+
+Getting user permissions into an Auth0 ID token so your application can easily parse them can be a surprisingly challenging task. If you've found yourself struggling with this, possibly even after seeking support, you're not alone. It's a common pain point that can lead to significant frustration, especially when it seems like this should be a straightforward setting. This post is dedicated to sharing a solution that finally worked after much trial and error, piecing together insights from Auth0's ManagementClient documentation.
+
+We'll explore how to leverage the `onExecutePostLogin` trigger within Auth0 Actions to dynamically fetch a user's permissions (based on their assigned roles) and embed them directly into the ID token. Hopefully, this guide will save you the month of headaches it took to figure this out!
+
+## Why Add Permissions to Tokens?
+
+Embedding permissions directly into tokens can streamline authorization checks in your applications. Instead of making separate calls to an authorization server or database to determine what a user can do, your application can inspect the token itself. This can lead to:
+
+-   **Reduced Latency**: Fewer external calls mean faster response times.
+-   **Simplified Logic**: Your application's authorization logic becomes more straightforward.
+-   **Stateless Authorization**: Services can make authorization decisions independently by validating the token and its claims.
+
+## The Auth0 Action: `onExecutePostLogin`
+
+The `onExecutePostLogin` Action trigger runs after a user has successfully logged in but before the tokens are issued to the application. This is the perfect place to augment the token with additional information.
+
+Here's the JavaScript code for an Action that adds permissions to the ID token:
+
+```javascript
+exports.onExecutePostLogin = async (event, api) => {
+  // Define a namespace for custom claims to avoid collisions
+  const namespace = `https://verify4.com/permissions`;
+  const ManagementClient = require('auth0').ManagementClient;
+
+  // For debugging: Log the namespace
+  console.log(`Namespace for custom claims: ${namespace}`);
+
+  // Initialize the Auth0 ManagementClient
+  // Secrets like AUTH0_DOMAIN, AUTH0_MGMT_CLIENT_ID, and AUTH0_MGMT_CLIENT_SECRET
+  // must be configured in the Action's settings in the Auth0 dashboard.
+  const management = new ManagementClient({
+    domain: event.secrets.AUTH0_DOMAIN,
+    clientId: event.secrets.AUTH0_MGMT_CLIENT_ID,
+    clientSecret: event.secrets.AUTH0_MGMT_CLIENT_SECRET,
+  });
+
+  // For debugging: Log client ID and secret (ensure this is handled carefully in production)
+  // It's generally not recommended to log secrets, even in development,
+  // unless you have strict controls over log access and retention.
+  console.log(`Auth0 Management Client ID: ${event.secrets.AUTH0_MGMT_CLIENT_ID}`);
+  // console.log(`Auth0 Management Client Secret: ${event.secrets.AUTH0_MGMT_CLIENT_SECRET}`); // Be cautious with logging secrets
+
+  // Check if the user has assigned roles
+  if (event.authorization && event.authorization.roles) {
+    try {
+      let permissions = []; // Array to hold all permissions from all roles
+
+      // Iterate over each role assigned to the user
+      for (const roleName of event.authorization.roles) {
+        console.log(`Processing role: ${roleName}`);
+
+        // Fetch all roles from Auth0 to find the ID of the current roleName
+        // This is less efficient than fetching a role by its name directly if the API supports it.
+        // Auth0's Node.js SDK might require fetching all and then filtering.
+        const allRolesResponse = await management.roles.getAll();
+        const allRoles = allRolesResponse.data; // Extract the array of roles
+        // console.log('All available roles:', allRoles); // Can be very verbose
+
+        // Find the specific role by its name
+        const roles = allRoles.filter((role) => role.name === roleName);
+        console.log(`Roles matching '${roleName}':`, roles);
+
+        // Check if the role was found and has a valid ID
+        if (!roles.length || !roles[0].id) {
+          console.error(`Role not found or invalid ID for role name: ${roleName}`);
+          continue; // Skip to the next role if this one is not found
+        }
+
+        const roleId = roles[0].id;
+        console.log(`Role ID for ${roleName}: ${roleId}`);
+
+        // Fetch the permissions associated with this role ID
+        const rolePermissionsResponse = await management.roles.getPermissions({ id: roleId });
+        const rolePermissions = rolePermissionsResponse.data; // Extract permissions data
+        console.log(`Permissions for ${roleName}:`, rolePermissions);
+
+        // Add the permission names to our permissions array
+        // The actual permission strings are in `permission_name`.
+        permissions = permissions.concat(rolePermissions.map((p) => p.permission_name));
+      }
+
+      // Remove any duplicate permissions that might arise if a user has multiple roles
+      // granting the same permission.
+      permissions = [...new Set(permissions)];
+
+      // Set the custom claim in the ID token.
+      // The ID token is typically used by the client-side application.
+      // If you need these permissions in an Access Token (for API authorization),
+      // you would use `api.accessToken.setCustomClaim()` instead or in addition.
+      api.idToken.setCustomClaim(`${namespace}`, permissions);
+      console.log(`Successfully set permissions in ID token:`, permissions);
+
+    } catch (error) {
+      // Log any errors encountered during the process
+      console.error('Error getting permissions and setting custom claim:', error);
+      // Depending on your error handling strategy, you might want to:
+      // - Allow login without custom claims.
+      // - Deny login if permissions are critical: `api.access.deny('Failed to retrieve permissions.');`
+    }
+  } else {
+    console.log('No roles assigned to the user or authorization object is missing.');
+  }
+};
+```
+
+## Code Breakdown
+
+1.  **Namespace**:
+    `const namespace = \`https://verify4.com/permissions\`;`
+    Custom claims in Auth0 tokens should be namespaced to avoid collisions with standard OIDC claims. Using a URI (like your domain) is a common practice.
+
+2.  **Auth0 Management Client**:
+    ```javascript
+    const ManagementClient = require('auth0').ManagementClient;
+    const management = new ManagementClient({
+      domain: event.secrets.AUTH0_DOMAIN,
+      clientId: event.secrets.AUTH0_MGMT_CLIENT_ID,
+      clientSecret: event.secrets.AUTH0_MGMT_CLIENT_SECRET,
+    });
+    ```
+    This initializes the Auth0 ManagementClient, which is necessary to query for roles and their associated permissions. The credentials (`AUTH0_DOMAIN`, `AUTH0_MGMT_CLIENT_ID`, `AUTH0_MGMT_CLIENT_SECRET`) must be stored as "Secrets" in the Auth0 Action's settings.
+
+3.  **Role Processing Loop**:
+    ```javascript
+    if (event.authorization && event.authorization.roles) {
+      // ...
+      for (const roleName of event.authorization.roles) {
+        // ...
+      }
+    }
+    ```
+    The code checks if the user has any roles assigned (`event.authorization.roles`). If so, it iterates through each `roleName`.
+
+4.  **Fetching Role ID**:
+    ```javascript
+    const allRolesResponse = await management.roles.getAll();
+    const allRoles = allRolesResponse.data;
+    const roles = allRoles.filter((role) => role.name === roleName);
+    // ...
+    const roleId = roles[0].id;
+    ```
+    To get permissions for a role, we first need its ID. The current code fetches *all* roles and then filters by `roleName` to find the matching role object and its `id`. While functional, for environments with a very large number of roles, this could be inefficient. If a more direct "get role by name" API call is available and suitable, it might be preferred.
+
+5.  **Fetching Permissions**:
+    ```javascript
+    const rolePermissionsResponse = await management.roles.getPermissions({ id: roleId });
+    const rolePermissions = rolePermissionsResponse.data;
+    permissions = permissions.concat(rolePermissions.map((p) => p.permission_name));
+    ```
+    Once the `roleId` is obtained, `management.roles.getPermissions({ id: roleId })` fetches all permissions assigned to that role. The `permission_name` from each permission object is then added to the `permissions` array.
+
+6.  **Deduplication and Setting Claim**:
+    ```javascript
+    permissions = [...new Set(permissions)];
+    api.idToken.setCustomClaim(\`\${namespace}\`, permissions);
+    ```
+    After processing all roles, `[...new Set(permissions)]` removes any duplicate permission names. Finally, `api.idToken.setCustomClaim()` adds the consolidated list of permissions to the ID token under the defined namespace. If you need these permissions in an Access Token (e.g., for an API to consume), you would use `api.accessToken.setCustomClaim()`.
+
+## Important Considerations
+
+*   **Secrets Management**: Ensure `AUTH0_DOMAIN`, `AUTH0_MGMT_CLIENT_ID`, and `AUTH0_MGMT_CLIENT_SECRET` are correctly configured as secrets in your Auth0 Action. Never hardcode them.
+*   **Error Handling**: The `try...catch` block is crucial for gracefully handling potential issues, such as API errors or roles not being found. Decide how your application should behave if permissions cannot be fetched (e.g., deny login, log an error and proceed without permissions).
+*   **Performance**: Fetching all roles (`management.roles.getAll()`) in each login for each role can be resource-intensive if you have many roles. Consider caching role IDs or exploring if the Management API offers more direct ways to get a role ID by name if performance becomes an issue.
+*   **Token Size**: Adding many permissions can increase the size of your tokens. Be mindful of token size limits imposed by browsers (for cookies) or HTTP headers.
+*   **ID Token vs. Access Token**:
+    *   `api.idToken.setCustomClaim()`: Adds claims to the ID Token, which is intended for the client application to understand who the user is.
+    *   `api.accessToken.setCustomClaim()`: Adds claims to the Access Token, which is intended for resource servers (APIs) to authorize requests.
+    Choose the appropriate token based on where the permissions will be consumed. You can add claims to both if needed.
+
+## Alternative: Adding Roles Directly to Tokens
+
+If your primary goal is to make the user's roles available in the tokens, and your applications can derive permissions from these roles or only need role information, a simpler Action can be used. This Action directly adds the array of role names to a custom claim.
+
+Here's an example:
+
+```javascript
+/**
+ * Handler that will be called during the execution of a PostLogin flow.
+ *
+ * @param {Event} event - Details about the user and the context in which they are logging in.
+ * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.
+ */
+exports.onExecutePostLogin = async (event, api) => {
+  // It's good practice to use a namespace for custom claims.
+  // This namespace can be the same or different from the one used for permissions.
+  const namespace = `https://v4hub-development.infra.verify4.com`;
+
+  if (event.authorization && event.authorization.roles) {
+    // Add roles to the ID Token
+    api.idToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+    // Add roles to the Access Token
+    api.accessToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+    console.log(`Successfully set roles in ID and Access tokens:`, event.authorization.roles);
+  } else {
+    console.log('No roles assigned to the user or authorization object is missing.');
+  }
+};
+```
+
+### Key Differences and Use Cases:
+
+*   **Simplicity**: This Action is much simpler as it doesn't involve calls to the Auth0 Management API.
+*   **Content**: It adds role names (e.g., `["editor", "viewer"]`) rather than a granular list of permissions (e.g., `["read:articles", "edit:articles"]`).
+*   **Performance**: This Action is more performant as it avoids external API calls.
+*   **Use Case**: Suitable when applications are designed to interpret roles directly or when the set of permissions associated with roles is managed and understood by the client applications or APIs consuming the tokens.
+
+You could even use both Actions if needed: one to add detailed permissions and another (or the same one extended) to add roles. The choice depends on the specific needs of your client applications and APIs.
+
+## Conclusion
+
+Navigating Auth0 to get granular permissions into your tokens can feel like a maze, but Auth0 Actions, specifically the `onExecutePostLogin` trigger, offer a robust way out. By implementing the Action detailed in this post, you can finally get those much-needed permissions directly into your ID (and Access) tokens. This empowers your applications to make informed authorization decisions without extra calls, streamlining your architecture.
+
+It's a journey that, for many, has been fraught with unexpected complexity. The fact that this functionality isn't a simple toggle in the Auth0 dashboard is, frankly, baffling. However, with this Action, you now have a clear path forward. Hopefully, this solution spares you the frustration and time spent wrestling with what should be a more accessible feature, and you can get back to building great things with clear, actionable permission data in your tokens.
