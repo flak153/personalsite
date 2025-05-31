@@ -14,12 +14,12 @@ export default function Home() {
       
       {/* Hero Section with Text */}
       <section className="relative h-screen w-full flex items-center justify-center z-10">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white font-[family-name:var(--font-geist-sans)] px-8 py-4 drop-shadow-[0_0_15px_rgba(0,0,0,0.8)] shadow-2xl">
+        <div className="text-center bg-black/30 backdrop-blur-lg rounded-xl p-10">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white font-[family-name:var(--font-geist-sans)] py-4">
             Mohammed &quot;Flak&quot; Ali
           </h1>
-          <p className="text-xl md:text-2xl text-white mb-8 font-[family-name:var(--font-geist-mono)] px-6 py-3 drop-shadow-[0_0_15px_rgba(0,0,0,0.8)] shadow-xl">
-            Tech Blog &amp; Personal Site
+          <p className="text-xl md:text-2xl text-white mb-8 font-[family-name:var(--font-geist-mono)] py-3">
+            Tech Blog & Personal Site
           </p>
           <div className="animate-bounce mt-10">
             <p className="text-white text-sm drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">Scroll to explore</p>

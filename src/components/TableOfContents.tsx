@@ -13,26 +13,66 @@ const TableOfContents = () => {
   const [activeId, setActiveId] = useState<string>("");
   
   useEffect(() => {
-    // Find all headings in the article (h2, h3, h4)
-    const articleHeadings = Array.from(document.querySelectorAll('h2, h3, h4'))
-      .map((heading) => {
-        // Generate an ID if it doesn't exist
-        if (!heading.id) {
-          const id = heading.textContent?.toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '') || `heading-${Math.random().toString(36).substr(2, 9)}`;
-          heading.id = id;
+    const processHeadings = () => {
+      // Find all headings in the article (h2, h3, h4)
+      const articleHeadings = Array.from(document.querySelectorAll('h2, h3, h4'))
+        .map((heading) => {
+          // Generate an ID if it doesn't exist
+          if (!heading.id) {
+            const id = heading.textContent?.toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '') || `heading-${Math.random().toString(36).substr(2, 9)}`;
+            heading.id = id;
+          }
+          
+          return {
+            id: heading.id,
+            text: heading.textContent || "",
+            level: parseInt(heading.tagName.substring(1), 10) // Get heading level (2 for h2, 3 for h3, etc.)
+          };
+        });
+      
+      return articleHeadings;
+    };
+
+    // Initial check
+    const articleHeadings = processHeadings();
+    
+    // If no headings found, set up a MutationObserver to wait for content
+    if (articleHeadings.length === 0) {
+      const mutationObserver = new MutationObserver(() => {
+        const newHeadings = processHeadings();
+        if (newHeadings.length > 0) {
+          setHeadings(newHeadings);
+          mutationObserver.disconnect();
         }
-        
-        return {
-          id: heading.id,
-          text: heading.textContent || "",
-          level: parseInt(heading.tagName.substring(1), 10) // Get heading level (2 for h2, 3 for h3, etc.)
-        };
       });
-    
-    setHeadings(articleHeadings);
-    
+
+      // Observe the entire document for changes
+      mutationObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Set a timeout to disconnect the observer after 5 seconds
+      const timeout = setTimeout(() => {
+        mutationObserver.disconnect();
+      }, 5000);
+
+      // Cleanup
+      return () => {
+        clearTimeout(timeout);
+        mutationObserver.disconnect();
+      };
+    } else {
+      setHeadings(articleHeadings);
+    }
+  }, []);
+
+  // Separate effect for intersection observer
+  useEffect(() => {
+    if (headings.length === 0) return;
+
     // Set up intersection observer for headings
     const headingElements = document.querySelectorAll('h2, h3, h4');
     const observer = new IntersectionObserver(
@@ -51,7 +91,7 @@ const TableOfContents = () => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [headings]);
   
   if (headings.length === 0) {
     return null;
