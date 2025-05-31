@@ -1,14 +1,14 @@
 ---
-title: "Adding Permissions to Auth0 Access Tokens via Actions"
+title: "Adding Permissions to Auth0 ID Tokens via Actions"
 date: "2025-05-31"
-description: "Learn how to dynamically add user permissions to Auth0 access tokens using post-login Actions."
-tags: ["auth0", "actions", "permissions", "javascript", "authentication", "authorization"]
+description: "Learn how to dynamically add user permissions to Auth0 ID tokens using post-login Actions."
+tags: ["auth0", "actions", "permissions", "javascript", "authentication", "authorization", "id token"]
 ---
 
 import { MermaidDiagram } from '@/components/MermaidDiagram';
 import { MDXComponents } from '@/components/MDXComponents';
 
-# Adding Permissions to Auth0 Access Tokens via Actions
+# Adding Permissions to Auth0 ID Tokens via Actions
 
 Getting user permissions into an Auth0 ID token so your application can easily parse them can be a surprisingly challenging task. If you've found yourself struggling with this, possibly even after seeking support, you're not alone. It's a common pain point that can lead to significant frustration, especially when it seems like this should be a straightforward setting. This post is dedicated to sharing a solution that finally worked after much trial and error, piecing together insights from Auth0's ManagementClient documentation.
 
@@ -97,8 +97,6 @@ exports.onExecutePostLogin = async (event, api) => {
 
       // Set the custom claim in the ID token.
       // The ID token is typically used by the client-side application.
-      // If you need these permissions in an Access Token (for API authorization),
-      // you would use `api.accessToken.setCustomClaim()` instead or in addition.
       api.idToken.setCustomClaim(`${namespace}`, permissions);
       console.log(`Successfully set permissions in ID token:`, permissions);
 
@@ -166,7 +164,7 @@ exports.onExecutePostLogin = async (event, api) => {
     permissions = [...new Set(permissions)];
     api.idToken.setCustomClaim(\`\${namespace}\`, permissions);
     ```
-    After processing all roles, `[...new Set(permissions)]` removes any duplicate permission names. Finally, `api.idToken.setCustomClaim()` adds the consolidated list of permissions to the ID token under the defined namespace. If you need these permissions in an Access Token (e.g., for an API to consume), you would use `api.accessToken.setCustomClaim()`.
+    After processing all roles, `[...new Set(permissions)]` removes any duplicate permission names. Finally, `api.idToken.setCustomClaim()` adds the consolidated list of permissions to the ID token under the defined namespace.
 
 ## Important Considerations
 
@@ -175,9 +173,15 @@ exports.onExecutePostLogin = async (event, api) => {
 *   **Performance**: Fetching all roles (`management.roles.getAll()`) in each login for each role can be resource-intensive if you have many roles. Consider caching role IDs or exploring if the Management API offers more direct ways to get a role ID by name if performance becomes an issue.
 *   **Token Size**: Adding many permissions can increase the size of your tokens. Be mindful of token size limits imposed by browsers (for cookies) or HTTP headers.
 *   **ID Token vs. Access Token**:
-    *   `api.idToken.setCustomClaim()`: Adds claims to the ID Token, which is intended for the client application to understand who the user is.
-    *   `api.accessToken.setCustomClaim()`: Adds claims to the Access Token, which is intended for resource servers (APIs) to authorize requests.
-    Choose the appropriate token based on where the permissions will be consumed. You can add claims to both if needed.
+    *   **ID Token (`api.idToken.setCustomClaim()`):** This token is primarily for the client application (e.g., your frontend). It contains information about the authenticated user, like their profile details (`sub`, `name`, `email`, etc.). According to the OpenID Connect (OIDC) specification, the ID Token is meant to provide identity information to the client. For client-side applications that need to make UI decisions based on user permissions (e.g., show/hide buttons, enable/disable features), having permissions directly in the ID Token is often more convenient and semantically correct. It's generally easier to parse and use on the client-side.
+    *   **Access Token (`api.accessToken.setCustomClaim()`):** This token is intended for resource servers (your APIs). It signifies that the bearer has been authorized to access specific resources. While Auth0 provides a toggle in the API settings ("RBAC Settings" -> "Add Permissions in the Access Token"), this only adds permissions to the Access Token.
+    *   **Why the Auth0 Toggle Isn't Always Enough:**
+        *   **Client-Side Needs:** If your client application (not just your backend API) needs to be aware of user permissions to render the UI appropriately, the Access Token permissions aren't directly helpful. The ID Token is the standard place for client-consumable identity information.
+        *   **Server-Side Initialization & Client-Side Ease of Use:** Even for server-side tasks like initializing a new user's profile or permissions in your own database upon their first login, working with the ID Token can be more straightforward. Its structure is designed for identity information. Subsequently, for client-side applications, ID Tokens are often more readily available and easier to work with in standard authentication libraries compared to Access Tokens, which might be opaque or require more effort to decode and validate for identity purposes.
+        *   **Separation of Concerns:** Keeping client-facing identity information (including permissions relevant to UI or initial user setup) in the ID Token and API-facing authorization information in the Access Token maintains a clearer separation of concerns.
+    *   **The Action's Advantage:** The Auth0 Action shown in this post specifically targets adding permissions to the **ID Token**. This directly addresses the need for applications (both client-side for UI and server-side for user context/initialization) to easily access and use these permissions from a token designed for identity information. While you *could* also add them to the Access Token using `api.accessToken.setCustomClaim()` within the same Action if your APIs also need them there, the primary focus here is solving the visibility and usability problem for identity-related permission data.
+
+    Choose the appropriate token (or both) based on where the permissions will be consumed. For many UI-driven scenarios, the ID Token is the more logical and convenient place.
 
 ## Alternative: Adding Roles Directly to Tokens
 
@@ -220,6 +224,6 @@ You could even use both Actions if needed: one to add detailed permissions and a
 
 ## Conclusion
 
-Navigating Auth0 to get granular permissions into your tokens can feel like a maze, but Auth0 Actions, specifically the `onExecutePostLogin` trigger, offer a robust way out. By implementing the Action detailed in this post, you can finally get those much-needed permissions directly into your ID (and Access) tokens. This empowers your applications to make informed authorization decisions without extra calls, streamlining your architecture.
+Navigating Auth0 to get granular permissions into your tokens can feel like a maze, but Auth0 Actions, specifically the `onExecutePostLogin` trigger, offer a robust way out. By implementing the Action detailed in this post, you can finally get those much-needed permissions directly into your ID tokens. This empowers your applications to make informed authorization decisions without extra calls, streamlining your architecture.
 
 It's a journey that, for many, has been fraught with unexpected complexity. The fact that this functionality isn't a simple toggle in the Auth0 dashboard is, frankly, baffling. However, with this Action, you now have a clear path forward. Hopefully, this solution spares you the frustration and time spent wrestling with what should be a more accessible feature, and you can get back to building great things with clear, actionable permission data in your tokens.
