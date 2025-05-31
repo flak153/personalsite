@@ -134,26 +134,11 @@ export default function CodeRain({ textColliders }: CodeRainProps) {
     
     window.addEventListener("mousemove", onMouseMove);
     
-    // Convert screen position to 3D position
-    const screenToWorld = (x: number, y: number): THREE.Vector3 => {
-      const vector = new THREE.Vector3();
-      vector.set(
-        (x / window.innerWidth) * 2 - 1,
-        -(y / window.innerHeight) * 2 + 1,
-        0
-      );
-      vector.unproject(camera);
-      const dir = vector.sub(camera.position).normalize();
-      const distance = -camera.position.z / dir.z;
-      return camera.position.clone().add(dir.multiplyScalar(distance));
-    };
-    
     // Check collision with text elements
     const checkTextCollision = (
       x: number, 
       y: number, 
-      z: number, 
-      radius: number
+      z: number
     ): { collision: boolean; normal?: { x: number; y: number } } => {
       // Use the current value from props, not the closure value
       const currentTextColliders = textColliders;
@@ -231,12 +216,10 @@ export default function CodeRain({ textColliders }: CodeRainProps) {
         positions[iy] += velocities[viy];
         
         // Text collision
-        const particleRadius = sizes[i];
         const collision = checkTextCollision(
           positions[ix], 
           positions[iy], 
-          positions[iz], 
-          particleRadius
+          positions[iz]
         );
         
         if (collision.collision && collision.normal) {
@@ -322,7 +305,7 @@ export default function CodeRain({ textColliders }: CodeRainProps) {
       shaderMaterial.dispose();
     };
   // Only re-initialize when the component mounts, not when textColliders change
-  }, []);
+  }, [textColliders]);
   
   return (
     <div 

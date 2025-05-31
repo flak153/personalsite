@@ -56,3 +56,46 @@ canvas, .animation-layer {
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* Mermaid diagram styling */
+.mermaid-diagram-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.mermaid-diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Override Mermaid's default styles for better readability */
+.mermaid-diagram-container .node rect,
+.mermaid-diagram-container .node circle,
+.mermaid-diagram-container .node ellipse,
+.mermaid-diagram-container .node polygon {
+  fill: #f3f4f6 !important;
+  stroke: #374151 !important;
+  stroke-width: 2px !important;
+}
+
+.mermaid-diagram-container .node text {
+  fill: #111827 !important;
+  font-size: 14px !important;
+}
+
+.mermaid-diagram-container .edgeLabel {
+  background-color: #ffffff !important;
+  fill: #111827 !important;
+}
+
+.mermaid-diagram-container .edgeLabel rect {
+  fill: #ffffff !important;
+  stroke: none !important;
+}
+
+.mermaid-diagram-container .edgePath .path {
+  stroke: #6b7280 !important;
+  stroke-width: 2px !important;
+}

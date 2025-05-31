@@ -6,11 +6,15 @@ import { MDXRemote } from "next-mdx-remote";
 import { components } from "./MDXComponents";
 import rehypePrism from "rehype-prism-plus";
 
-// Define a global Prism type to avoid TypeScript errors
+// Fix global Prism type mismatch for MDXContent
+// The Prism property must always have both highlightAll and languages
+// Unify the type declaration
+
 declare global {
   interface Window {
     Prism: {
       highlightAll: () => void;
+      languages: Record<string, unknown>;
     };
   }
 }
@@ -20,7 +24,7 @@ interface MDXContentProps {
 }
 
 export default function MDXContent({ source }: MDXContentProps) {
-  const [mdxSource, setMdxSource] = useState<any>(null);
+  const [mdxSource, setMdxSource] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,7 +107,8 @@ export default function MDXContent({ source }: MDXContentProps) {
   // Render content
   return (
     <div className="text-white">
-      <MDXRemote {...mdxSource} components={components} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <MDXRemote {...(mdxSource as any)} components={components} />
     </div>
   );
 }

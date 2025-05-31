@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export const MarkCompactAnimation = () => {
   const [step, setStep] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   
   const totalSteps = 8;
   // Common settings used across all drawing functions
@@ -79,7 +77,7 @@ export const MarkCompactAnimation = () => {
     
     // Define objects (mix of reachable and unreachable)
     const objectCount = 8;
-    const objects = [];
+    const objects: unknown[] = [];
     const isReachable = [true, false, true, true, false, false, true, false];
     
     // Initial layout with fragmentation
@@ -173,12 +171,12 @@ export const MarkCompactAnimation = () => {
     ctx.font = '14px Arial';
     ctx.fillText(subExplanation, canvas.width / 2, canvas.height - 25);
     
-  }, [step]);
+  }, [step, drawInitialState, drawMarkPhase, drawCalculateAddresses, drawUpdateReferences, drawCompactObjects, drawFinalState]);
   
-  // Helper functions for drawing different stages
-  function drawInitialState(
+  // Wrap all draw* functions in useCallback to stabilize references for useEffect dependencies
+  const drawInitialState = useCallback(function drawInitialState(
     ctx: CanvasRenderingContext2D,
-    objects: Array<any>,
+    objects: unknown[],
     rootY: number,
     arrowColor: string,
     objectColor: string,
@@ -203,31 +201,31 @@ export const MarkCompactAnimation = () => {
     ctx.strokeStyle = arrowColor;
     ctx.lineWidth = 2;
     
-    const reachableIndices = objects.filter(obj => obj.reachable).map(obj => obj.id);
-    reachableIndices.forEach(id => {
-      const obj = objects.find(o => o.id === id);
+    const reachableIndices = objects.filter((obj: unknown) => (obj as { reachable: boolean }).reachable).map((obj: unknown) => (obj as { id: number }).id);
+    reachableIndices.forEach((id: number) => {
+      const obj = objects.find((o: unknown) => (o as { id: number }).id === id);
       if (obj) {
-        drawArrow(ctx, rootX, rootY + 20, obj.x + obj.width / 2, obj.y);
+        drawArrow(ctx, rootX, rootY + 20, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number }).y);
       }
     });
     
     // Draw all objects
-    objects.forEach(obj => {
+    objects.forEach((obj: unknown) => {
       // Draw object
-      ctx.fillStyle = objectColor;
-      ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+      ctx.fillStyle = (obj as { reachable: boolean }).reachable ? markedColor : objectColor;
+      ctx.fillRect((obj as { x: number, width: number, height: number }).x, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
       
       // Object label
       ctx.fillStyle = textColor;
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`Obj ${obj.id}`, obj.x + obj.width / 2, obj.y + obj.height / 2 + 5);
+      ctx.fillText(`Obj ${(obj as { id: number }).id}`, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2 + 5);
     });
-  }
-  
-  function drawMarkPhase(
+  }, []);
+
+  const drawMarkPhase = useCallback(function drawMarkPhase(
     ctx: CanvasRenderingContext2D,
-    objects: Array<any>,
+    objects: unknown[],
     phase: number,
     rootY: number,
     arrowColor: string,
@@ -254,35 +252,35 @@ export const MarkCompactAnimation = () => {
     ctx.strokeStyle = arrowColor;
     ctx.lineWidth = 2;
     
-    const reachableIndices = objects.filter(obj => obj.reachable).map(obj => obj.id);
-    reachableIndices.forEach(id => {
-      const obj = objects.find(o => o.id === id);
+    const reachableIndices = objects.filter((obj: unknown) => (obj as { reachable: boolean }).reachable).map((obj: unknown) => (obj as { id: number }).id);
+    reachableIndices.forEach((id: number) => {
+      const obj = objects.find((o: unknown) => (o as { id: number }).id === id);
       if (obj) {
-        drawArrow(ctx, rootX, rootY + 20, obj.x + obj.width / 2, obj.y);
+        drawArrow(ctx, rootX, rootY + 20, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number }).y);
       }
     });
     
     // Draw all objects
-    objects.forEach(obj => {
+    objects.forEach((obj: unknown) => {
       // For reachable objects, use marked color in phase 1 for first half, in phase 2 for all
       const isMarked = phase === 0 
-        ? obj.reachable && obj.id <= 3
-        : obj.reachable;
+        ? (obj as { reachable: boolean, id: number }).reachable && (obj as { id: number }).id <= 3
+        : (obj as { reachable: boolean }).reachable;
         
       ctx.fillStyle = isMarked ? markedColor : objectColor;
-      ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+      ctx.fillRect((obj as { x: number, width: number, height: number }).x, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
       
       // Object label
       ctx.fillStyle = textColor;
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`Obj ${obj.id}`, obj.x + obj.width / 2, obj.y + obj.height / 2 + 5);
+      ctx.fillText(`Obj ${(obj as { id: number }).id}`, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2 + 5);
     });
-  }
-  
-  function drawCalculateAddresses(
+  }, []);
+
+  const drawCalculateAddresses = useCallback(function drawCalculateAddresses(
     ctx: CanvasRenderingContext2D,
-    objects: Array<any>,
+    objects: unknown[],
     rootY: number,
     arrowColor: string,
     objectColor: string,
@@ -308,56 +306,56 @@ export const MarkCompactAnimation = () => {
     ctx.strokeStyle = arrowColor;
     ctx.lineWidth = 2;
     
-    const reachableIndices = objects.filter(obj => obj.reachable).map(obj => obj.id);
-    reachableIndices.forEach(id => {
-      const obj = objects.find(o => o.id === id);
+    const reachableIndices = objects.filter((obj: unknown) => (obj as { reachable: boolean }).reachable).map((obj: unknown) => (obj as { id: number }).id);
+    reachableIndices.forEach((id: number) => {
+      const obj = objects.find((o: unknown) => (o as { id: number }).id === id);
       if (obj) {
-        drawArrow(ctx, rootX, rootY + 20, obj.x + obj.width / 2, obj.y);
+        drawArrow(ctx, rootX, rootY + 20, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number }).y);
       }
     });
     
     // Draw all objects
-    objects.forEach(obj => {
+    objects.forEach((obj: unknown) => {
       // Draw object
-      ctx.fillStyle = obj.reachable ? markedColor : objectColor;
-      ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+      ctx.fillStyle = (obj as { reachable: boolean }).reachable ? markedColor : objectColor;
+      ctx.fillRect((obj as { x: number, width: number, height: number }).x, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
       
       // Object label
       ctx.fillStyle = textColor;
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`Obj ${obj.id}`, obj.x + obj.width / 2, obj.y + obj.height / 2 + 5);
+      ctx.fillText(`Obj ${(obj as { id: number }).id}`, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2 + 5);
       
       // Draw new address for reachable objects
-      if (obj.reachable) {
-        const newX = margin + 20 + (reachableIndices.indexOf(obj.id) * (obj.width + 10));
+      if ((obj as { reachable: boolean }).reachable) {
+        const newX = margin + 20 + (reachableIndices.indexOf((obj as { id: number }).id) * ((obj as { width: number }).width + 10));
         
         // Arrow pointing to new position
         ctx.strokeStyle = '#FF9800';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(obj.x + obj.width / 2, obj.y + obj.height + 15);
-        ctx.lineTo(newX + obj.width / 2, obj.y + obj.height + 40);
+        ctx.moveTo((obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height + 15);
+        ctx.lineTo(newX + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height + 40);
         ctx.stroke();
         
         // New position marker
         ctx.strokeStyle = '#FF9800';
         ctx.setLineDash([5, 3]);
-        ctx.strokeRect(newX, obj.y + obj.height + 50, obj.width, obj.height);
+        ctx.strokeRect(newX, (obj as { y: number, height: number }).y + (obj as { height: number }).height + 50, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
         ctx.setLineDash([]);
         
         // Label
         ctx.fillStyle = '#FF9800';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('New address', newX + obj.width / 2, obj.y + obj.height + 80);
+        ctx.fillText('New address', newX + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height + 80);
       }
     });
-  }
-  
-  function drawUpdateReferences(
+  }, []);
+
+  const drawUpdateReferences = useCallback(function drawUpdateReferences(
     ctx: CanvasRenderingContext2D,
-    objects: Array<any>,
+    objects: unknown[],
     phase: number,
     rootY: number,
     arrowColor: string,
@@ -382,30 +380,30 @@ export const MarkCompactAnimation = () => {
     ctx.fillText('Root', rootX, rootY + 5);
     
     // Find reachable objects
-    const reachableObjects = objects.filter(obj => obj.reachable);
-    const reachableIndices = reachableObjects.map(obj => obj.id);
+    const reachableObjects = objects.filter((obj: unknown) => (obj as { reachable: boolean }).reachable);
+    const reachableIndices = reachableObjects.map((obj: unknown) => (obj as { id: number }).id);
     
     // Draw objects and forwarding addresses
-    objects.forEach(obj => {
+    objects.forEach((obj: unknown) => {
       // Draw object
-      ctx.fillStyle = obj.reachable ? markedColor : objectColor;
-      ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+      ctx.fillStyle = (obj as { reachable: boolean }).reachable ? markedColor : objectColor;
+      ctx.fillRect((obj as { x: number, width: number, height: number }).x, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
       
       // Object label
       ctx.fillStyle = textColor;
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`Obj ${obj.id}`, obj.x + obj.width / 2, obj.y + obj.height / 2 + 5);
+      ctx.fillText(`Obj ${(obj as { id: number }).id}`, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2 + 5);
       
       // Draw forwarding pointers for reachable objects
-      if (obj.reachable) {
-        const newX = margin + 20 + (reachableIndices.indexOf(obj.id) * (obj.width + 10));
+      if ((obj as { reachable: boolean }).reachable) {
+        const newX = margin + 20 + (reachableIndices.indexOf((obj as { id: number }).id) * ((obj as { width: number }).width + 10));
         
         // Small icon indicating forwarding pointer
         ctx.fillStyle = compactingArrowColor;
         ctx.font = '10px Arial';
         ctx.textAlign = 'right';
-        ctx.fillText('→' + newX, obj.x + obj.width - 5, obj.y + 12);
+        ctx.fillText('→' + newX, (obj as { x: number, width: number }).x + (obj as { width: number }).width - 5, (obj as { y: number, height: number }).y + 12);
       }
     });
     
@@ -413,32 +411,31 @@ export const MarkCompactAnimation = () => {
     ctx.strokeStyle = phase === 0 ? arrowColor : compactingArrowColor;
     ctx.lineWidth = 2;
     
-    reachableIndices.forEach((id, index) => {
+    reachableIndices.forEach((id: number, index: number) => {
       // Calculate the new position this object will have after compaction
-      const newX = margin + 20 + (index * (objects[0].width + 10));
-      const newY = objects[0].y;
+      const newX = margin + 20 + (index * (((objects as unknown[])[0] as { width: number }).width + 10));
       
       // In phase 0, only update first half of references
       // In phase 1, all references are updated
       if (phase === 0 && index >= reachableIndices.length / 2) {
         // Draw old-style reference
-        drawArrow(ctx, rootX, rootY + 20, objects[id].x + objects[id].width / 2, objects[id].y);
+        drawArrow(ctx, rootX, rootY + 20, ((objects as unknown[])[id] as { x: number, width: number }).x + ((objects as unknown[])[id] as { width: number }).width / 2, ((objects as unknown[])[id] as { y: number, height: number }).y);
       } else {
         // Draw updated reference pointing to new location
-        drawArrow(ctx, rootX, rootY + 20, newX + objects[id].width / 2, newY);
+        drawArrow(ctx, rootX, rootY + 20, newX + ((objects as unknown[])[id] as { width: number }).width / 2, ((objects as unknown[])[0] as { y: number, height: number }).y);
         
         // Draw dotted outline of future position
         ctx.strokeStyle = compactingArrowColor;
         ctx.setLineDash([5, 3]);
-        ctx.strokeRect(newX, newY, objects[id].width, objects[id].height);
+        ctx.strokeRect(newX, ((objects as unknown[])[0] as { y: number, height: number }).y, ((objects as unknown[])[id] as { width: number, height: number }).width, ((objects as unknown[])[id] as { height: number }).height);
         ctx.setLineDash([]);
       }
     });
-  }
-  
-  function drawCompactObjects(
+  }, []);
+
+  const drawCompactObjects = useCallback(function drawCompactObjects(
     ctx: CanvasRenderingContext2D,
-    objects: Array<any>,
+    objects: unknown[],
     rootY: number,
     arrowColor: string,
     objectColor: string,
@@ -461,45 +458,45 @@ export const MarkCompactAnimation = () => {
     ctx.fillText('Root', rootX, rootY + 5);
     
     // Find reachable objects and their new positions
-    const reachableObjects = objects.filter(obj => obj.reachable);
-    const reachableIndices = reachableObjects.map(obj => obj.id);
+    const reachableObjects = objects.filter((obj: unknown) => (obj as { reachable: boolean }).reachable);
+    const reachableIndices = reachableObjects.map((obj: unknown) => (obj as { id: number }).id);
     
     // Draw animation of objects moving
-    objects.forEach(obj => {
-      if (obj.reachable) {
-        const index = reachableIndices.indexOf(obj.id);
-        const newX = margin + 20 + (index * (obj.width + 10));
+    objects.forEach((obj: unknown) => {
+      if ((obj as { reachable: boolean }).reachable) {
+        const index = reachableIndices.indexOf((obj as { id: number }).id);
+        const newX = margin + 20 + (index * (((objects as unknown[])[0] as { width: number }).width + 10));
         
         // Draw movement trail
         ctx.strokeStyle = '#FF9800';
         ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.moveTo(obj.x + obj.width / 2, obj.y + obj.height / 2);
-        ctx.lineTo(newX + obj.width / 2, obj.y + obj.height / 2);
+        ctx.moveTo((obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2);
+        ctx.lineTo(newX + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2);
         ctx.stroke();
         ctx.setLineDash([]);
         
         // Draw object at new position
         ctx.fillStyle = markedColor;
-        ctx.fillRect(newX, obj.y, obj.width, obj.height);
+        ctx.fillRect(newX, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
         
         // Object label
         ctx.fillStyle = textColor;
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`Obj ${obj.id}`, newX + obj.width / 2, obj.y + obj.height / 2 + 5);
+        ctx.fillText(`Obj ${(obj as { id: number }).id}`, newX + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2 + 5);
       } else {
         // Unreachable objects fade away
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = objectColor;
-        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+        ctx.fillRect((obj as { x: number, width: number, height: number }).x, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
         
         // Label
         ctx.fillStyle = textColor;
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`Obj ${obj.id}`, obj.x + obj.width / 2, obj.y + obj.height / 2 + 5);
+        ctx.fillText(`Obj ${(obj as { id: number }).id}`, (obj as { x: number, width: number }).x + (obj as { width: number }).width / 2, (obj as { y: number, height: number }).y + (obj as { height: number }).height / 2 + 5);
         ctx.globalAlpha = 1;
       }
     });
@@ -508,15 +505,15 @@ export const MarkCompactAnimation = () => {
     ctx.strokeStyle = arrowColor;
     ctx.lineWidth = 2;
     
-    reachableIndices.forEach((id, index) => {
-      const newX = margin + 20 + (index * (objects[0].width + 10));
-      drawArrow(ctx, rootX, rootY + 20, newX + objects[0].width / 2, objects[0].y);
+    reachableIndices.forEach((id: number, index: number) => {
+      const newX = margin + 20 + (index * (((objects as unknown[])[0] as { width: number }).width + 10));
+      drawArrow(ctx, rootX, rootY + 20, newX + ((objects as unknown[])[0] as { width: number }).width / 2, ((objects as unknown[])[0] as { y: number, height: number }).y);
     });
-  }
-  
-  function drawFinalState(
+  }, []);
+
+  const drawFinalState = useCallback(function drawFinalState(
     ctx: CanvasRenderingContext2D,
-    objects: Array<any>,
+    objects: unknown[],
     rootY: number,
     arrowColor: string,
     objectColor: string,
@@ -538,43 +535,43 @@ export const MarkCompactAnimation = () => {
     ctx.fillText('Root', rootX, rootY + 5);
     
     // Find reachable objects and their new positions
-    const reachableObjects = objects.filter(obj => obj.reachable);
-    const reachableIndices = reachableObjects.map(obj => obj.id);
+    const reachableObjects = objects.filter((obj: unknown) => (obj as { reachable: boolean }).reachable);
+    const reachableIndices = reachableObjects.map((obj: unknown) => (obj as { id: number }).id);
     
     // Draw compacted objects
-    reachableIndices.forEach((id, index) => {
-      const newX = margin + 20 + (index * (objects[0].width + 10));
+    reachableIndices.forEach((id: number, index: number) => {
+      const newX = margin + 20 + (index * (((objects as unknown[])[0] as { width: number }).width + 10));
       
       // Draw object
       ctx.fillStyle = objectColor;
-      ctx.fillRect(newX, objects[0].y, objects[0].width, objects[0].height);
+      ctx.fillRect(newX, ((objects as unknown[])[0] as { y: number, height: number }).y, ((objects as unknown[])[0] as { width: number, height: number }).width, ((objects as unknown[])[0] as { height: number }).height);
       
       // Object label
       ctx.fillStyle = textColor;
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`Obj ${id}`, newX + objects[0].width / 2, objects[0].y + objects[0].height / 2 + 5);
+      ctx.fillText(`Obj ${id}`, newX + ((objects as unknown[])[0] as { width: number }).width / 2, ((objects as unknown[])[0] as { y: number, height: number }).y + ((objects as unknown[])[0] as { height: number }).height / 2 + 5);
       
       // Draw reference
       ctx.strokeStyle = arrowColor;
       ctx.lineWidth = 2;
-      drawArrow(ctx, rootX, rootY + 20, newX + objects[0].width / 2, objects[0].y);
+      drawArrow(ctx, rootX, rootY + 20, newX + ((objects as unknown[])[0] as { width: number }).width / 2, ((objects as unknown[])[0] as { y: number, height: number }).y);
     });
     
     // Draw free space
-    const usedWidth = reachableIndices.length * (objects[0].width + 10);
+    const usedWidth = reachableIndices.length * (((objects as unknown[])[0] as { width: number }).width + 10);
     const freeX = margin + 20 + usedWidth;
-    const freeWidth = (objects.length - reachableIndices.length) * (objects[0].width + 10) - 10;
+    const freeWidth = (objects.length - reachableIndices.length) * (((objects as unknown[])[0] as { width: number }).width + 10) - 10;
     
     ctx.fillStyle = 'rgba(100, 100, 100, 0.1)';
-    ctx.fillRect(freeX, objects[0].y, freeWidth, objects[0].height);
+    ctx.fillRect(freeX, ((objects as unknown[])[0] as { y: number, height: number }).y, freeWidth, ((objects as unknown[])[0] as { height: number }).height);
     
     // Free space label
     ctx.fillStyle = textColor;
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Contiguous Free Space', freeX + freeWidth / 2, objects[0].y + objects[0].height / 2 + 5);
-  }
+    ctx.fillText('Contiguous Free Space', freeX + freeWidth / 2, ((objects as unknown[])[0] as { y: number, height: number }).y + ((objects as unknown[])[0] as { height: number }).height / 2 + 5);
+  }, []);
   
   const nextStep = () => {
     setStep(prevStep => (prevStep < totalSteps - 1) ? prevStep + 1 : prevStep);
@@ -582,50 +579,6 @@ export const MarkCompactAnimation = () => {
   
   const prevStep = () => {
     setStep(prevStep => (prevStep > 0) ? prevStep - 1 : prevStep);
-  };
-  
-  const resetAnimation = () => {
-    setStep(0);
-    setIsPlaying(false);
-    if (animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-  };
-  
-  const playAnimation = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-      return;
-    }
-    
-    setIsPlaying(true);
-    let lastStepTime = Date.now();
-    
-    const animate = () => {
-      const now = Date.now();
-      if (now - lastStepTime > 1000) { // Change step every second
-        lastStepTime = now;
-        setStep(prevStep => {
-          const nextStep = prevStep + 1;
-          if (nextStep >= totalSteps) {
-            setIsPlaying(false);
-            return 0; // Reset to beginning
-          }
-          return nextStep;
-        });
-      }
-      
-      if (isPlaying) {
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationRef.current = requestAnimationFrame(animate);
   };
   
   return (
@@ -638,11 +591,7 @@ export const MarkCompactAnimation = () => {
       />
       <div style={{ marginTop: '10px' }}>
         <button onClick={prevStep} disabled={step === 0} style={{ marginRight: '10px' }}>Previous</button>
-        <button onClick={playAnimation}>
-          {isPlaying ? 'Pause' : 'Play'}
-        </button>
-        <button onClick={nextStep} disabled={step === totalSteps - 1} style={{ marginLeft: '10px' }}>Next</button>
-        <button onClick={resetAnimation} style={{ marginLeft: '10px' }}>Reset</button>
+        <button onClick={nextStep} disabled={step === totalSteps - 1}>Next</button>
       </div>
       <div style={{ marginTop: '10px' }}>
         Step {step + 1} of {totalSteps}

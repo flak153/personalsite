@@ -19,9 +19,9 @@ export function generateStaticParams() {
 }
 
 interface ProjectProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Simple function to extract frontmatter (as a fallback)
@@ -32,26 +32,26 @@ function extractFrontmatter(content: string) {
   if (!match) return { frontmatter: {}, content };
   
   const frontmatterBlock = match[1];
-  const frontmatter: Record<string, any> = {};
+  const frontmatter: Record<string, unknown> = {};
   
   // Extract key-value pairs from frontmatter
   frontmatterBlock.split('\n').forEach(line => {
     const colonIndex = line.indexOf(':');
     if (colonIndex !== -1) {
       const key = line.slice(0, colonIndex).trim();
-      let value = line.slice(colonIndex + 1).trim();
+      const value = line.slice(colonIndex + 1).trim();
       
       // Special case for tech array
       if (key === 'tech' && value.startsWith('[') && value.endsWith(']')) {
         try {
-          value = JSON.parse(value);
+          frontmatter[key] = JSON.parse(value);
         } catch (e) {
           console.error('Error parsing tech array:', e);
-          value = [];
+          frontmatter[key] = [];
         }
+      } else {
+        frontmatter[key] = value;
       }
-      
-      frontmatter[key] = value;
     }
   });
   
@@ -60,8 +60,7 @@ function extractFrontmatter(content: string) {
 
 // Metadata for the project page
 export async function generateMetadata({ params }: ProjectProps): Promise<Metadata> {
-  const resolvedParams = await Promise.resolve(params);
-  const { slug } = resolvedParams;
+  const { slug } = await params;
   
   try {
     const projectsDir = path.join(process.cwd(), "src/app/projects");
@@ -87,8 +86,7 @@ export async function generateMetadata({ params }: ProjectProps): Promise<Metada
 
 // The project page
 export default async function Project({ params }: ProjectProps) {
-  const resolvedParams = await Promise.resolve(params);
-  const { slug } = resolvedParams;
+  const { slug } = await params;
   
   try {
     const projectsDir = path.join(process.cwd(), "src/app/projects");
@@ -158,8 +156,9 @@ export default async function Project({ params }: ProjectProps) {
               <p className="text-white text-lg mb-4">There was an error rendering this project.</p>
               <p className="text-white text-lg mb-4 text-red-300">Error: {(error as Error).message}</p>
               <p className="text-white text-lg mt-8 bg-yellow-900/20 p-4 rounded-lg border border-yellow-600/20">
-                This project page may contain complex MDX features that our current renderer doesn't support.
-                We're working on improving the MDX support!
+                This project page may contain complex MDX features that our current renderer doesn&apos;t support.
+                We&apos;ve enjoyed working on this project from {project.author}&apos;s perspective
+                If you&apos;ve enjoyed this project, share it!
               </p>
             </div>
           </article>

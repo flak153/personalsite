@@ -7,7 +7,7 @@ declare global {
   interface Window {
     Prism: {
       highlightAll: () => void;
-      languages: Record<string, any>;
+      languages: Record<string, unknown>;
     };
   }
 }
@@ -18,7 +18,7 @@ export default function PrismLoader() {
     const loadPrism = async () => {
       try {
         // First, import Prism core
-        const Prism = await import("prismjs");
+        await import("prismjs");
         
         // Load JavaScript first as it's required by TypeScript and JSX
         await import("prismjs/components/prism-javascript");
@@ -29,18 +29,16 @@ export default function PrismLoader() {
         // Then JSX (needed for TSX)
         await import("prismjs/components/prism-jsx");
         
-        // Load remaining languages after TypeScript and JSX are registered
-        await Promise.all([
-          import("prismjs/components/prism-java"),
-          import("prismjs/components/prism-python"),
-          import("prismjs/components/prism-c"),
-          import("prismjs/components/prism-cpp"),
-          import("prismjs/components/prism-csharp"),
-          import("prismjs/components/prism-bash"),
-          import("prismjs/components/prism-json"),
-          import("prismjs/components/prism-rust"),
-          import("prismjs/components/prism-go"),
-        ]);
+        // Load remaining languages one-by-one in dependency order
+        await import("prismjs/components/prism-c");      // C
+        await import("prismjs/components/prism-cpp");    // C++ (depends on C)
+        await import("prismjs/components/prism-csharp"); // C#
+        await import("prismjs/components/prism-java");   // Java
+        await import("prismjs/components/prism-python"); // Python
+        await import("prismjs/components/prism-bash");   // Bash
+        await import("prismjs/components/prism-json");   // JSON
+        await import("prismjs/components/prism-rust");   // Rust
+        await import("prismjs/components/prism-go");     // Go
         
         // Manually register the TSX language since there might be dependency issues
         if (typeof window !== 'undefined' && window.Prism && window.Prism.languages.typescript && window.Prism.languages.jsx) {

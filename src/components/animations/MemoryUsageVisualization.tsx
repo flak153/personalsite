@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 export const MemoryUsageVisualization = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoveredSection, setHoveredSection] = useState<number | null>(null);
   
-  const sections = [
+  // Wrap sections array in useMemo to stabilize its reference for useEffect dependency array
+  const sections = useMemo(() => [
     { label: "Program Code", color: "#4CAF50", percentage: 15 },
     { label: "Data Structures", color: "#2196F3", percentage: 35 },
     { label: "Processing", color: "#9C27B0", percentage: 30 },
     { label: "Caching", color: "#FF9800", percentage: 20 }
-  ];
+  ], []);
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -112,7 +113,7 @@ export const MemoryUsageVisualization = () => {
       legendY += 30;
     });
     
-  }, [hoveredSection]);
+  }, [hoveredSection, sections]);
   
   // Handle mouse movement to detect hovering over sections
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {

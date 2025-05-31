@@ -111,7 +111,7 @@ export default function BackgroundRain() {
         
         return prevCommands.map(cmd => {
           // Update y position
-          let newY = cmd.y + cmd.speed;
+          const newY = cmd.y + cmd.speed;
           
           // Reset if it goes off screen
           if (newY > 100) {
@@ -194,4 +194,3 @@ export default function BackgroundRain() {
     </div>
   );
 }
-

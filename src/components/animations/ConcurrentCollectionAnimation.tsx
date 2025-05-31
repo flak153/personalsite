@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 const ConcurrentCollectionAnimation = () => {
   const [step, setStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
   const totalSteps = 5;
 
   useEffect(() => {
@@ -413,53 +411,6 @@ const ConcurrentCollectionAnimation = () => {
     setStep((prevStep) => (prevStep > 0 ? prevStep - 1 : prevStep));
   };
 
-  const resetAnimation = () => {
-    setStep(0);
-    setIsPlaying(false);
-    if (animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-  };
-
-  const playAnimation = () => {
-    setIsPlaying(!isPlaying);
-    
-    if (!isPlaying) {
-      const startTime = Date.now();
-      const intervalMs = 1000; // 1 second interval
-      
-      const animate = () => {
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - startTime;
-        
-        if (elapsedTime > intervalMs) {
-          nextStep();
-          if (step >= totalSteps - 1) {
-            setIsPlaying(false);
-            return;
-          }
-        }
-        
-        animationRef.current = requestAnimationFrame(animate);
-      };
-      
-      animationRef.current = requestAnimationFrame(animate);
-    } else if (animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div className="flex flex-col items-center my-4">
       <canvas
@@ -468,36 +419,10 @@ const ConcurrentCollectionAnimation = () => {
         height={400}
         className="border border-gray-300 rounded-md"
       />
-      <div className="flex items-center mt-2 space-x-4">
-        <button
-          onClick={prevStep}
-          disabled={step === 0}
-          className="px-3 py-1 bg-blue-500 text-white rounded-md disabled:opacity-50"
-        >
-          Prev
-        </button>
-        <button
-          onClick={playAnimation}
-          className="px-3 py-1 bg-blue-500 text-white rounded-md"
-        >
-          {isPlaying ? "Pause" : "Play"}
-        </button>
-        <button
-          onClick={nextStep}
-          disabled={step === totalSteps - 1}
-          className="px-3 py-1 bg-blue-500 text-white rounded-md disabled:opacity-50"
-        >
-          Next
-        </button>
-        <button
-          onClick={resetAnimation}
-          className="px-3 py-1 bg-blue-500 text-white rounded-md"
-        >
-          Reset
-        </button>
-        <span>
-          Step {step + 1} of {totalSteps}
-        </span>
+      <div style={{ marginTop: '10px' }}>
+        <button onClick={prevStep} disabled={step === 0} style={{ marginRight: '10px' }}>Previous</button>
+        <button onClick={nextStep} disabled={step === totalSteps - 1}>Next</button>
+        <span style={{ marginLeft: '16px' }}>Step {step + 1} of {totalSteps}</span>
       </div>
     </div>
   );

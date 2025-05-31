@@ -5,8 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 export const MarkAndSweepAnimation = () => {
   const [step, setStep] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   
   const totalSteps = 8;
   
@@ -215,50 +213,6 @@ export const MarkAndSweepAnimation = () => {
     setStep(prevStep => (prevStep > 0) ? prevStep - 1 : prevStep);
   };
   
-  const resetAnimation = () => {
-    setStep(0);
-    setIsPlaying(false);
-    if (animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-  };
-  
-  const playAnimation = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-      return;
-    }
-    
-    setIsPlaying(true);
-    let lastStepTime = Date.now();
-    
-    const animate = () => {
-      const now = Date.now();
-      if (now - lastStepTime > 1000) { // Change step every second
-        lastStepTime = now;
-        setStep(prevStep => {
-          const nextStep = prevStep + 1;
-          if (nextStep >= totalSteps) {
-            setIsPlaying(false);
-            return 0; // Reset to beginning
-          }
-          return nextStep;
-        });
-      }
-      
-      if (isPlaying) {
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationRef.current = requestAnimationFrame(animate);
-  };
-  
   return (
     <div className="mark-and-sweep-animation" style={{ textAlign: 'center', margin: '20px 0' }}>
       <canvas 
@@ -269,11 +223,7 @@ export const MarkAndSweepAnimation = () => {
       />
       <div style={{ marginTop: '10px' }}>
         <button onClick={prevStep} disabled={step === 0} style={{ marginRight: '10px' }}>Previous</button>
-        <button onClick={playAnimation}>
-          {isPlaying ? 'Pause' : 'Play'}
-        </button>
-        <button onClick={nextStep} disabled={step === totalSteps - 1} style={{ marginLeft: '10px' }}>Next</button>
-        <button onClick={resetAnimation} style={{ marginLeft: '10px' }}>Reset</button>
+        <button onClick={nextStep} disabled={step === totalSteps - 1}>Next</button>
       </div>
       <div style={{ marginTop: '10px' }}>
         Step {step + 1} of {totalSteps}

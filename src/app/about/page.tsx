@@ -37,7 +37,7 @@ export default function About() {
             
             <div className="space-y-6">
               <p className="text-white/90 text-lg leading-relaxed">
-                I'm a seasoned developer and startup ecosystem veteran, specializing in taking projects from idea to MVP and beyond. My core expertise includes:
+                I&apos;m a seasoned developer and startup ecosystem veteran, specializing in taking projects from idea to MVP and beyond. My core expertise includes:
               </p>
               
               <ul className="list-disc pl-6 text-white/90 text-lg leading-relaxed space-y-2">
@@ -54,7 +54,7 @@ export default function About() {
               
               <ul className="list-disc pl-6 text-white/90 text-lg leading-relaxed space-y-2">
                 <li>Comprehensive business acumen from years as a small business owner and early-stage employee</li>
-                <li>Ability to wear multiple hats: from HR, marketing, sales, I've done it all</li>
+                <li>Ability to wear multiple hats: from HR, marketing, sales, I&apos;ve done it all</li>
                 <li>Deep understanding of various industries and business models</li>
                 <li>Proven track record in leading compliance initiatives and security</li>
                 <li>Extensive knowledge of accounting, and finance</li>
@@ -72,7 +72,7 @@ export default function About() {
               </ul>
               
               <p className="text-white/90 text-lg leading-relaxed">
-                Having run the full startup gauntlet, I've developed a keen eye for common pitfalls and a toolbox of solutions. I excel at rising to the challenge of solving whatever problem a company faces, whether it's technical, operational, or strategic.
+                Having run the full startup gauntlet, I&apos;ve developed a keen eye for common pitfalls and a toolbox of solutions. I excel at rising to the challenge of solving whatever problem a company faces, whether it&apos;s technical, operational, or strategic.
               </p>
             </div>
             
@@ -87,7 +87,7 @@ export default function About() {
             
             <h2 className="text-2xl font-bold mb-4 text-white">Technical Interests</h2>
             <p className="text-white/90 text-lg leading-relaxed mb-4">
-              Beyond my core work, I'm interested in advancing the field of computer science. My areas I follow are:
+              Beyond my core work, I&apos;m interested in advancing the field of computer science. My areas I follow are:
             </p>
             
             <div className="flex flex-wrap gap-2 mb-8">

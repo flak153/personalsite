@@ -19,9 +19,9 @@ export function generateStaticParams() {
 }
 
 interface BlogPostProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Simple function to extract frontmatter manually (as a fallback)
@@ -49,8 +49,7 @@ function extractFrontmatter(content: string) {
 
 // Metadata for the blog post
 export async function generateMetadata({ params }: BlogPostProps): Promise<Metadata> {
-  const resolvedParams = await Promise.resolve(params);
-  const { slug } = resolvedParams;
+  const { slug } = await params;
   
   try {
     const blogDir = path.join(process.cwd(), "src/app/blog");
@@ -76,8 +75,7 @@ export async function generateMetadata({ params }: BlogPostProps): Promise<Metad
 
 // The blog post page
 export default async function BlogPost({ params }: BlogPostProps) {
-  const resolvedParams = await Promise.resolve(params);
-  const { slug } = resolvedParams;
+  const { slug } = await params;
   
   try {
     const blogDir = path.join(process.cwd(), "src/app/blog");
@@ -157,8 +155,8 @@ export default async function BlogPost({ params }: BlogPostProps) {
                 </div>
                 
                 <p className="text-white text-lg mt-8 bg-yellow-900/20 p-4 rounded-lg border border-yellow-600/20">
-                  This blog post may contain complex MDX features that our current renderer doesn't support.
-                  We're working on improving the MDX support!
+                  This blog post may contain complex MDX features that our current renderer doesn&apos;t support.
+                  We&apos;re working on improving the MDX support!
                 </p>
               </div>
             </article>

@@ -5,10 +5,8 @@ import { useState, useEffect, useRef } from 'react';
 export const ReferenceCountingAnimation = () => {
   const [step, setStep] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   
-  const totalSteps = 6;
+  const totalSteps = 8;
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -34,9 +32,41 @@ export const ReferenceCountingAnimation = () => {
     const arrowColor = '#2196F3';
     const textColor = '#F8FAFC';
     
-    // Draw object
-    ctx.fillStyle = step === 5 ? deadBoxColor : boxColor;
-    ctx.fillRect(objectX - boxSize/2, objectY - boxSize/2, boxSize, boxSize);
+    // Draw central or cyclic visuals
+    if (step <= 4) {
+      ctx.fillStyle = boxColor;
+      ctx.fillRect(objectX - boxSize/2, objectY - boxSize/2, boxSize, boxSize);
+    } else if (step === 5) {
+      ctx.fillStyle = deadBoxColor;
+      ctx.fillRect(objectX - boxSize/2, objectY - boxSize/2, boxSize, boxSize);
+    } else if (step === 6) {
+      // Object freed: no visual
+    } else if (step === 7) {
+      // Cyclic refs: draw two boxes with arrows
+      const offsetX = 120;
+      ctx.fillStyle = boxColor;
+      ctx.fillRect(objectX - offsetX - boxSize/2, objectY - boxSize/2, boxSize, boxSize);
+      ctx.fillRect(objectX + offsetX - boxSize/2, objectY - boxSize/2, boxSize, boxSize);
+      ctx.strokeStyle = arrowColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      // Left -> Right
+      ctx.moveTo(objectX - offsetX + boxSize/2, objectY);
+      ctx.lineTo(objectX + offsetX - boxSize/2, objectY);
+      const headLen = 10;
+      ctx.moveTo(objectX + offsetX - boxSize/2, objectY);
+      ctx.lineTo(objectX + offsetX - boxSize/2 - headLen, objectY - headLen);
+      ctx.moveTo(objectX + offsetX - boxSize/2, objectY);
+      ctx.lineTo(objectX + offsetX - boxSize/2 - headLen, objectY + headLen);
+      // Right -> Left
+      ctx.moveTo(objectX + offsetX - boxSize/2, objectY + 20);
+      ctx.lineTo(objectX - offsetX + boxSize/2, objectY + 20);
+      ctx.moveTo(objectX - offsetX + boxSize/2, objectY + 20);
+      ctx.lineTo(objectX - offsetX + boxSize/2 + headLen, objectY + 20 - headLen);
+      ctx.moveTo(objectX - offsetX + boxSize/2, objectY + 20);
+      ctx.lineTo(objectX - offsetX + boxSize/2 + headLen, objectY + 20 + headLen);
+      ctx.stroke();
+    }
     
     // Draw ref count
     let refCount;
@@ -47,13 +77,17 @@ export const ReferenceCountingAnimation = () => {
       case 3: refCount = 3; break;
       case 4: refCount = 0; break;
       case 5: refCount = 0; break;
+      case 6: refCount = 0; break;
+      case 7: refCount = 0; break;
       default: refCount = 0;
     }
     
     ctx.fillStyle = textColor;
     ctx.font = 'bold 20px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(`Count: ${refCount}`, objectX, objectY + 5);
+    if (step <= 5) {
+      ctx.fillText(`Count: ${refCount}`, objectX, objectY + 5);
+    }
     
     // Draw references based on current step
     const angles = [210, 270, 330]; // Angles for the three references
@@ -125,6 +159,12 @@ export const ReferenceCountingAnimation = () => {
       case 5:
         explanation = 'Object eligible for garbage collection';
         break;
+      case 6:
+        explanation = 'Garbage collector frees the object from memory';
+        break;
+      case 7:
+        explanation = 'Cyclic references can prevent deallocation';
+        break;
       default:
         explanation = '';
     }
@@ -145,50 +185,6 @@ export const ReferenceCountingAnimation = () => {
     setStep(prevStep => (prevStep > 0) ? prevStep - 1 : prevStep);
   };
   
-  const resetAnimation = () => {
-    setStep(0);
-    setIsPlaying(false);
-    if (animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-  };
-  
-  const playAnimation = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-      return;
-    }
-    
-    setIsPlaying(true);
-    let lastStepTime = Date.now();
-    
-    const animate = () => {
-      const now = Date.now();
-      if (now - lastStepTime > 1000) { // Change step every second
-        lastStepTime = now;
-        setStep(prevStep => {
-          const nextStep = prevStep + 1;
-          if (nextStep >= totalSteps) {
-            setIsPlaying(false);
-            return 0; // Reset to beginning
-          }
-          return nextStep;
-        });
-      }
-      
-      if (isPlaying) {
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationRef.current = requestAnimationFrame(animate);
-  };
-  
   return (
     <div className="reference-counting-animation" style={{ textAlign: 'center', margin: '20px 0' }}>
       <canvas 
@@ -199,11 +195,7 @@ export const ReferenceCountingAnimation = () => {
       />
       <div style={{ marginTop: '10px' }}>
         <button onClick={prevStep} disabled={step === 0} style={{ marginRight: '10px' }}>Previous</button>
-        <button onClick={playAnimation}>
-          {isPlaying ? 'Pause' : 'Play'}
-        </button>
-        <button onClick={nextStep} disabled={step === totalSteps - 1} style={{ marginLeft: '10px' }}>Next</button>
-        <button onClick={resetAnimation} style={{ marginLeft: '10px' }}>Reset</button>
+        <button onClick={nextStep} disabled={step === totalSteps - 1}>Next</button>
       </div>
       <div style={{ marginTop: '10px' }}>
         Step {step + 1} of {totalSteps}

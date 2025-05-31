@@ -237,8 +237,9 @@ export default function ImmersiveBackground() {
       });
     }
     
+    const startTime = Date.now();
+    
     let animationFrame: number;
-    let startTime = Date.now();
     
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);

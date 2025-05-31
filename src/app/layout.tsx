@@ -24,9 +24,6 @@ export const metadata: Metadata = {
   description: "Personal site and tech blog by Mohammed Ali",
   other: {
     // Add preconnect hint for better background loading performance
-    "http-equiv": {
-      "Content-Security-Policy": "upgrade-insecure-requests"
-    }
   }
 };
 
