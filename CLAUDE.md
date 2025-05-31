@@ -3,6 +3,7 @@
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint and automatically fix issues (including unescaped quotes)
 
 # Code Style
 - TypeScript with strict mode

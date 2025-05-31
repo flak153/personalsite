@@ -32,12 +32,29 @@ Imagine Sarah is graduating from university and needs to prove her degree to emp
 4. **Tamper-proof** - Any changes invalidate the signature
 5. **Always available** - No need to contact the university
 
+### 🚀 Try This Scenario Yourself
+
+Let's simulate Sarah getting her university degree credential:
+
+1. **Sarah (You):** Generate your personal DID and **copy it** - you'll need to share it with the university
+2. **University:** Generate an institution DID to represent the university
+3. **Issue Degree:** **Manually paste** Sarah's DID and issue her a credential, then **copy the credential**
+4. **Employer:** **Paste the credential** you received to verify its authenticity
+
+The manual copy-paste simulates real-world communication where different parties don't share the same system!
+
 ## Try It Yourself
 
-The explorer above lets you experience this process:
-1. **Generate a DID** - Create your cryptographic identity
-2. **Issue a credential** - Sign it with your DID (in real life, institutions would do this)
-3. **Verify it** - See how the math proves authenticity
+The explorer above lets you play all three roles in the credential ecosystem:
+
+1. **As an Individual** - Generate your personal DID (your digital identity)
+2. **As an Institution** - Issue a credential to someone by entering their DID
+3. **As a Verifier** - Verify the credential's authenticity through cryptography
+
+Watch the animations to see:
+- How institutions cryptographically sign credentials
+- The step-by-step verification process
+- Why tampering is impossible without the private key
 
 ## Why This Matters
 
