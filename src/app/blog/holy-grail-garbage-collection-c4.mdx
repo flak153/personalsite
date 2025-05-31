@@ -41,7 +41,7 @@ While these operations sound simple, coordinating them correctly and efficiently
 When memory isn't managed correctly, a host of problems can arise, often subtle at first but potentially devastating in the long run:
 
 *   **Memory Leaks:** The program allocates memory but fails to deallocate it after it's no longer needed. Over time, available memory dwindles, leading to slowdowns and eventual crashes.
-    {/* CODE_EXAMPLE_IDEA: Simple C/C++ loop: `while(true) { malloc(1024); /* no free */ }` to illustrate a basic memory leak. */}
+    {/* CODE_EXAMPLE_IDEA: Simple C/C++ loop: `while(true) { malloc(1024); // no free }` to illustrate a basic memory leak. */}
     <Mermaid code={`
     flowchart LR
         A["Start: 20% Used"] --> B["40% Used"]
@@ -57,7 +57,7 @@ When memory isn't managed correctly, a host of problems can arise, often subtle 
     `} />
 
 *   **Dangling Pointers/References:** The program attempts to use memory that has already been deallocated. This can lead to data corruption, crashes, or security vulnerabilities as the program might be reading or writing to memory now used by another part of the system or even another program.
-    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); *ptr = 10; /* undefined behavior */` to show a dangling pointer. */}
+    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); *ptr = 10; // undefined behavior` to show a dangling pointer. */}
     <Mermaid code={`
     flowchart LR
         A["Pointer → Memory"] --> B["Memory Freed 🗑️"]
@@ -71,7 +71,7 @@ When memory isn't managed correctly, a host of problems can arise, often subtle 
     `} />
 
 *   **Double Frees:** The program attempts to deallocate the same block of memory multiple times. This can corrupt the memory manager's internal data structures, leading to unpredictable behavior or crashes.
-    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); free(ptr); /* undefined behavior */` to illustrate a double free. */}
+    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); free(ptr); // undefined behavior` to illustrate a double free. */}
     <Mermaid code={`
     flowchart LR
         A["Memory Block"] --> B["First Free ✅"]
@@ -118,7 +118,7 @@ int main() {
     int *arr = (int *)malloc(5 * sizeof(int));
 
     if (arr == NULL) {
-        fprintf(stderr, "Memory allocation failed\\n");
+        fprintf(stderr, "Memory allocation failed\n");
         return 1;
     }
 
@@ -131,7 +131,7 @@ int main() {
     for (int i = 0; i < 5; i++) {
         printf("%d ", arr[i]);
     }
-    printf("\\n");
+    printf("\n");
 
     // Deallocate the memory when no longer needed
     free(arr);
@@ -181,225 +181,193 @@ Garbage collection algorithm design is a complex balancing act, often referred t
 3.  **Memory Footprint:** Using memory efficiently, both for the application's objects and for the GC's own internal data structures and operations (e.g., space needed for copying collectors).
 
 Historically, improvements in one of these areas often came at the expense of another. For example, a collector designed for very high throughput might achieve this by performing less frequent but longer "stop-the-world" pauses, thus sacrificing low latency. Understanding this trilemma is key to appreciating the challenges faced by GC designers and the significance of algorithms like C4 that attempt to push the boundaries on all fronts, especially latency.
-{/* VISUAL_IDEA: A triangular diagram with Latency, Throughput, and Memory Footprint at the corners, perhaps with arrows indicating the trade-offs (e.g., improving one negatively impacts another). Could also show different GC types plotted within this triangle. */}
+
+<GCEvolutionVisualization />
 
 Garbage collection itself has evolved significantly. Understanding this evolution provides context for C4's innovations.
 
-### 2.1. Early Attempts: Reference Counting
-*   **Mechanism:** Each object tracks its reference count. If count drops to zero, it's reclaimed.
-    
+### 2.1. Early Attempts: Reference Counting - The Intuitive Approach
+
+As programmers grappled with the complexities and pitfalls of manual memory management (like memory leaks and dangling pointers, discussed in Section 1), the desire for a more automated, less error-prone system grew. One of the earliest and most intuitive strategies to emerge was **Reference Counting**.
+
+The fundamental thought process was: "If we can keep track of how many parts of our program are actively using a piece of memory (an object), then when that number drops to zero, nobody is using it anymore, and it's safe to reclaim." This seemed like a direct and logical way to automate deallocation.
+
+*   **The "How":**
+    *   **The Count:** The system associates a small integer, the "reference count," with every object allocated in memory.
+    *   **Incrementing:** When a new reference to an object is created (e.g., a variable `x` is assigned to point to object `O`, or `O` is added to a list), object `O`'s reference count is incremented.
+    *   **Decrementing:** When an existing reference to an object is destroyed (e.g., variable `x` is reassigned to point to something else or goes out of scope, or `O` is removed from a list), object `O`'s reference count is decremented.
+    *   **Reclamation:** If, after a decrement, an object's reference count reaches zero, it means no active references to it exist anywhere in the program. The object is now considered garbage, and its memory can be immediately reclaimed.
+    *   **Cascading Effect:** Importantly, when an object is reclaimed, any other objects it might have been referencing will, in turn, have their reference counts decremented. This can lead to a cascade, where freeing one object triggers the reclamation of several others.
+
     **Reference Counting Lifecycle:**
     <Mermaid code={`
     stateDiagram-v2
-        [*] --> Created: Object Allocated
-        Created --> Referenced: Root Reference Added
-        Referenced --> MultiRef: Additional References
-        MultiRef --> Referenced: References Removed
-        Referenced --> Unreferenced: Last Reference Removed
+        [*] --> Created: Object Allocated (RC=0 initially, then 1 by creator)
+        Created --> Referenced: Root Reference Added (e.g. assigned to var, RC++)
+        Referenced --> MultiRef: Additional References (RC++)
+        MultiRef --> Referenced: References Removed (RC--)
+        Referenced --> Unreferenced: Last Reference Removed (RC becomes 0)
         Unreferenced --> [*]: Object Deallocated
         
-        Referenced --> CycleFormed: Circular Reference Created
-        CycleFormed --> CycleUnreachable: External References Removed
-        CycleUnreachable --> CycleUnreachable: Stuck! (Memory Leak)
+        Referenced --> CycleFormed: Circular Reference Created (e.g. A.next=B, B.next=A)
+        CycleFormed --> CycleUnreachable: External References to A & B Removed
+        CycleUnreachable --> CycleUnreachable: Stuck! (RCs > 0, Memory Leak)
         
         note right of CycleUnreachable
-            Objects A and B reference each other
-            Both have RefCount = 1
-            But unreachable from roots!
+            Objects A and B reference each other.
+            If only external refs are removed,
+            A.RC and B.RC remain > 0 (e.g., 1 each from the cycle).
+            They are leaked despite being unreachable from roots.
         end note
     `} />
     
     **Reference Counting with Cycle Problem:**
     <Mermaid code={`
     graph TB
-        subgraph Roots["GC Roots"]
-            Root1["Stack Variable 1"]
-            Root2["Stack Variable 2"]
+        subgraph Roots["GC Roots (e.g., Stack Variables)"]
+            Root1["var x"]
+            Root2["var y"]
         end
         
         subgraph LiveObjects["Live Objects"]
-            A["Object A<br/>RefCount: 1<br/>✅ Reachable"]
+            A["Object A<br/>RefCount: 1"]
         end
         
-        subgraph Cycle["Unreachable Cycle ⚠️"]
-            B["Object B<br/>RefCount: 1<br/>❌ Leaked"]
-            C["Object C<br/>RefCount: 1<br/>❌ Leaked"]
-            B -.->|circular ref| C
-            C -.->|circular ref| B
+        subgraph Cycle["Unreachable Cycle ⚠️ - Memory Leak"]
+            direction LR
+            B["Object B<br/>RefCount: 1"]
+            C["Object C<br/>RefCount: 1"]
+            B -- "refers to" --> C
+            C -- "refers to" --> B
         end
         
-        Root1 ==>|strong ref| A
-        Root2 -.->|❌ removed| B
+        Root1 ==>|points to| A
+        Root2 -.->|was pointing to<br/>❌ ref removed| B
         
         style A fill:#90EE90,stroke:#228B22,stroke-width:3px
         style B fill:#FFB6C1,stroke:#DC143C,stroke-width:3px,stroke-dasharray: 5 5
         style C fill:#FFB6C1,stroke:#DC143C,stroke-width:3px,stroke-dasharray: 5 5
-        style Root2 fill:#D3D3D3,stroke:#696969,stroke-width:2px,text-decoration:line-through
+        style Root2 text-decoration:line-through
         style Cycle fill:#FFF0F5,stroke:#DC143C,stroke-width:2px,stroke-dasharray: 10 5
     `} />
-*   **Pros:** Incremental, often immediate reclamation.
-*   **Cons:** Overhead of count updates; fails to collect circular references.
-    ```java
-    // Conceptual example of a reference cycle in Java-like pseudocode
-    class Node {
-        Node next;
-        // (Reference count would be managed by RC system)
-    }
-    Node a = new Node(); // a ref count = 1
-    Node b = new Node(); // b ref count = 1
-    a.next = b;         // b ref count = 2
-    b.next = a;         // a ref count = 2
 
-    // If external references to 'a' and 'b' are removed:
-    // a = null; (a's external ref gone, but b still points to a, so a's count = 1)
-    // b = null; (b's external ref gone, but a still points to b, so b's count = 1)
-    // 'a' and 'b' now form an unreachable cycle, but their counts remain 1.
-    // Simple Reference Counting would not reclaim them.
+*   **The Appeal (Pros):**
+    *   **Simplicity (Conceptual):** The core idea is relatively easy to grasp. It directly models the notion of "usefulness" through reference counts.
+    *   **Incremental Nature & Immediate Reclamation:** Garbage is collected in small, distributed steps as soon as an object becomes unreferenced. This means memory is returned to the system promptly, and there are typically no long, unpredictable pauses associated with a separate GC phase. This was very attractive for interactive systems or those with tight memory constraints, as it promised smoother performance.
+    *   **Deterministic Destruction (Potentially):** Because objects are reclaimed as soon as their count hits zero, their destructors (if any) are run predictably. This can be useful for managing non-memory resources (files, network connections) tied to an object's lifetime.
+
+*   **The Problems Uncovered (Cons & Challenges):**
+    *   **Overhead of Count Updates:** This turned out to be a significant performance bottleneck. *Every* operation that creates, copies, or destroys a reference (assignments, parameter passing, returning from functions, variables going out of scope) requires one or more atomic updates to reference counts. In programs with frequent pointer manipulations, this constant overhead can noticeably slow down the application. Making these updates thread-safe in concurrent environments adds further complexity and cost.
+    *   **The Achilles' Heel - Circular References:** Simple reference counting cannot reclaim objects involved in a reference cycle. If Object A points to Object B, and Object B points back to Object A, their reference counts will each be at least 1 (due to the mutual reference). If all *external* references to this A-B pair are removed, they become unreachable garbage, but their counts remain positive, so they are never reclaimed. This leads to memory leaks, undermining one of the primary goals of automatic memory management.
+    {/* CODE_EXAMPLE_IDEA: A simple Python or Swift snippet showing how reference counts change with assignments and how a cycle is formed and not collected by basic RC. Python's `sys.getrefcount()` could be mentioned. */}
+    *   **Space Overhead:** Storing a reference count for every single object in the system consumes extra memory. While usually small per object, this can add up in systems with many small objects.
+    *   **Cascading Deallocations & Potential Pauses:** While reclamation is generally incremental, if freeing a single object (e.g., the head of a large data structure) causes a long chain of other objects to also have their counts drop to zero, this cascade of deallocations and destructor calls can still lead to a noticeable, albeit usually shorter, pause.
+
+Despite its elegance in theory, the practical drawbacks of reference counting, especially the cycle problem and update overhead, became apparent. While some systems adopted it (e.g., early Smalltalk, Perl, and it's still a core part of Python's CPython implementation, which supplements it with a separate cycle detector), the quest for more robust and efficient GC solutions continued. The limitations of reference counting directly motivated the exploration of entirely different approaches, leading to the development of tracing collectors.
+    ```python
+    # Conceptual example of a reference cycle in Python
+    # CPython uses reference counting primarily, with a separate cycle detector.
+
+    class Node:
+        def __init__(self, name):
+            self.name = name
+            self.next = None
+            # In a real scenario, reference counts are managed internally.
+            # For demonstration, imagine a count is associated with self.
+
+        def __del__(self):
+            # This destructor might not be called for cycled objects 
+            # if only basic RC is used without a cycle detector.
+            # print(f"Node {self.name} is being destroyed.") 
+            pass
+
+
+    # Create two nodes
+    a = Node("A")  # Node "A" object is created. 'a' references it.
+    b = Node("B")  # Node "B" object is created. 'b' references it.
+
+    # Create a cycle
+    a.next = b     # Node "B" is now also referenced by Node "A".
+    b.next = a     # Node "A" is now also referenced by Node "B".
+
+    # Remove external references
+    # In a real scenario, 'a' and 'b' might go out of scope or be explicitly deleted.
+    # For this example, we simulate this by reassigning or deleting the variables.
+    a = None       # The variable 'a' no longer references Node "A".
+                   # Node "A" is still referenced by Node "B".next.
+    b = None       # The variable 'b' no longer references Node "B".
+                   # Node "B" is still referenced by Node "A".next.
+
+    # At this point, Node "A" and Node "B" form an unreachable cycle.
+    # Each object in the cycle has a reference count of 1 (from the other object in the cycle).
+    # A simple reference counter would not reclaim them because their counts are not zero.
+    # CPython's additional cycle detector is designed to find and collect such cycles.
     ```
 
-### 2.2. The Rise of Tracing Collectors
+### 2.2. The Rise of Tracing Collectors - A Different Perspective
 
-#### Mark and Sweep
-*   **Mechanism:** 1. Mark reachable objects from roots. 2. Sweep (reclaim) unmarked objects.
-    
-    **Mark and Sweep Process Visualized:**
-    <Mermaid code={`
-    graph TB
-        subgraph Phase1["1️⃣ Initial Heap State"]
-            subgraph Memory1["Memory Grid"]
-                A1[Obj A<br/>Live] -.->|ref| C1[Obj C<br/>Live]
-                B1[Obj B<br/>Live] -.->|ref| D1[Obj D<br/>Live]
-                E1[Obj E<br/>Garbage]
-                F1[Obj F<br/>Garbage]
-                G1[Obj G<br/>Live]
-                C1 -.->|ref| G1
-            end
-            subgraph Roots1["GC Roots"]
-                R1A[Root 1] ==>|ref| A1
-                R1B[Root 2] ==>|ref| B1
-            end
-        end
-        
-        subgraph Phase2["2️⃣ Mark Phase (Trace from Roots)"]
-            subgraph Memory2["Memory Grid - Marking in Progress"]
-                A2[Obj A<br/>✅ Marked] -.->|trace| C2[Obj C<br/>✅ Marked]
-                B2[Obj B<br/>✅ Marked] -.->|trace| D2[Obj D<br/>✅ Marked]
-                E2[Obj E<br/>❌ Unmarked]
-                F2[Obj F<br/>❌ Unmarked]
-                G2[Obj G<br/>✅ Marked]
-                C2 -.->|trace| G2
-            end
-        end
-        
-        subgraph Phase3["3️⃣ Sweep Phase (Reclaim Unmarked)"]
-            subgraph Memory3["Memory Grid - After Sweep"]
-                A3[Obj A] -.->|ref| C3[Obj C]
-                B3[Obj B] -.->|ref| D3[Obj D]
-                E3[🗑️ Free]
-                F3[🗑️ Free]
-                G3[Obj G]
-                C3 -.->|ref| G3
-            end
-        end
-        
-        Phase1 ==>|"STW Pause<br/>Begin Mark"| Phase2
-        Phase2 ==>|"Continue STW<br/>Sweep Garbage"| Phase3
-        
-        style A1 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style B1 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style C1 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style D1 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style E1 fill:#FFA07A,stroke:#FF6347,stroke-width:2px
-        style F1 fill:#FFA07A,stroke:#FF6347,stroke-width:2px
-        style G1 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        
-        style A2 fill:#90EE90,stroke:#228B22,stroke-width:3px
-        style B2 fill:#90EE90,stroke:#228B22,stroke-width:3px
-        style C2 fill:#90EE90,stroke:#228B22,stroke-width:3px
-        style D2 fill:#90EE90,stroke:#228B22,stroke-width:3px
-        style E2 fill:#FFB6C1,stroke:#DC143C,stroke-width:2px,stroke-dasharray: 5 5
-        style F2 fill:#FFB6C1,stroke:#DC143C,stroke-width:2px,stroke-dasharray: 5 5
-        style G2 fill:#90EE90,stroke:#228B22,stroke-width:3px
-        
-        style E3 fill:#E0E0E0,stroke:#808080,stroke-width:2px,stroke-dasharray: 3 3
-        style F3 fill:#E0E0E0,stroke:#808080,stroke-width:2px,stroke-dasharray: 3 3
-    `} />
-*   **Pros:** Handles cycles.
-*   **Cons:** Stop-the-world (STW) pauses (sacrificing latency); memory fragmentation (impacting memory footprint efficiency over time). It navigated the trilemma by accepting these trade-offs to handle cycles reliably.
+The inherent challenges of reference counting, particularly its inability to handle circular references without complex add-ons and the performance overhead of constant count updates, spurred computer scientists to seek alternative approaches. This led to the development of **tracing collectors**. Instead of objects individually tracking their own liveness, tracing collectors take a global perspective: they start from a set of known "live" references (the "GC roots" – like local variables on the stack, global variables, CPU registers) and traverse all reachable objects from these roots. Any object not reached by this traversal is considered garbage. This fundamental shift in perspective elegantly solved the cycle problem, as unreachable cycles would simply not be visited.
 
-#### Mark-Compact
-*   **Mechanism:** Extends Mark-Sweep by moving live objects together to eliminate fragmentation.
+#### Mark and Sweep - The Foundational Trace
+
+The first widely recognized tracing algorithm was **Mark and Sweep**. The insight was simple yet powerful: if we can identify all *live* objects, then everything else must be garbage.
+
+*   **The "How":**
+    1.  **Mark Phase:** The collector starts with the GC roots. It "marks" every object directly referenced by a root as live. Then, it recursively visits all objects referenced by these newly marked objects, marking them live as well, and so on, until all objects reachable from the roots are marked. Think of it like exploring a maze: you start at the entrance (roots) and mark every path and room you can reach.
+    2.  **Sweep Phase:** Once the marking is complete, the collector scans the entire heap. Any object that was not marked during the Mark phase is considered unreachable garbage and its memory is reclaimed. The marks on the live objects are then typically cleared in preparation for the next GC cycle.
+
+Mark and Sweep algorithms often use a "Tricolor Abstraction" to keep track of objects during the marking phase:
+*   **White:** Objects initially considered garbage or not yet visited.
+*   **Gray:** Objects that are known to be live but whose children (referenced objects) have not yet been fully scanned. These are on the GC's "to-do" list.
+*   **Black:** Objects that are known to be live, and all of their children have been scanned. The GC is "done" with these for the current marking phase.
+
+The goal of the marking phase is to turn all live objects black, leaving only garbage objects white.
+
+<TricolorAbstractionVisualization />
+
+*   **The Realization (Pros & Cons):**
+    *   **Pros:**
+        *   **Handles Cycles Naturally:** Because tracing starts from roots and only follows live references, circular structures that are not connected to any root are never visited and thus correctly identified as garbage. This was a huge step forward from basic reference counting.
+    *   **Cons (The Trade-offs Discovered):**
+        *   **Stop-the-World (STW) Pauses:** The most significant drawback was that the application had to be completely paused ("stopped the world") during both the mark and sweep phases. If the application continued to run and change object references while the GC was trying to mark, the GC could get an inconsistent view of live objects, leading to errors (e.g., freeing a live object). These pauses could be lengthy, especially for large heaps, making applications unresponsive. This was a major sacrifice in latency.
+        *   **Memory Fragmentation:** After several mark-and-sweep cycles, the heap could become fragmented. Live objects would be scattered throughout memory, interspersed with free blocks of varying sizes. Even if there was enough total free memory, it might be difficult to find a contiguous block large enough for a new, large object allocation. This impacted memory footprint efficiency and could slow down future allocations.
+
+Mark and Sweep laid the groundwork for tracing GC, but its STW pauses and fragmentation issues highlighted the need for further refinement. It addressed the GC trilemma by prioritizing correct cycle handling over consistent low latency and optimal memory layout.
+
+#### Mark-Compact - Tackling Fragmentation
+
+The fragmentation problem caused by Mark and Sweep was a practical concern. While it correctly reclaimed memory, the resulting "swiss cheese" memory layout could hinder performance. The next logical step was to not just reclaim free space, but to organize the remaining live objects more efficiently. This led to **Mark-Compact** collectors.
+
+*   **The "How":** Mark-Compact builds upon Mark and Sweep.
+    1.  **Mark Phase:** Identical to Mark and Sweep – all live objects are identified and marked.
+    2.  **Compact Phase:** This is the key addition. Instead of just sweeping away unmarked objects, the collector now *moves* all the marked (live) objects to one end of the heap (or a specific memory region). This consolidates all live objects into a contiguous block, leaving a single, large free area at the other end. This phase also requires updating all references to the moved objects (pointers from roots and from other live objects) to point to their new locations.
     
     **Mark-Compact Memory Transformation:**
-    <Mermaid code={`
-    graph TB
-        subgraph Before["🔴 Before Compaction - Fragmented Memory"]
-            subgraph MemBefore["Memory Layout (Start → End)"]
-                MB1[📦 Object A - 32KB]
-                MB1 --> MBF1[🔲 Free - 16KB]
-                MBF1 --> MB2[📦 Object B - 64KB]
-                MB2 --> MBF2[🔲 Free - 32KB]
-                MBF2 --> MB3[📦 Object C - 16KB]
-                MB3 --> MBF3[🔲 Free - 8KB]
-                MBF3 --> MB4[📦 Object D - 128KB]
-                MB4 --> MBF4[🔲 Free - 64KB]
-                MBF4 --> MB5[📦 Object E - 32KB]
-            end
-            FragStats["❌ Total Free: 120KB<br/>❌ Largest Contiguous: 64KB<br/>❌ Cannot allocate 100KB object!"]
-        end
-        
-        Before ==>|"⏸️ STW Pause Begins"| Process
-        
-        subgraph Process["⚙️ Compaction Process"]
-            Step1[1️⃣ Mark live objects]
-            Step1 --> Step2[2️⃣ Calculate new positions]
-            Step2 --> Step3[3️⃣ Update all references]
-            Step3 --> Step4[4️⃣ Move objects to new positions]
-        end
-        
-        Process ==>|"▶️ Resume Application"| After
-        
-        subgraph After["🟢 After Compaction - Defragmented"]
-            subgraph MemAfter["Memory Layout (Start → End)"]
-                MA1[📦 Object A - 32KB]
-                MA1 --> MA2[📦 Object B - 64KB]
-                MA2 --> MA3[📦 Object C - 16KB]
-                MA3 --> MA4[📦 Object D - 128KB]
-                MA4 --> MA5[📦 Object E - 32KB]
-                MA5 --> MAF[🟦 Free Space - 120KB contiguous]
-            end
-            CompactStats["✅ Total Free: 120KB<br/>✅ All Contiguous!<br/>✅ Can allocate 100KB object!"]
-        end
-        
-        style Before fill:#FFE4E1,stroke:#DC143C,stroke-width:3px
-        style Process fill:#FFF4E4,stroke:#FF8C00,stroke-width:3px
-        style After fill:#E4FFE4,stroke:#228B22,stroke-width:3px
-        
-        style MB1 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style MB2 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style MB3 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style MB4 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style MB5 fill:#87CEEB,stroke:#4682B4,stroke-width:2px
-        style MBF1 fill:#F0F0F0,stroke:#808080,stroke-width:1px,stroke-dasharray: 3 3
-        style MBF2 fill:#F0F0F0,stroke:#808080,stroke-width:1px,stroke-dasharray: 3 3
-        style MBF3 fill:#F0F0F0,stroke:#808080,stroke-width:1px,stroke-dasharray: 3 3
-        style MBF4 fill:#F0F0F0,stroke:#808080,stroke-width:1px,stroke-dasharray: 3 3
-        
-        style MA1 fill:#90EE90,stroke:#228B22,stroke-width:2px
-        style MA2 fill:#90EE90,stroke:#228B22,stroke-width:2px
-        style MA3 fill:#90EE90,stroke:#228B22,stroke-width:2px
-        style MA4 fill:#90EE90,stroke:#228B22,stroke-width:2px
-        style MA5 fill:#90EE90,stroke:#228B22,stroke-width:2px
-        style MAF fill:#E6F3FF,stroke:#0066CC,stroke-width:3px
-        
-        style FragStats fill:#FFE4E1,stroke:#DC143C,stroke-width:2px
-        style CompactStats fill:#E4FFE4,stroke:#228B22,stroke-width:2px
-    `} />
-*   **Pros:** Solves fragmentation; improves allocation speed.
-*   **Cons:** Longer STW pauses due to object copying and reference updates (further sacrificing latency for better memory footprint and throughput via faster allocations). This was a direct trilemma trade-off: improved memory use for worse worst-case latency.
+    
+    <MarkCompactVisualization />
 
-#### Generational Collection
-*   **Mechanism:** Divides heap (Young/Old Gen). Frequent, fast collections in Young Gen.
+*   **The Realization (Pros & Cons):**
+    *   **Pros:**
+        *   **Solves Fragmentation:** By compacting live objects, it eliminates fragmentation, resulting in a large, contiguous free space. This makes subsequent allocations very fast (often just a pointer bump in the free area).
+        *   **Improved Data Locality (Potentially):** Moving related objects closer together *could* improve cache performance, though this wasn't always guaranteed or the primary goal.
+    *   **Cons (The Trade-offs Worsened):**
+        *   **Even Longer STW Pauses:** The compaction phase itself is complex and time-consuming. Copying objects and, crucially, updating all references to them (which could be scattered throughout the heap and in program stacks/registers) added significant time to the STW pause. While it improved memory footprint efficiency and subsequent allocation throughput, it often made the worst-case latency even worse than simple Mark-Sweep. This was a clear trilemma trade-off: better memory utilization and allocation speed at the cost of longer application freezes.
+
+Mark-Compact was a crucial step in managing memory efficiently, but the increased pause times underscored the pressing need for techniques that could reduce or eliminate these disruptive STW events.
+
+#### Generational Collection - The Insight of Object Lifecycles
+
+As developers built larger and more complex applications, a key observation about object behavior emerged, known as the **Generational Hypothesis**:
+1.  Most objects die young. (Many objects are allocated, used briefly, and then become garbage quickly – e.g., temporary variables, short-lived data structures).
+2.  Few objects live for a long time. (Objects that survive many GC cycles are likely to survive for much longer – e.g., application configuration, caches, core data structures).
+
+This insight led to **Generational Collection**, a strategy to optimize GC by focusing effort where it's most likely to yield results.
+
+*   **The "How":** The heap is divided into two or more "generations":
+    *   **Young Generation (or Nursery):** This is where all new objects are initially allocated. It's typically small. Because most objects die young, the Young Generation tends to fill up quickly with a high proportion of garbage. Collections here are frequent and fast (often called "minor GCs"). Live objects that survive a few minor GCs are "promoted" (moved) to the Old Generation.
+    *   **Old Generation (or Tenured Space):** This area holds longer-lived objects. It's typically much larger than the Young Generation. Collections here are less frequent but more time-consuming (often called "major GCs" or "full GCs" if they involve the entire heap). These collections often use algorithms like Mark-Sweep or Mark-Compact.
+    A crucial part of generational collection is managing "inter-generational pointers" – references from objects in the Old Generation to objects in the Young Generation. These must be tracked (often using "card tables" and "write barriers") so that a Young Generation collection doesn't mistakenly reclaim young objects still referenced by old objects.
+    
     <Mermaid code={`
     graph TD
         subgraph Heap
@@ -414,8 +382,15 @@ Garbage collection itself has evolved significantly. Understanding this evolutio
         end
         NewObject[New Object] --> EdenSpace
     `} />
-*   **Pros:** Improves throughput; reduces average pause times.
-*   **Cons:** Major STW pauses for Old Gen collection still problematic for low-latency applications. While improving average latency and throughput (two points of the trilemma), the worst-case latency for full collections remained a significant challenge.
+
+*   **The Realization (Pros & Cons):**
+    *   **Pros:**
+        *   **Improved Throughput:** By frequently collecting the Young Generation where garbage is plentiful, the GC can reclaim a lot of memory quickly and efficiently. This reduces the overall CPU time spent on GC compared to non-generational collectors that always scan the entire heap.
+        *   **Reduced Average Pause Times:** Minor GCs in the Young Generation are typically very short because they only deal with a small portion of the heap. This significantly improves the *average* application responsiveness.
+    *   **Cons (The Persistent Problem):**
+        *   **Major STW Pauses Still an Issue:** While average pauses improved, the major GCs on the Old Generation (especially if they involved compaction) could still cause long, disruptive STW pauses. For applications requiring consistent low latency, these occasional major pauses remained a significant problem. Generational collection improved two points of the trilemma (average latency and throughput) but didn't fully solve the worst-case latency for large, long-lived heaps.
+
+Generational collection became a very popular and effective strategy, adopted by many mainstream language runtimes (like Java's HotSpot JVM). It represented a significant step forward in balancing GC efficiency with application performance. However, the "pause problem," especially for large, mature heaps, was not fully conquered, setting the stage for the next wave of innovations focused on concurrency.
 
 ### 2.3. The Lingering Challenge: The Pause Problem
 Despite advancements, long, unpredictable STW pauses persisted, especially during full heap compaction. This set the stage for C4.
@@ -507,35 +482,9 @@ C4, like other advanced concurrent collectors, employs sophisticated strategies 
 
 *   **Incremental Update:** In this approach, the GC attempts to track changes to the object graph more dynamically. If an application thread creates a new reference from an already processed (black) object to an unprocessed (white) object, the write barrier ensures that either the white object is immediately marked and added to the GC's worklist (turned gray), or the black object is re-queued for scanning its references again.
 
-While specific C4 implementation details are proprietary, the core idea is that the marking process runs alongside the application, using a **write barrier** to maintain consistency. These concurrent marking algorithms often use a "Tricolor Abstraction" to keep track of objects:
-*   **White:** Objects initially considered garbage or not yet visited.
-*   **Gray:** Objects that are known to be live but whose children (referenced objects) have not yet been fully scanned. These are on the GC's "to-do" list.
-*   **Black:** Objects that are known to be live, and all of their children have been scanned. The GC is "done" with these for the current marking phase (unless a write barrier flags a change).
+While specific C4 implementation details are proprietary, the core idea is that the marking process runs alongside the application, using a **write barrier** to maintain consistency.
 
-The goal of the marking phase is to turn all live objects black, leaving only garbage objects white.
-{/* VISUAL_IDEA: A Mermaid diagram illustrating the Tricolor Abstraction states (White, Gray, Black) and the transitions between them during marking, including how write barriers can cause a black object to be re-evaluated or its newly referenced white object to be grayed. Example:
-    graph LR
-        subgraph ObjectStates ["Object States during Concurrent Marking"]
-            White["⚪ White<br/>(Potentially Garbage / Not Visited)"]
-            Gray["🔘 Gray<br/>(Live, Children Not Scanned)"]
-            Black["⚫ Black<br/>(Live, Children Scanned)"]
-        end
-
-        subgraph Transitions ["State Transitions"]
-            direction LR
-            Start(["Initial State (All White)"]) --> White
-            White -- "GC Discovers from Root or Gray Object" --> Gray
-            Gray -- "GC Scans Children" --> Black
-            Black -- "Write Barrier: Black obj points to White obj" --> GrayReconsider["Gray (Reconsider Black Object or Mark White as Gray)"]
-        end
-    
-        style White fill:#FFFFFF,stroke:#CCCCCC,stroke-width:2px
-        style Gray fill:#B0B0B0,stroke:#808080,stroke-width:2px,color:#FFFFFF
-        style Black fill:#333333,stroke:#000000,stroke-width:2px,color:#FFFFFF
-        style GrayReconsider fill:#B0B0B0,stroke:#FF8C00,stroke-width:2px,color:#FFFFFF,stroke-dasharray: 5 5
-*/}
-
-A **write barrier** is a small piece of code inserted by the Just-In-Time (JIT) compiler that executes just before (or sometimes after) any pointer write in the application code (e.g., `obj.field = newReference;`). Its purpose is to inform the GC about this modification so the GC can take appropriate action, often by changing an object's color or adding it to a worklist.
+A **write barrier** is a small piece of code inserted by the Just-In-Time (JIT) compiler that executes just before (or sometimes after) any pointer write in the application code (e.g., `obj.field = newReference;`). Its purpose is to inform the GC about this modification so the GC can take appropriate action. In the context of concurrent marking with tricolor abstraction, write barriers prevent the loss of live objects by ensuring that when a black object (already processed) gains a reference to a white object (not yet visited), the white object is marked gray or the black object is reconsidered.
 
 ```java
 // Conceptual Write Barrier (Java-like pseudocode)
@@ -817,15 +766,7 @@ To achieve its goal of continuous concurrency and avoid disruptive stop-the-worl
     *   Loop back-edges (the point where a loop decides to iterate again or terminate).
     *   Before or after certain complex bytecode instructions or native calls.
     The JIT compiler is responsible for generating code that includes these safe point checks.
-    {/* CODE_EXAMPLE_IDEA: Pseudocode of a JIT-compiled loop:
-        loop_start:
-          // ... loop body ...
-          // Safepoint check at loop back-edge
-          if (GC_yield_requested_flag) {
-            yield_to_GC();
-          }
-          branch_if_condition_met loop_start;
-    This would illustrate where a safepoint check is typically inserted by a JIT. */}
+    {/* CODE_EXAMPLE_IDEA: Pseudocode of a JIT-compiled loop showing where a safepoint check is typically inserted by a JIT */}
 
 *   **Yielding Mechanism (Cooperative Preemption):** At each safe point, the compiled application code includes a tiny check, often as simple as testing a global or thread-local "GC yield requested" flag.
     *   If the flag is not set, the application thread continues without interruption.

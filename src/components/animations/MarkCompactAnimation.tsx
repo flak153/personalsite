@@ -31,148 +31,7 @@ export const MarkCompactAnimation = () => {
     ctx.lineTo(toX - headLen * Math.cos(angle + Math.PI/6), toY - headLen * Math.sin(angle + Math.PI/6));
     ctx.stroke();
   }
-  
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Settings
-    const blockWidth = 60;
-    const blockHeight = 40;
-    const heapWidth = canvas.width - (2 * margin);
-    const heapY = 180;
-    const objectSpacing = 10;
-    const rootY = 80;
-    
-    // Colors
-    const objectColor = '#9E9E9E';
-    const markedColor = '#4CAF50';
-    const rootColor = '#2196F3';
-    const arrowColor = '#757575';
-    const textColor = '#F8FAFC';
-    const compactingArrowColor = '#FF9800';
-    
-    // Draw title
-    ctx.fillStyle = textColor;
-    ctx.font = 'bold 20px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Mark-Compact Garbage Collection', canvas.width / 2, 30);
-    
-    // Draw heap boundary
-    ctx.strokeStyle = '#BDBDBD';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(margin, heapY - 60, heapWidth, blockHeight + 80);
-    
-    // Label the heap
-    ctx.fillStyle = textColor;
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('Heap', margin + 10, heapY - 40);
-    
-    // Define objects (mix of reachable and unreachable)
-    const objectCount = 8;
-    const objects: unknown[] = [];
-    const isReachable = [true, false, true, true, false, false, true, false];
-    
-    // Initial layout with fragmentation
-    let currentX = margin + 20; // This is fine since margin is defined at the component level
-    for (let i = 0; i < objectCount; i++) {
-      objects.push({
-        id: i,
-        x: currentX,
-        y: heapY,
-        width: blockWidth,
-        height: blockHeight,
-        reachable: isReachable[i]
-      });
-      currentX += blockWidth + objectSpacing;
-    }
-    
-    // Step-specific rendering
-    switch(step) {
-      case 0: 
-        // Initial state
-        drawInitialState(ctx, objects, rootY, arrowColor, objectColor, textColor, rootColor, margin);
-        break;
-      case 1:
-      case 2:
-        // Mark phase
-        drawMarkPhase(ctx, objects, step - 1, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, margin);
-        break;
-      case 3:
-        // Calculate addresses
-        drawCalculateAddresses(ctx, objects, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, margin);
-        break;
-      case 4:
-      case 5:
-        // Update references
-        drawUpdateReferences(ctx, objects, step - 4, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, compactingArrowColor, margin);
-        break;
-      case 6:
-        // Compact objects
-        drawCompactObjects(ctx, objects, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, margin);
-        break;
-      case 7:
-        // Final state
-        drawFinalState(ctx, objects, rootY, arrowColor, objectColor, textColor, rootColor, margin);
-        break;
-    }
-    
-    // Draw explanation text
-    ctx.fillStyle = textColor;
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    
-    let explanation = '';
-    let subExplanation = '';
-    
-    switch(step) {
-      case 0:
-        explanation = 'Initial Fragmented Heap';
-        subExplanation = 'Mix of live (reachable) and dead (unreachable) objects';
-        break;
-      case 1:
-        explanation = 'Mark Phase: First Pass';
-        subExplanation = 'Identifying reachable objects from roots';
-        break;
-      case 2:
-        explanation = 'Mark Phase: Complete';
-        subExplanation = 'All reachable objects are now marked';
-        break;
-      case 3:
-        explanation = 'Preparing for Compaction';
-        subExplanation = 'Calculate new addresses for live objects';
-        break;
-      case 4:
-        explanation = 'Update References: First Pass';
-        subExplanation = 'Updating pointers to reference new locations';
-        break;
-      case 5:
-        explanation = 'Update References: Complete';
-        subExplanation = 'All references now point to new locations';
-        break;
-      case 6:
-        explanation = 'Compaction Phase';
-        subExplanation = 'Moving objects to their new locations';
-        break;
-      case 7:
-        explanation = 'Compaction Complete';
-        subExplanation = 'Heap is now defragmented with contiguous free space';
-        break;
-    }
-    
-    ctx.fillText(explanation, canvas.width / 2, canvas.height - 50);
-    ctx.font = '14px Arial';
-    ctx.fillText(subExplanation, canvas.width / 2, canvas.height - 25);
-    
-  }, [step, drawInitialState, drawMarkPhase, drawCalculateAddresses, drawUpdateReferences, drawCompactObjects, drawFinalState]);
-  
+
   // Wrap all draw* functions in useCallback to stabilize references for useEffect dependencies
   const drawInitialState = useCallback(function drawInitialState(
     ctx: CanvasRenderingContext2D,
@@ -211,8 +70,8 @@ export const MarkCompactAnimation = () => {
     
     // Draw all objects
     objects.forEach((obj: unknown) => {
-      // Draw object
-      ctx.fillStyle = (obj as { reachable: boolean }).reachable ? markedColor : objectColor;
+      // Draw object - in initial state, just show regular colors
+      ctx.fillStyle = objectColor;
       ctx.fillRect((obj as { x: number, width: number, height: number }).x, (obj as { y: number, height: number }).y, (obj as { width: number, height: number }).width, (obj as { height: number }).height);
       
       // Object label
@@ -572,6 +431,354 @@ export const MarkCompactAnimation = () => {
     ctx.textAlign = 'center';
     ctx.fillText('Contiguous Free Space', freeX + freeWidth / 2, ((objects as unknown[])[0] as { y: number, height: number }).y + ((objects as unknown[])[0] as { height: number }).height / 2 + 5);
   }, []);
+
+  const drawComparisonView = useCallback(function drawComparisonView(
+    ctx: CanvasRenderingContext2D,
+    objects: unknown[],
+    rootY: number,
+    arrowColor: string,
+    objectColor: string,
+    markedColor: string,
+    textColor: string,
+    rootColor: string,
+    compactingArrowColor: string,
+    margin: number,
+    heapWidth: number,
+    blockWidth: number,
+    blockHeight: number,
+    objectSpacing: number,
+    isFinal: boolean
+  ) {
+    // Section headers
+    ctx.fillStyle = '#DC143C';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🔴 Before Compaction - Fragmented Memory', margin + heapWidth / 2, 50);
+    
+    ctx.fillStyle = '#228B22';
+    ctx.fillText('🟢 After Compaction - Defragmented', margin * 2 + heapWidth + heapWidth / 2, 50);
+    
+    // Memory layout labels
+    ctx.fillStyle = textColor;
+    ctx.font = '14px Arial';
+    ctx.fillText('Memory Layout (Start → End)', margin + heapWidth / 2, 75);
+    ctx.fillText('Memory Layout (Start → End)', margin * 2 + heapWidth + heapWidth / 2, 75);
+    
+    // Left side - Before compaction (fragmented)
+    const beforeY = 95;
+    const leftX = margin + 10;
+    let currentX = leftX;
+    
+    // Draw memory blocks with alternating objects and free spaces
+    const memoryLayout = [
+      { type: 'object', id: 'A', size: '32KB', color: '#87CEEB' },
+      { type: 'free', size: '16KB' },
+      { type: 'object', id: 'B', size: '64KB', color: '#87CEEB' },
+      { type: 'free', size: '32KB' },
+      { type: 'object', id: 'C', size: '16KB', color: '#87CEEB' },
+      { type: 'free', size: '8KB' },
+      { type: 'object', id: 'D', size: '128KB', color: '#87CEEB' },
+      { type: 'free', size: '64KB' },
+      { type: 'object', id: 'E', size: '32KB', color: '#87CEEB' }
+    ];
+    
+    // Calculate block widths based on size
+    const totalKB = 368; // Total memory shown
+    const pixelsPerKB = (heapWidth - 20) / totalKB;
+    
+    memoryLayout.forEach((block) => {
+      const blockSize = parseInt(block.size);
+      const blockPixelWidth = blockSize * pixelsPerKB;
+      
+      if (block.type === 'object') {
+        ctx.fillStyle = block.color || '#87CEEB';
+        ctx.strokeStyle = '#4682B4';
+        ctx.lineWidth = 2;
+        ctx.fillRect(currentX, beforeY, blockPixelWidth, blockHeight);
+        ctx.strokeRect(currentX, beforeY, blockPixelWidth, blockHeight);
+        
+        // Object label
+        ctx.fillStyle = '#000';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`📦 ${block.id}`, currentX + blockPixelWidth / 2, beforeY + blockHeight / 2 - 5);
+        ctx.fillText(block.size, currentX + blockPixelWidth / 2, beforeY + blockHeight / 2 + 8);
+      } else {
+        // Free space
+        ctx.fillStyle = '#F0F0F0';
+        ctx.strokeStyle = '#808080';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.fillRect(currentX, beforeY, blockPixelWidth, blockHeight);
+        ctx.strokeRect(currentX, beforeY, blockPixelWidth, blockHeight);
+        ctx.setLineDash([]);
+        
+        // Free space label
+        ctx.fillStyle = '#666';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('🔲 Free', currentX + blockPixelWidth / 2, beforeY + blockHeight / 2 - 3);
+        ctx.fillText(block.size, currentX + blockPixelWidth / 2, beforeY + blockHeight / 2 + 8);
+      }
+      
+      currentX += blockPixelWidth;
+    });
+    
+    // Stats for before
+    ctx.fillStyle = '#DC143C';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    const beforeStatsY = beforeY + blockHeight + 20;
+    ctx.fillText('❌ Total Free: 120KB', margin + heapWidth / 2, beforeStatsY);
+    ctx.fillText('❌ Largest Contiguous: 64KB', margin + heapWidth / 2, beforeStatsY + 15);
+    ctx.fillText('❌ Cannot allocate 100KB object!', margin + heapWidth / 2, beforeStatsY + 30);
+    
+    // Right side - After compaction
+    const afterY = beforeY;
+    const rightX = margin * 2 + heapWidth + 10;
+    currentX = rightX;
+    
+    // Draw compacted objects
+    const compactedLayout = [
+      { type: 'object', id: 'A', size: '32KB', color: '#90EE90' },
+      { type: 'object', id: 'B', size: '64KB', color: '#90EE90' },
+      { type: 'object', id: 'C', size: '16KB', color: '#90EE90' },
+      { type: 'object', id: 'D', size: '128KB', color: '#90EE90' },
+      { type: 'object', id: 'E', size: '32KB', color: '#90EE90' },
+      { type: 'free', size: '96KB', isContinuous: true }
+    ];
+    
+    compactedLayout.forEach((block) => {
+      const blockSize = parseInt(block.size);
+      const blockPixelWidth = blockSize * pixelsPerKB;
+      
+      if (block.type === 'object') {
+        ctx.fillStyle = block.color || '#90EE90';
+        ctx.strokeStyle = '#228B22';
+        ctx.lineWidth = 2;
+        ctx.fillRect(currentX, afterY, blockPixelWidth, blockHeight);
+        ctx.strokeRect(currentX, afterY, blockPixelWidth, blockHeight);
+        
+        // Object label
+        ctx.fillStyle = '#000';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`📦 ${block.id}`, currentX + blockPixelWidth / 2, afterY + blockHeight / 2 - 5);
+        ctx.fillText(block.size, currentX + blockPixelWidth / 2, afterY + blockHeight / 2 + 8);
+      } else if (block.isContinuous) {
+        // Continuous free space
+        ctx.fillStyle = '#E6F3FF';
+        ctx.strokeStyle = '#0066CC';
+        ctx.lineWidth = 3;
+        ctx.fillRect(currentX, afterY, blockPixelWidth, blockHeight);
+        ctx.strokeRect(currentX, afterY, blockPixelWidth, blockHeight);
+        
+        // Free space label
+        ctx.fillStyle = '#0066CC';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('🟦 Free Space', currentX + blockPixelWidth / 2, afterY + blockHeight / 2 - 5);
+        ctx.fillText('120KB contiguous', currentX + blockPixelWidth / 2, afterY + blockHeight / 2 + 8);
+      }
+      
+      currentX += blockPixelWidth;
+    });
+    
+    // Stats for after
+    ctx.fillStyle = '#228B22';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    const afterStatsY = afterY + blockHeight + 20;
+    ctx.fillText('✅ Total Free: 120KB', margin * 2 + heapWidth + heapWidth / 2, afterStatsY);
+    ctx.fillText('✅ All Contiguous!', margin * 2 + heapWidth + heapWidth / 2, afterStatsY + 15);
+    ctx.fillText('✅ Can allocate 100KB object!', margin * 2 + heapWidth + heapWidth / 2, afterStatsY + 30);
+    
+    // Draw process arrow in the middle
+    if (!isFinal) {
+      const processY = beforeY + blockHeight / 2;
+      const arrowStartX = margin + heapWidth + 20;
+      const arrowEndX = margin * 2 + heapWidth - 20;
+      
+      ctx.strokeStyle = compactingArrowColor;
+      ctx.lineWidth = 3;
+      drawArrow(ctx, arrowStartX, processY, arrowEndX, processY);
+      
+      // Process steps
+      ctx.fillStyle = compactingArrowColor;
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      const midX = (arrowStartX + arrowEndX) / 2;
+      ctx.fillText('⚙️ Compaction', midX, processY - 25);
+      ctx.font = '10px Arial';
+      ctx.fillText('1️⃣ Mark live', midX, processY - 10);
+      ctx.fillText('2️⃣ Calculate positions', midX, processY + 5);
+      ctx.fillText('3️⃣ Update references', midX, processY + 20);
+      ctx.fillText('4️⃣ Move objects', midX, processY + 35);
+    }
+  }, []);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Settings
+    const blockWidth = 50;
+    const blockHeight = 45;
+    const heapWidth = (canvas.width - (3 * margin)) / 2; // Split canvas into two halves
+    const heapY = 140;
+    const objectSpacing = 8;
+    const rootY = 60;
+    
+    // Colors
+    const objectColor = '#9E9E9E';
+    const markedColor = '#4CAF50';
+    const rootColor = '#2196F3';
+    const arrowColor = '#757575';
+    const textColor = '#F8FAFC';
+    const compactingArrowColor = '#FF9800';
+    
+    // Draw title
+    ctx.fillStyle = textColor;
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Mark-Compact Garbage Collection', canvas.width / 2, 25);
+    
+    // For steps that show before/after comparison
+    const showComparison = step >= 6;
+    
+    if (showComparison) {
+      // Draw left heap boundary (Before)
+      ctx.strokeStyle = '#BDBDBD';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(margin, heapY - 50, heapWidth, blockHeight + 70);
+      
+      // Draw right heap boundary (After)
+      ctx.strokeRect(margin * 2 + heapWidth, heapY - 50, heapWidth, blockHeight + 70);
+      
+      // Labels
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Before Compaction', margin + heapWidth / 2, heapY - 30);
+      ctx.fillText('After Compaction', margin * 2 + heapWidth + heapWidth / 2, heapY - 30);
+    } else {
+      // Single heap for other steps
+      ctx.strokeStyle = '#BDBDBD';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(margin, heapY - 50, canvas.width - 2 * margin, blockHeight + 70);
+      
+      // Label the heap
+      ctx.fillStyle = textColor;
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText('Heap', margin + 10, heapY - 30);
+    }
+    
+    // Define objects (mix of reachable and unreachable)
+    const objectCount = 8;
+    const objects: unknown[] = [];
+    const isReachable = [true, false, true, true, false, false, true, false];
+    
+    // Initial layout with fragmentation
+    let currentX = showComparison ? margin + 10 : margin + 20;
+    const maxObjectsPerRow = showComparison ? 4 : 8;
+    
+    for (let i = 0; i < objectCount; i++) {
+      objects.push({
+        id: i,
+        x: currentX,
+        y: heapY,
+        width: blockWidth,
+        height: blockHeight,
+        reachable: isReachable[i]
+      });
+      currentX += blockWidth + objectSpacing;
+    }
+    
+    // Step-specific rendering
+    switch(step) {
+      case 0: 
+        // Initial state
+        drawInitialState(ctx, objects, rootY, arrowColor, objectColor, textColor, rootColor, margin);
+        break;
+      case 1:
+      case 2:
+        // Mark phase
+        drawMarkPhase(ctx, objects, step - 1, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, margin);
+        break;
+      case 3:
+        // Calculate addresses
+        drawCalculateAddresses(ctx, objects, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, margin);
+        break;
+      case 4:
+      case 5:
+        // Update references
+        drawUpdateReferences(ctx, objects, step - 4, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, compactingArrowColor, margin);
+        break;
+      case 6:
+        // Compact objects - show before/after comparison
+        drawComparisonView(ctx, objects, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, compactingArrowColor, margin, heapWidth, blockWidth, blockHeight, objectSpacing, false);
+        break;
+      case 7:
+        // Final state - show before/after comparison complete
+        drawComparisonView(ctx, objects, rootY, arrowColor, objectColor, markedColor, textColor, rootColor, compactingArrowColor, margin, heapWidth, blockWidth, blockHeight, objectSpacing, true);
+        break;
+    }
+    
+    // Draw explanation text
+    ctx.fillStyle = textColor;
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    
+    let explanation = '';
+    let subExplanation = '';
+    
+    switch(step) {
+      case 0:
+        explanation = 'Initial Fragmented Heap';
+        subExplanation = 'Mix of live (reachable) and dead (unreachable) objects';
+        break;
+      case 1:
+        explanation = 'Mark Phase: First Pass';
+        subExplanation = 'Identifying reachable objects from roots';
+        break;
+      case 2:
+        explanation = 'Mark Phase: Complete';
+        subExplanation = 'All reachable objects are now marked';
+        break;
+      case 3:
+        explanation = 'Preparing for Compaction';
+        subExplanation = 'Calculate new addresses for live objects';
+        break;
+      case 4:
+        explanation = 'Update References: First Pass';
+        subExplanation = 'Updating pointers to reference new locations';
+        break;
+      case 5:
+        explanation = 'Update References: Complete';
+        subExplanation = 'All references now point to new locations';
+        break;
+      case 6:
+        explanation = 'Compaction Phase';
+        subExplanation = 'Moving objects to their new locations';
+        break;
+      case 7:
+        explanation = 'Compaction Complete';
+        subExplanation = 'Heap is now defragmented with contiguous free space';
+        break;
+    }
+    
+    ctx.fillText(explanation, canvas.width / 2, canvas.height - 50);
+    ctx.font = '14px Arial';
+    ctx.fillText(subExplanation, canvas.width / 2, canvas.height - 25);
+    
+  }, [step, drawInitialState, drawMarkPhase, drawCalculateAddresses, drawUpdateReferences, drawCompactObjects, drawFinalState, drawComparisonView]);
   
   const nextStep = () => {
     setStep(prevStep => (prevStep < totalSteps - 1) ? prevStep + 1 : prevStep);
@@ -585,8 +792,8 @@ export const MarkCompactAnimation = () => {
     <div className="mark-compact-animation" style={{ textAlign: 'center', margin: '20px 0' }}>
       <canvas 
         ref={canvasRef} 
-        width={600} 
-        height={400} 
+        width={900} 
+        height={280} 
         style={{ border: '1px solid #ddd', maxWidth: '100%' }} 
       />
       <div style={{ marginTop: '10px' }}>

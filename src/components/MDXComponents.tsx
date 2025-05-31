@@ -1,18 +1,11 @@
 "use client";
 
 import React, { useEffect } from "react";
-import ReferenceCountingAnimation from './animations/ReferenceCountingAnimation';
-import MarkAndSweepAnimation from './animations/MarkAndSweepAnimation';
-import MarkCompactAnimation from './animations/MarkCompactAnimation';
-import GenerationalCollectionAnimation from './animations/GenerationalCollectionAnimation';
-import ConcurrentCollectionAnimation from './animations/ConcurrentCollectionAnimation';
-import MemoryUsageVisualization from './animations/MemoryUsageVisualization';
 import ApartmentBuildingMemoryAnalogy from './animations/ApartmentBuildingMemoryAnalogy';
 import PlaceholderAnimation from './animations/PlaceholderAnimation';
-import MemoryLeakAnimation from './animations/MemoryLeakAnimation';
-import DanglingPointerAnimation from './animations/DanglingPointerAnimation';
-import DoubleFreeAnimation from './animations/DoubleFreeAnimation';
-import BufferOverflowAnimation from './animations/BufferOverflowAnimation';
+import GCEvolutionVisualization from './animations/GCEvolutionVisualization';
+import TricolorAbstractionVisualization from './animations/TricolorAbstractionVisualization';
+import MarkCompactVisualization from './animations/MarkCompactVisualization';
 import dynamic from 'next/dynamic';
 
 // Dynamically import MermaidDiagram to avoid SSR issues
@@ -255,18 +248,11 @@ export const components = {
   Callout,
   Mermaid: MermaidDiagram, // Added Mermaid component
   
-  ReferenceCountingAnimation,
-  MarkAndSweepAnimation,
-  MarkCompactAnimation,
-  GenerationalCollectionAnimation,
-  ConcurrentCollectionAnimation,
-  MemoryUsageVisualization,
   ApartmentBuildingMemoryAnalogy,
   PlaceholderAnimation,
-  MemoryLeakAnimation,
-  DanglingPointerAnimation,
-  DoubleFreeAnimation,
-  BufferOverflowAnimation,
+  GCEvolutionVisualization,
+  TricolorAbstractionVisualization,
+  MarkCompactVisualization,
   
   MemoryManagementVisualizedAsApartmentBuilding: () => <ApartmentBuildingMemoryAnalogy />,
   CommonMemoryManagementErrorsAndTheirConsequences: () => <PlaceholderAnimation title="Common Memory Management Errors" />,

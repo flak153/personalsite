@@ -71,8 +71,8 @@ export async function generateMetadata({ params }: ProjectProps): Promise<Metada
       const { frontmatter } = extractFrontmatter(source);
       
       return {
-        title: frontmatter.title || `${slug} | Projects`,
-        description: frontmatter.description || undefined
+        title: (typeof frontmatter.title === 'string' ? frontmatter.title : null) || `${slug} | Projects`,
+        description: typeof frontmatter.description === 'string' ? frontmatter.description : undefined
       };
     }
   } catch (error) {
