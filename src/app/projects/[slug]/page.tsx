@@ -99,8 +99,9 @@ export default async function Project({ params }: ProjectProps) {
     const source = fs.readFileSync(filePath, "utf-8");
     const { frontmatter } = extractFrontmatter(source);
     
-    const title = frontmatter.title || slug;
-    const description = frontmatter.description || "";
+    const titleValue = frontmatter.title;
+    const title = (typeof titleValue === 'string' || typeof titleValue === 'number') ? titleValue : slug;
+    const description = typeof frontmatter.description === 'string' ? frontmatter.description : "";
     const tech = Array.isArray(frontmatter.tech) ? frontmatter.tech : [];
     
     return (
@@ -157,7 +158,7 @@ export default async function Project({ params }: ProjectProps) {
               <p className="text-white text-lg mb-4 text-red-300">Error: {(error as Error).message}</p>
               <p className="text-white text-lg mt-8 bg-yellow-900/20 p-4 rounded-lg border border-yellow-600/20">
                 This project page may contain complex MDX features that our current renderer doesn&apos;t support.
-                We&apos;ve enjoyed working on this project from {project.author}&apos;s perspective
+                We&apos;ve enjoyed working on this project.
                 If you&apos;ve enjoyed this project, share it!
               </p>
             </div>

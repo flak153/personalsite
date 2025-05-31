@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getAllProjects, Project } from "../../lib/projects"; // Corrected import path
 // Note: The Project interface from lib/projects.ts is richer, 
 // but we'll only use common fields for now unless JSX is updated.
@@ -24,7 +25,7 @@ export default function Projects() {
               <Link href={`/projects/${project.slug}`} key={i} className="block h-full"> {/* Added block and h-full to Link for better layout with image */}
                 <div className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm h-full flex flex-col"> {/* Added flex flex-col */}
                   {project.imageUrl && (
-                    <img src={project.imageUrl} alt={project.title} className="rounded-md mb-4 h-40 w-full object-cover" />
+                    <Image src={project.imageUrl} alt={project.title} width={400} height={160} className="rounded-md mb-4 h-40 w-full object-cover" unoptimized />
                   )}
                   <h2 className="text-xl font-bold mb-2 text-white">{project.title}</h2> {/* Removed hover from title as whole card is link */}
                   <p className="text-white/80 mb-4 flex-grow">{project.description}</p> {/* Added flex-grow */}

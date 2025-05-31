@@ -1,47 +1,97 @@
 ---
-title: Canvas Demo
-excerpt: Testing an interactive canvas with built-in animations
+title: Interactive Canvas Showcase
+excerpt: Explore a collection of dynamic and interactive HTML5 canvas animations, from physics simulations to generative art.
 date: 2025-03-17
-category: Testing
-readTime: 1 min read
+category: Web Development
+readTime: 3 min read
 ---
 
-# Canvas Demo
+# Interactive Canvas Showcase
 
-This is a test of the interactive Canvas component with a built-in animation.
+Dive into the world of interactive web graphics with this showcase of HTML5 canvas animations! The `<canvas>` element provides a powerful way to create dynamic visuals directly in the browser. Below, you'll find several examples demonstrating different animation techniques and interactive features, all built using a modular React component.
 
-## Bouncing Ball Demo
+## 1. Bouncing Ball Demo
 
-The following Canvas element shows a simple bouncing ball animation:
+A classic introduction to canvas animation. This demo features a single ball bouncing off the edges of the canvas. It's a great way to understand basic animation loops, collision detection, and coordinate updates.
 
 <Canvas id="bouncingBall" height="200px" />
 
-This animation is implemented directly in the Canvas component, so it doesn't rely on external script tags.
+Simple, yet foundational for more complex animations.
 
-## Physics Demo
+## 2. Physics Demo
 
-This Canvas shows a more complex physics simulation with boxes that respond to gravity:
+Take it up a notch with a basic physics simulation. Multiple boxes fall under the influence of "gravity" and interact with each other and the boundaries.
 
 <Canvas id="physicsDemo" height="300px" />
 
-You can click on the canvas to add more boxes!
+Click anywhere on the canvas to add more boxes and see how they react! This demonstrates handling user input and managing multiple animated objects.
 
-## How It Works
+## 3. Pulsing Circle Demo
 
-The Canvas component uses React's `useEffect` hook to set up the animation:
+This demo showcases a more subtle, generative art style. A circle smoothly expands and contracts, with its opacity tied to its size, creating a calming visual effect.
 
-```javascript
-useEffect(() => {
-  const canvas = document.getElementById(id);
-  const ctx = canvas.getContext("2d");
-  
-  function draw() {
-    // Drawing code here
-    requestAnimationFrame(draw);
-  }
-  
-  draw();
-}, [id]);
+<Canvas id="pulsingCircle" height="150px" />
+
+It's an example of how simple mathematical changes can lead to engaging visuals.
+
+## 4. Interactive Drawing Demo
+
+Now it's your turn to create! This canvas acts as a mini drawing pad. Click and drag your mouse to draw lines. The color of the line changes as you draw, creating a rainbow effect.
+
+<Canvas id="interactiveDrawing" height="300px" />
+
+This demo highlights event handling (mouse down, move, up) and direct user interaction with the canvas.
+
+## 5. Starfield Demo
+
+Prepare for liftoff! This animation simulates flying through a field of stars. Stars appear in the distance and rush towards you, creating a sense of depth and movement.
+
+<Canvas id="starfield" height="300px" />
+
+This uses a common technique for creating pseudo-3D effects on a 2D canvas by manipulating object size and speed based on a simulated Z-depth.
+
+## How It's Built: A Modular Approach
+
+These demos are powered by a reusable React `<Canvas>` component. Initially, the animation logic was hardcoded within this component. However, it has been refactored for better modularity and scalability.
+
+**Key Architectural Changes:**
+
+*   **Dedicated Animation Functions**: Each animation (Bouncing Ball, Physics Demo, etc.) now resides in its own JavaScript/TypeScript file (e.g., `bouncingBall.ts`, `physicsDemo.ts`) located in `src/app/blog/canvas-demos/`. These files export a function that takes the canvas element and its 2D rendering context as arguments and then proceeds to set up and run the specific animation.
+*   **Dynamic Loading in `Canvas` Component**: The main `<Canvas>` component, defined in `src/components/MDXComponents.tsx`, now imports these individual animation functions. Based on an `id` prop passed to it (e.g., `<Canvas id="bouncingBall" />`), it dynamically selects and executes the corresponding animation function.
+
+Here's a simplified look at how the `Canvas` component in `MDXComponents.tsx` manages this:
+
+```tsx
+// src/components/MDXComponents.tsx (simplified)
+import { bouncingBallAnimation } from "@/app/blog/canvas-demos/bouncingBall";
+import { physicsDemoAnimation } from "@/app/blog/canvas-demos/physicsDemo";
+// ... other animation imports
+
+const Canvas = ({ id, height, animationType }) => {
+  useEffect(() => {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const type = animationType || id; // Use id to select animation
+
+    if (type === "bouncingBall") {
+      bouncingBallAnimation(canvas, ctx);
+    } else if (type === "physicsDemo") {
+      physicsDemoAnimation(canvas, ctx);
+    } // ... and so on for other demos
+    
+  }, [id, height, animationType]);
+
+  return <canvas id={id} style={{ width: "100%", height }} />;
+};
 ```
 
-This approach makes the interactive demos more reliable in a React environment.
+**Benefits of this Approach:**
+
+*   **Modularity**: Each animation is self-contained, making it easier to develop, debug, and maintain.
+*   **Scalability**: Adding new canvas demos is as simple as creating a new animation file and adding a condition in the `Canvas` component.
+*   **Reusability**: The core `Canvas` component remains clean and focused on rendering the canvas element, while the specific drawing logic is delegated.
+*   **Organization**: Animation logic is co-located with the blog content it supports, improving project structure.
+
+This setup allows for a clean separation of concerns and makes the overall system more robust and easier to extend with even more creative canvas animations in the future. Feel free to explore the code to see how each animation is implemented!

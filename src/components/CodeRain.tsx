@@ -42,7 +42,8 @@ export default function CodeRain({ textColliders }: CodeRainProps) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    containerRef.current.appendChild(renderer.domElement);
+    const container = containerRef.current;
+    container.appendChild(renderer.domElement);
     
     // Custom shader for gradient transition
     const shaderMaterial = new THREE.ShaderMaterial({
@@ -294,9 +295,9 @@ export default function CodeRain({ textColliders }: CodeRainProps) {
       console.log("CodeRain cleanup");
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", handleResize);
-      if (containerRef.current) {
+      if (container) {
         try {
-          containerRef.current.removeChild(renderer.domElement);
+          container.removeChild(renderer.domElement);
         } catch (e) {
           console.error("Error removing canvas:", e);
         }

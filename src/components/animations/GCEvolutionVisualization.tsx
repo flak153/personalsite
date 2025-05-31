@@ -106,7 +106,7 @@ export default function GCEvolutionVisualization() {
       <div className="relative mb-8">
         <div className="absolute left-0 right-0 top-12 h-1 bg-gray-300"></div>
         <div className="flex justify-between relative">
-          {memoryApproaches.map((approach, index) => (
+          {memoryApproaches.map((approach) => (
             <div
               key={approach.name}
               className="flex flex-col items-center cursor-pointer group"
@@ -118,8 +118,7 @@ export default function GCEvolutionVisualization() {
                   selectedApproach === approach ? 'ring-4 ring-opacity-50' : ''
                 } group-hover:scale-125`}
                 style={{ 
-                  backgroundColor: approach.color,
-                  ringColor: approach.color
+                  backgroundColor: approach.color
                 }}
               ></div>
               <div className="text-xs mt-2 text-center max-w-[100px] group-hover:font-semibold">
@@ -481,7 +480,7 @@ export default function GCEvolutionVisualization() {
             </p>
             <p>
               Notice how C4 and modern pauseless collectors achieve excellent scores across all dimensions - 
-              they don't just make trade-offs, they push the boundaries of what's possible.
+              they don&apos;t just make trade-offs, they push the boundaries of what&apos;s possible.
             </p>
           </div>
         </div>

@@ -46,7 +46,7 @@ export default function TricolorAbstractionVisualization() {
     } else if (isPlaying && step >= markingSteps.length - 1) {
       setIsPlaying(false);
     }
-  }, [isPlaying, step]);
+  }, [isPlaying, step, markingSteps.length]);
 
   const currentState = showWriteBarrier && step === markingSteps.length - 1 
     ? writeBarrierStep 

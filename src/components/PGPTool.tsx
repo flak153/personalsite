@@ -35,8 +35,12 @@ const PGPTool: React.FC = () => {
         encryptionKeys: publicKey,
       });
       setOutput(encryptedMessage as string);
-    } catch (e: any) {
-      setError(`Encryption failed: ${e.message}`);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(`Encryption failed: ${e.message}`);
+      } else {
+        setError(`Encryption failed: An unknown error occurred`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -60,8 +64,12 @@ const PGPTool: React.FC = () => {
                 privateKey: privateKey,
                 passphrase,
             });
-        } catch (e: any) {
-            setError(`Failed to decrypt private key: ${e.message}. Check passphrase.`);
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+              setError(`Failed to decrypt private key: ${e.message}. Check passphrase.`);
+            } else {
+              setError(`Failed to decrypt private key: An unknown error occurred. Check passphrase.`);
+            }
             setIsLoading(false);
             return;
         }
@@ -72,7 +80,7 @@ const PGPTool: React.FC = () => {
       }
 
       const encryptedMessage = await openpgp.readMessage({ armoredMessage: message });
-      const { data: decryptedMessage, signatures } = await openpgp.decrypt({
+      const { data: decryptedMessage } = await openpgp.decrypt({ // Removed _signatures
         message: encryptedMessage,
         decryptionKeys: decryptedPrivateKey,
       });
@@ -80,18 +88,27 @@ const PGPTool: React.FC = () => {
       setOutput(decryptedMessage as string);
       
       // Optionally, verify signatures if needed
+      // const signatures = _signatures; // If needed for commented code, re-assign here
       // try {
       //   if (signatures && signatures.length > 0) {
       //     const publicKeyForVerification = await openpgp.readKey({ armoredKey: publicKeyArmored }); // Or extract from message
       //     await signatures[0].verified; // throws on invalid signature
       //     console.log('Signature verified');
       //   }
-      // } catch (e: any) {
-      //   setError(prev => prev + `\nSignature verification failed: ${e.message}`);
+      // } catch (e: unknown) {
+      //   if (e instanceof Error) {
+      //     setError(prev => prev + `\nSignature verification failed: ${e.message}`);
+      //   } else {
+      //     setError(prev => prev + `\nSignature verification failed: An unknown error occurred`);
+      //   }
       // }
 
-    } catch (e: any) {
-      setError(`Decryption failed: ${e.message}`);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(`Decryption failed: ${e.message}`);
+      } else {
+        setError(`Decryption failed: An unknown error occurred`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +128,7 @@ const PGPTool: React.FC = () => {
     setGeneratedPrivateKey('');
     setIsGeneratingKeys(true);
     try {
-      const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
+      const { privateKey, publicKey } = await openpgp.generateKey({ // Removed _revocationCertificate
         type: 'curve25519', // Use 'curve25519' as the type, as per the TS error hint
         userIDs: [{ name: userName, email: userEmail }],
         passphrase: keyGenPassphrase,
@@ -119,9 +136,13 @@ const PGPTool: React.FC = () => {
       });
       setGeneratedPublicKey(publicKey);
       setGeneratedPrivateKey(privateKey);
-      // Optionally, offer revocationCertificate for download/display
-    } catch (e: any) {
-      setError(`Key generation failed: ${e.message}`);
+      // Optionally, offer revocationCertificate for download/display (Note: _revocationCertificate was removed from destructuring)
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(`Key generation failed: ${e.message}`);
+      } else {
+        setError(`Key generation failed: An unknown error occurred`);
+      }
     } finally {
       setIsGeneratingKeys(false);
     }
@@ -174,7 +195,7 @@ const PGPTool: React.FC = () => {
         <summary className="cursor-pointer text-lg font-medium text-yellow-300 hover:text-yellow-100">Encrypt Message</summary>
         <div className="mt-4 space-y-4">
           <div>
-            <label htmlFor="encryptPublicKey" className="block text-sm font-medium text-gray-300 mb-1">Recipient's PGP Public Key:</label>
+            <label htmlFor="encryptPublicKey" className="block text-sm font-medium text-gray-300 mb-1">Recipient&apos;s PGP Public Key:</label>
             <textarea
               id="encryptPublicKey"
               value={publicKeyArmored}

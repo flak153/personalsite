@@ -8,6 +8,11 @@ import TricolorAbstractionVisualization from './animations/TricolorAbstractionVi
 import MarkCompactVisualization from './animations/MarkCompactVisualization';
 import PGPTool from './PGPTool'; // Import PGPTool
 import dynamic from 'next/dynamic';
+import { bouncingBallAnimation } from "@/app/blog/canvas-demos/bouncingBall";
+import { physicsDemoAnimation } from "@/app/blog/canvas-demos/physicsDemo";
+import { pulsingCircleAnimation } from "@/app/blog/canvas-demos/pulsingCircle";
+import { interactiveDrawingAnimation } from "@/app/blog/canvas-demos/interactiveDrawing";
+import { starfieldAnimation } from "@/app/blog/canvas-demos/starfield";
 
 // Dynamically import MermaidDiagram to avoid SSR issues
 const MermaidDiagram = dynamic(
@@ -66,109 +71,35 @@ const Script = ({ children }: { children: string | { props?: { children?: string
   return null;
 };
 
-// A Canvas component with built-in animation for the bouncing ball example
-const Canvas = ({ id, height = "200px" }: { id: string; height?: string }) => {
+// A Canvas component that can run different animations
+const Canvas = ({ id, height = "200px", animationType }: { id: string; height?: string; animationType?: string }) => {
   useEffect(() => {
-    // Only run this for the bouncingBall canvas to add the demo animation
-    if (id === "bouncingBall") {
-      const canvas = document.getElementById(id) as HTMLCanvasElement;
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      
-      // Set canvas dimensions
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      const width = canvas.width;
-      const height = canvas.height;
-      
-      // Ball properties
-      let x = width / 2;
-      let y = height / 2;
-      let dx = 2;
-      let dy = -2;
-      const radius = 20;
-      
-      // Animation function
-      function draw() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, width, height);
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = "#FFFF00";
-        ctx.fill();
-        ctx.closePath();
-        if (x + dx > width - radius || x + dx < radius) {
-          dx = -dx;
-        }
-        if (y + dy > height - radius || y + dy < radius) {
-          dy = -dy;
-        }
-        x += dx;
-        y += dy;
-        requestAnimationFrame(draw);
-      }
-      draw();
-    }
+    const canvas = document.getElementById(id) as HTMLCanvasElement;
+    if (!canvas) return;
     
-    if (id === "physicsDemo") {
-      const canvas = document.getElementById(id) as HTMLCanvasElement;
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      const width = canvas.width;
-      const height = canvas.height;
-      const boxes: {x: number, y: number, width: number, height: number, vx: number, vy: number, color: string}[] = [];
-      for (let i = 0; i < 10; i++) {
-        boxes.push({
-          x: Math.random() * width,
-          y: Math.random() * height * 0.5,
-          width: 20 + Math.random() * 30,
-          height: 20 + Math.random() * 30,
-          vx: -1 + Math.random() * 2,
-          vy: -1 + Math.random() * 2,
-          color: `hsl(${Math.random() * 360}, 70%, 60%)`
-        });
-      }
-      function update() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = "#333";
-        ctx.fillRect(0, height - 20, width, 20);
-        boxes.forEach(box => {
-          box.vy += 0.1;
-          box.x += box.vx;
-          box.y += box.vy;
-          if (box.x < 0 || box.x + box.width > width) {
-            box.vx *= -0.8;
-            box.x = box.x < 0 ? 0 : width - box.width;
-          }
-          if (box.y + box.height > height - 20) {
-            box.vy *= -0.8;
-            box.y = height - 20 - box.height;
-            box.vx *= 0.95;
-          }
-          ctx.fillStyle = box.color;
-          ctx.fillRect(box.x, box.y, box.width, box.height);
-        });
-        requestAnimationFrame(update);
-      }
-      canvas.addEventListener("click", (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        boxes.push({
-          x: clickX - 15, y: clickY - 15, width: 30, height: 30,
-          vx: -2 + Math.random() * 4, vy: -2,
-          color: `hsl(${Math.random() * 360}, 70%, 60%)`
-        });
-      });
-      update();
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Determine which animation to run based on id or animationType
+    const type = animationType || id;
+
+    if (type === "bouncingBall") {
+      bouncingBallAnimation(canvas, ctx);
+    } else if (type === "physicsDemo") {
+      physicsDemoAnimation(canvas, ctx);
+    } else if (type === "pulsingCircle") {
+      pulsingCircleAnimation(canvas, ctx);
+    } else if (type === "interactiveDrawing") {
+      interactiveDrawingAnimation(canvas, ctx);
+    } else if (type === "starfield") {
+      starfieldAnimation(canvas, ctx);
     }
-  }, [id, height]);
+    // Add more animations here as needed
+    // else if (type === "newAnimation") {
+    //   newAnimationFunction(canvas, ctx);
+    // }
+
+  }, [id, height, animationType]);
   
   return (
     <div className="my-6">

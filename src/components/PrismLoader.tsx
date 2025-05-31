@@ -7,7 +7,8 @@ declare global {
   interface Window {
     Prism: {
       highlightAll: () => void;
-      languages: Record<string, unknown>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      languages: Record<string, any>;
     };
   }
 }
@@ -42,12 +43,14 @@ export default function PrismLoader() {
         
         // Manually register the TSX language since there might be dependency issues
         if (typeof window !== 'undefined' && window.Prism && window.Prism.languages.typescript && window.Prism.languages.jsx) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const jsx = window.Prism.languages.jsx as any;
           window.Prism.languages.tsx = {
             ...window.Prism.languages.typescript,
-            'tag': window.Prism.languages.jsx.tag,
-            'attr-value': window.Prism.languages.jsx['attr-value'],
-            'attr-name': window.Prism.languages.jsx['attr-name'],
-            'script': window.Prism.languages.jsx.script
+            'tag': jsx.tag,
+            'attr-value': jsx['attr-value'],
+            'attr-name': jsx['attr-name'],
+            'script': jsx.script
           };
         }
         

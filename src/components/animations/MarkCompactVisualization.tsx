@@ -90,7 +90,7 @@ export default function MarkCompactVisualization() {
     } else if (isPlaying && step >= steps.length - 1) {
       setIsPlaying(false);
     }
-  }, [isPlaying, step]);
+  }, [isPlaying, step, steps.length]);
 
   const currentStep = steps[step];
   const totalMemory = 296; // Total heap size
@@ -152,12 +152,12 @@ export default function MarkCompactVisualization() {
           {/* Memory blocks */}
           <g transform="translate(10, 40)">
             {/* Draw all blocks */}
-            {(currentStep.showFinal ? compactedBlocks : compactedBlocks).map((block, index) => {
+            {(currentStep.showFinal ? compactedBlocks : compactedBlocks).map((block) => {
               if (currentStep.showFinal && !block.isAlive) return null;
               
               const x = (getBlockX(block) / totalMemory) * 580;
               const width = (block.size / totalMemory) * 580;
-              const isHighlighted = currentStep.highlight.includes(block.id);
+              // const isHighlighted = currentStep.highlight.includes(block.id); // Removed as unused
               const isMoving = currentStep.animate && block.newPosition !== undefined;
               
               return (
@@ -225,7 +225,7 @@ export default function MarkCompactVisualization() {
                         fill="#3b82f6"
                         fontWeight="bold"
                       >
-                        {block.id}'
+                        {block.id}&apos;
                       </text>
                       {/* Arrow from current to new position */}
                       <path

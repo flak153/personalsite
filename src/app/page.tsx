@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getBlogPosts } from '@/lib/blog';
 import { getFeaturedProjects } from '@/lib/projects';
 
@@ -15,7 +16,7 @@ export default function Home() {
       <section className="relative h-screen w-full flex items-center justify-center z-10">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white font-[family-name:var(--font-geist-sans)] px-8 py-4 drop-shadow-[0_0_15px_rgba(0,0,0,0.8)] shadow-2xl">
-            Mohammed Ali
+            Mohammed "Flak" Ali
           </h1>
           <p className="text-xl md:text-2xl text-white mb-8 font-[family-name:var(--font-geist-mono)] px-6 py-3 drop-shadow-[0_0_15px_rgba(0,0,0,0.8)] shadow-xl">
             Tech Blog &amp; Personal Site
@@ -102,7 +103,7 @@ export default function Home() {
             {featuredProjects.map((project) => (
               <div key={project.slug} className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm h-full flex flex-col">
                 {project.imageUrl && (
-                  <img src={project.imageUrl} alt={project.title} className="rounded-md mb-4 h-40 w-full object-cover" />
+                  <Image src={project.imageUrl} alt={project.title} width={400} height={160} className="rounded-md mb-4 h-40 w-full object-cover" unoptimized />
                 )}
                 <h3 className="text-xl font-bold mb-2 text-white hover:text-yellow-200 transition-colors">
                   {project.demoUrl ? (
