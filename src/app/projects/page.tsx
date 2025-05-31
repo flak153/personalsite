@@ -21,14 +21,17 @@ export default function Projects() {
             </div>
           ) : (
             displayProjects.map((project: Project, i: number) => (
-              <Link href={`/projects/${project.slug}`} key={i}>
-                <div className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm h-full">
-                  <h2 className="text-xl font-bold mb-2 text-white hover:text-yellow-200 transition-colors">{project.title}</h2>
-                  <p className="text-white/80 mb-4">{project.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.tech.map((tech, i) => (
-                      <span key={i} className="bg-white/20 px-3 py-1 rounded-full text-xs text-white">
-                        {tech}
+              <Link href={`/projects/${project.slug}`} key={i} className="block h-full"> {/* Added block and h-full to Link for better layout with image */}
+                <div className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm h-full flex flex-col"> {/* Added flex flex-col */}
+                  {project.imageUrl && (
+                    <img src={project.imageUrl} alt={project.title} className="rounded-md mb-4 h-40 w-full object-cover" />
+                  )}
+                  <h2 className="text-xl font-bold mb-2 text-white">{project.title}</h2> {/* Removed hover from title as whole card is link */}
+                  <p className="text-white/80 mb-4 flex-grow">{project.description}</p> {/* Added flex-grow */}
+                  <div className="flex flex-wrap gap-2 mt-auto"> {/* Added mt-auto to push tech tags down */}
+                    {project.tech.map((techItem, j) => ( // Changed inner map key from i to j
+                      <span key={j} className="bg-white/20 px-3 py-1 rounded-full text-xs text-white">
+                        {techItem}
                       </span>
                     ))}
                   </div>
