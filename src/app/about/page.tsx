@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function About() {
   const skills = [
     "Backend Systems",
@@ -117,7 +119,7 @@ export default function About() {
               </ul>
               
               <p className="text-white/90 text-lg leading-relaxed">
-                Having navigated the exhilarating, and at times, perilous startup journey from multiple vantage points, I've cultivated an instinct for anticipating challenges and a versatile toolkit for overcoming them. I don't just solve technical puzzles; I embrace the holistic challenge of helping a company thrive, whether that means architecting a new system, streamlining operations, or contributing to strategic direction. It's about building something meaningful, something that lasts.
+                Having navigated the exhilarating, and at times, perilous startup journey from multiple vantage points, I&apos;ve cultivated an instinct for anticipating challenges and a versatile toolkit for overcoming them. I don&apos;t just solve technical puzzles; I embrace the holistic challenge of helping a company thrive, whether that means architecting a new system, streamlining operations, or contributing to strategic direction. It&apos;s about building something meaningful, something that lasts.
               </p>
             </div>
             
@@ -156,7 +158,7 @@ export default function About() {
                 Their journey from a war-torn village and a simple tin shack to establishing a new life in the U.S. has fundamentally shaped my understanding of perseverance and the effort required to build something meaningful from the ground up. These experiences are integral to my approach to both life and work.
               </p>
               <p className="text-white/90 text-lg leading-relaxed">
-                You can learn more about their story and its influence on me <a href="/blog/tribute-to-my-parents-perseverance" className="text-rose-300 hover:text-rose-200 underline">in this blog post</a>.
+                You can learn more about their story and its influence on me <Link href="/blog/tribute-to-my-parents-perseverance" className="text-rose-300 hover:text-rose-200 underline">in this blog post</Link>.
               </p>
             </div>
             
