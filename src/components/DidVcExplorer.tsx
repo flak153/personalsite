@@ -102,7 +102,10 @@ const DidVcExplorer: React.FC = () => {
   const [verificationResult, setVerificationResult] = useState<{
     verified: boolean;
     message: string;
-    details?: Record<string, unknown>;
+    details?: {
+      verificationSteps?: string[];
+      [key: string]: unknown;
+    };
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -925,7 +928,6 @@ const DidVcExplorer: React.FC = () => {
                 
                 {verificationResult.details && (
                   <div className="mt-3 space-y-3">
-                    {/* Special handling for verification steps */}
                     {verificationResult.details.verificationSteps && (
                       <div className="bg-green-500/10 p-3 rounded-lg">
                         <h5 className="font-medium text-green-400 mb-2">Verification Steps Completed:</h5>
