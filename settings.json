@@ -1,7 +1,7 @@
 {
   "animations": {
     "codeRain": {
-      "enabled": true,
+      "enabled": false,
       "description": "Matrix-style code rain background animation"
     },
     "circuitBoard": {
