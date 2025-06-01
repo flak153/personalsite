@@ -12,5 +12,53 @@
   },
   "theme": {
     "backgroundGradient": "linear-gradient(135deg,rgba(154,3,30,0.9),rgba(10,36,99,0.9))"
+  },
+  "fonts": {
+    "bodyFont": {
+      "current": "nunito",
+      "options": {
+        "nunito": {
+          "name": "Nunito",
+          "description": "Friendly and approachable with rounded letterforms",
+          "import": "Nunito",
+          "fallback": "sans-serif"
+        },
+        "inter": {
+          "name": "Inter",
+          "description": "Highly readable with a warm, human feel",
+          "import": "Inter",
+          "fallback": "sans-serif"
+        },
+        "poppins": {
+          "name": "Poppins",
+          "description": "Geometric but friendly with rounded edges",
+          "import": "Poppins",
+          "fallback": "sans-serif"
+        },
+        "openSans": {
+          "name": "Open Sans",
+          "description": "Clean, humanist design that feels welcoming",
+          "import": "Open_Sans",
+          "fallback": "sans-serif"
+        },
+        "lato": {
+          "name": "Lato",
+          "description": "Designed to feel friendly and approachable",
+          "import": "Lato",
+          "fallback": "sans-serif"
+        },
+        "geist": {
+          "name": "Geist",
+          "description": "Modern, neutral technical font (local package)",
+          "import": "GeistSans",
+          "fallback": "sans-serif"
+        }
+      }
+    },
+    "monoFont": {
+      "current": "geistMono",
+      "name": "Geist Mono",
+      "description": "Clean monospace font for code blocks (local package)"
+    }
   }
 }

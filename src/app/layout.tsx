@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito, Inter, Poppins, Open_Sans, Lato } from "next/font/google";
+import { GeistSans, GeistMono } from "geist/font";
 import Navigation from "@/components/Navigation";
 import BackgroundWrapper from "@/components/BackgroundWrapper";
 import PrismLoader from "@/components/PrismLoader";
@@ -8,16 +9,52 @@ import "./globals.css";
 // Import the Prism theme for syntax highlighting
 import "prismjs/themes/prism-tomorrow.css"; // Basic theme
 import "./styles/prism-theme.css"; // Our custom theme
+import settings from "../../settings.json";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Load all font options
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
+  subsets: ["latin"],
+});
+
+const lato = Lato({
+  variable: "--font-lato",
+  subsets: ["latin"],
+  weight: ["300", "400", "700"],
+});
+
+// Use local Geist fonts
+const geist = GeistSans;
+const geistMono = GeistMono;
+
+// Font mapping
+const fontMap = {
+  nunito,
+  inter,
+  poppins,
+  openSans,
+  lato,
+  geist,
+};
+
+// Get current font based on settings
+const currentBodyFont = fontMap[settings.fonts.bodyFont.current as keyof typeof fontMap] || nunito;
 
 export const metadata: Metadata = {
   title: "Mohammed Ali | Tech Blog",
@@ -35,7 +72,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${currentBodyFont.variable} ${geistMono.variable} antialiased`}
       >
         <BackgroundWrapper />
         <Navigation />
