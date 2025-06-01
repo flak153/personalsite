@@ -14,6 +14,8 @@ import { physicsDemoAnimation } from "@/app/blog/canvas-demos/physicsDemo";
 import { pulsingCircleAnimation } from "@/app/blog/canvas-demos/pulsingCircle";
 import { interactiveDrawingAnimation } from "@/app/blog/canvas-demos/interactiveDrawing";
 import { starfieldAnimation } from "@/app/blog/canvas-demos/starfield";
+import ResourceLegend from './ResourceLegend';
+import ResourceTypeIcon from './ResourceTypeIcon';
 
 // Dynamically import MermaidDiagram to avoid SSR issues
 const MermaidDiagram = dynamic(
@@ -182,6 +184,8 @@ export const components = {
   Mermaid: MermaidDiagram, // Added Mermaid component
   PGPTool, // Add PGPTool to components
   DidVcExplorer, // Add DidVcExplorer to components
+  ResourceLegend,
+  ResourceTypeIcon,
   
   ApartmentBuildingMemoryAnalogy,
   PlaceholderAnimation,

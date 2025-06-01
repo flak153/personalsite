@@ -33,88 +33,91 @@ export default function About() {
           </h1>
           
           <div className="bg-black/20 backdrop-blur-sm rounded-lg p-8 border border-white/40">
-            <h2 className="text-2xl font-bold mb-4 text-white">Startup Veteran & DevOps Specialist</h2>
+            <h2 className="text-3xl font-bold mb-6 text-white">My Journey in Code and Creation</h2>
             
             <div className="space-y-6">
               <p className="text-white/90 text-lg leading-relaxed">
-                I&apos;m a seasoned developer and startup ecosystem veteran, specializing in taking projects from idea to MVP and beyond. My core expertise includes:
+                For me, software development isn&apos;t just a profession; it&apos;s a craft I&apos;ve honed in the dynamic, often chaotic, world of startups. I thrive on transforming nascent ideas into tangible, robust products. My journey has been one of constant learning and adaptation, navigating the entire lifecycle from the spark of an idea to a scalable, market-ready MVP and beyond. This path has equipped me with a deep appreciation for not just elegant code, but for systems that endure and businesses that flourish.
+              </p>
+              
+              <p className="text-white/90 text-lg leading-relaxed">
+                My core technical passions lie in:
+              </p>
+              <ul className="text-white/90 text-lg leading-relaxed space-y-3">
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+                  <span>Architecting and nurturing backend systems that are both powerful and resilient.</span>
+                </li>
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+                  <span>Crafting cloud-native infrastructures that allow web applications to breathe and scale.</span>
+                </li>
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+                  <span>Orchestrating complex codebase migrations, ensuring continuity and minimizing disruption.</span>
+                </li>
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+                  <span>Building sophisticated CI/CD pipelines that make rapid, reliable deployment a reality.</span>
+                </li>
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+                  <span>Mastering the intricacies of compliance and security (SOC 2 Type II, ISO 27001), turning obligations into strengths.</span>
+                </li>
+              </ul>
+              
+              <p className="text-white/90 text-lg leading-relaxed">
+                The startup crucible has forged more than just my technical abilities. It has instilled in me a holistic understanding of business. I&apos;ve walked in the shoes of a founder and an early team member, which means I&apos;ve seen firsthand how every line of code, every system design choice, and every operational process impacts the bigger picture. This perspective allows me to contribute beyond the purely technical:
               </p>
               
               <ul className="text-white/90 text-lg leading-relaxed space-y-3">
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Designing, building and scaling robust backend systems</span>
+                  <span>A pragmatic business sense, understanding the delicate dance between innovation, resources, and market realities.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Implementing cloud-native solutions for web applications</span>
+                  <span>The versatility to bridge gaps across departments – I&apos;ve navigated the worlds of HR, marketing, and sales when the need arose.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Managing large-scale codebase migrations with minimal disruption</span>
+                  <span>An intuitive grasp of diverse industry landscapes and the nuances of different business models.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Designing and building elegant CI/CD pipelines for rapid, reliable deployments</span>
+                  <span>A history of spearheading compliance and security efforts, transforming them from hurdles into foundations of trust.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Navigating stringent compliance and security requirements (SOC 2 Type II, ISO 27001)</span>
+                  <span>A solid grounding in the principles of accounting and finance, crucial for sustainable growth.</span>
                 </li>
               </ul>
               
               <p className="text-white/90 text-lg leading-relaxed">
-                With years of experience in early-stage startups, I bring more than just technical skills to the table:
+                My philosophy for building great software and strong companies is rooted in:
               </p>
               
               <ul className="text-white/90 text-lg leading-relaxed space-y-3">
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Comprehensive business acumen from years as a small business owner and early-stage employee</span>
+                  <span>A commitment to meticulous documentation – clarity is kindness to your future self and your team.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Ability to wear multiple hats: from HR, marketing, sales, I&apos;ve done it all</span>
+                  <span>An unwavering belief in the power of thorough testing – building confidence with every check.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Deep understanding of various industries and business models</span>
+                  <span>A proactive stance on identifying and thoughtfully addressing technical debt before it compounds.</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Proven track record in leading compliance initiatives and security</span>
-                </li>
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Extensive knowledge of accounting, and finance</span>
+                  <span>A dedication to not just meeting, but exceeding industry security standards, because trust is paramount.</span>
                 </li>
               </ul>
               
               <p className="text-white/90 text-lg leading-relaxed">
-                My approach is characterized by:
-              </p>
-              
-              <ul className="text-white/90 text-lg leading-relaxed space-y-3">
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Rigorous documentation practices</span>
-                </li>
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Thorough testing</span>
-                </li>
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>A knack for identifying and addressing technical debt</span>
-                </li>
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-rose-300 mr-3 mt-1 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-                  <span>Meeting and exceeding industry security standards</span>
-                </li>
-              </ul>
-              
-              <p className="text-white/90 text-lg leading-relaxed">
-                Having run the full startup gauntlet, I&apos;ve developed a keen eye for common pitfalls and a toolbox of solutions. I excel at rising to the challenge of solving whatever problem a company faces, whether it&apos;s technical, operational, or strategic.
+                Having navigated the exhilarating, and at times, perilous startup journey from multiple vantage points, I've cultivated an instinct for anticipating challenges and a versatile toolkit for overcoming them. I don't just solve technical puzzles; I embrace the holistic challenge of helping a company thrive, whether that means architecting a new system, streamlining operations, or contributing to strategic direction. It's about building something meaningful, something that lasts.
               </p>
             </div>
             
@@ -143,6 +146,19 @@ export default function About() {
             <p className="text-white/90 text-lg leading-relaxed mt-6">
               While these interests may not always directly apply to day-to-day work, they inform my approach to problem-solving and keep me at the forefront of technological advancements in our field.
             </p>
+
+            <h2 className="text-3xl font-bold mt-12 mb-6 text-white">Roots & Perspective</h2>
+            <div className="space-y-4">
+              <p className="text-white/90 text-lg leading-relaxed">
+                My early life in the Bronx, sharing a one-bedroom, pest-ridden, rent-stabilized apartment with five family members, provided a unique lens on resourcefulness and community. This was the environment shortly after my Bengali parents immigrated from rural Bangladesh, arriving in New York with minimal resources just before I was born.
+              </p>
+              <p className="text-white/90 text-lg leading-relaxed">
+                Their journey from a war-torn village and a simple tin shack to establishing a new life in the U.S. has fundamentally shaped my understanding of perseverance and the effort required to build something meaningful from the ground up. These experiences are integral to my approach to both life and work.
+              </p>
+              <p className="text-white/90 text-lg leading-relaxed">
+                You can learn more about their story and its influence on me <a href="/blog/tribute-to-my-parents-perseverance" className="text-rose-300 hover:text-rose-200 underline">in this blog post</a>.
+              </p>
+            </div>
             
             <div className="mt-10 pt-6 border-t border-white/20">
               <div className="flex justify-between items-center">
