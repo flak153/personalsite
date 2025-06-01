@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import settings from "../../settings.json";
 
 // Dynamically import components to reduce initial load time
 const CircuitBoardBackground = dynamic(() => import("./CircuitBoardBackground"), { 
@@ -51,18 +52,27 @@ export default function CombinedBackground() {
   // Use reduced animations for non-home pages
   if (!isLoaded) {
     return (
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(135deg,rgba(154,3,30,0.9),rgba(10,36,99,0.9))]" />
+      <div className={`fixed inset-0 z-0 bg-[${settings.theme.backgroundGradient}]`} />
     );
   }
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <BackgroundRain />
-      </div>
+      {/* Static gradient background - render first as base layer */}
+      {!settings.animations.codeRain.enabled && (
+        <div className={`absolute inset-0 z-0 bg-[${settings.theme.backgroundGradient}]`} />
+      )}
       
-      {/* Only render circuit board on the home page to improve performance on other pages */}
-      {isHomePage && (
+      {/* Code rain animation - controlled by settings */}
+      {settings.animations.codeRain.enabled && (
+        <div className="absolute inset-0 z-0">
+          <BackgroundRain />
+        </div>
+      )}
+      
+      {/* Circuit board animation - controlled by settings */}
+      {settings.animations.circuitBoard.enabled && 
+       (!settings.animations.circuitBoard.homePageOnly || isHomePage) && (
         <div className="absolute inset-0 z-10 pointer-events-none opacity-40">
           <CircuitBoardBackground />
         </div>

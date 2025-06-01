@@ -1,0 +1,16 @@
+{
+  "animations": {
+    "codeRain": {
+      "enabled": true,
+      "description": "Matrix-style code rain background animation"
+    },
+    "circuitBoard": {
+      "enabled": true,
+      "homePageOnly": true,
+      "description": "Circuit board pattern animation"
+    }
+  },
+  "theme": {
+    "backgroundGradient": "linear-gradient(135deg,rgba(154,3,30,0.9),rgba(10,36,99,0.9))"
+  }
+}
