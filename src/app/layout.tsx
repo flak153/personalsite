@@ -59,6 +59,9 @@ const currentBodyFont = fontMap[settings.fonts.bodyFont.current as keyof typeof 
 export const metadata: Metadata = {
   title: "Mohammed Ali | Tech Blog",
   description: "Personal site and tech blog by Mohammed Ali",
+  keywords: "Mohammed Ali, tech blog, software engineering, DevOps, backend systems, cloud architecture, startup",
+  authors: [{ name: "Mohammed Ali" }],
+  viewport: "width=device-width, initial-scale=1",
   other: {
     // Add preconnect hint for better background loading performance
   }
@@ -74,10 +77,18 @@ export default function RootLayout({
       <body
         className={`${currentBodyFont.variable} ${geistMono.variable} antialiased`}
       >
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Skip to main content
+        </a>
         <BackgroundWrapper />
         <Navigation />
         <PrismLoader />
-        {children}
+        <main id="main-content" className="pt-20">
+          {children}
+        </main>
       </body>
     </html>
   );

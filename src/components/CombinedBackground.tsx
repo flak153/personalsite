@@ -52,20 +52,24 @@ export default function CombinedBackground() {
   // Use reduced animations for non-home pages
   if (!isLoaded) {
     return (
-      <div className={`fixed inset-0 z-0 bg-[${settings.theme.backgroundGradient}]`} />
+      <div 
+        className="fixed inset-0 z-0" 
+        style={{ background: settings.theme.backgroundGradient }}
+      />
     );
   }
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden">
-      {/* Static gradient background - render first as base layer */}
-      {!settings.animations.codeRain.enabled && (
-        <div className={`absolute inset-0 z-0 bg-[${settings.theme.backgroundGradient}]`} />
-      )}
+      {/* Static gradient background - always render as base layer */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{ background: settings.theme.backgroundGradient }}
+      />
       
       {/* Code rain animation - controlled by settings */}
       {settings.animations.codeRain.enabled && (
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-10">
           <BackgroundRain />
         </div>
       )}

@@ -12,7 +12,11 @@ module.exports = {
         foreground: "var(--foreground)",
         "royal-plum": "var(--royal-plum)",
         "mustard-yellow": "var(--mustard-yellow)",
-        "lavender": "var(--lavender)",
+        lavender: {
+          DEFAULT: "var(--lavender)",
+          bright: "var(--lavender-bright)",
+          dark: "var(--lavender-dark)",
+        },
         primary: "var(--color-primary)",
         secondary: "var(--color-secondary)",
         accent: "var(--color-accent)",

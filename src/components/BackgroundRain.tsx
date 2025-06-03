@@ -165,7 +165,7 @@ export default function BackgroundRain() {
   }, [fallingCommands.length]);
 
   return (
-    <div className="w-full h-full absolute top-0 left-0 overflow-hidden bg-[linear-gradient(135deg,rgba(154,3,30,0.9),rgba(10,36,99,0.9))]">
+    <div className="w-full h-full absolute top-0 left-0 overflow-hidden">
       {fallingCommands.map(cmd => (
         <div
           key={cmd.id}

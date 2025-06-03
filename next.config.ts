@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   output: 'export',
+  images: {
+    unoptimized: true
+  },
   
   // Ensure mermaid is properly bundled
   transpilePackages: ['mermaid'],

@@ -8,6 +8,9 @@ import TricolorAbstractionVisualization from './animations/TricolorAbstractionVi
 import MarkCompactVisualization from './animations/MarkCompactVisualization';
 import PGPTool from './PGPTool'; // Import PGPTool
 import DidVcExplorer from './DidVcExplorer'; // Import DidVcExplorer
+import DidVcExplorerEnhanced from './DidVcExplorerEnhanced'; // Import DidVcExplorerEnhanced
+import DidVcExplorerMultiMethod from './DidVcExplorerMultiMethod'; // Import DidVcExplorerMultiMethod
+import DidVcExplorerEnhancedV2 from './DidVcExplorerEnhancedV2'; // Import DidVcExplorerEnhancedV2
 import dynamic from 'next/dynamic';
 import { bouncingBallAnimation } from "@/app/blog/canvas-demos/bouncingBall";
 import { physicsDemoAnimation } from "@/app/blog/canvas-demos/physicsDemo";
@@ -184,6 +187,9 @@ export const components = {
   Mermaid: MermaidDiagram, // Added Mermaid component
   PGPTool, // Add PGPTool to components
   DidVcExplorer, // Add DidVcExplorer to components
+  DidVcExplorerEnhanced, // Add DidVcExplorerEnhanced to components
+  DidVcExplorerMultiMethod, // Add DidVcExplorerMultiMethod to components
+  DidVcExplorerEnhancedV2, // Add DidVcExplorerEnhancedV2 to components
   ResourceLegend,
   ResourceTypeIcon,
   
