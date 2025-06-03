@@ -39,7 +39,6 @@ export default function CircuitBoardBackground() {
     window.addEventListener("resize", handleResize);
     
     // Colors for the maze and pathfinding visualization
-    const mazeColor = "rgba(10, 36, 99, 0.45)"; // Royal Blue with increased opacity
     const startColor = "rgba(75, 192, 192, 0.4)"; // Teal for start points with reduced opacity
     const endColor = "rgba(154, 3, 30, 0.35)"; // Deep Red for end points with reduced opacity
     const visitedColor = "rgba(50, 50, 200, 0.2)"; // Blue for visited cells (more transparent)
@@ -52,6 +51,9 @@ export default function CircuitBoardBackground() {
     let mazePaths: PathfindingProcess[] = [];
     const maxConcurrentPaths = 3; // Maximum number of concurrent pathfinding visualizations
     
+    // Maze generation animation state
+    let mazeGenerationComplete = false;
+    
     // Cell class to represent each grid cell in the maze
     class Cell {
       row: number;
@@ -60,6 +62,9 @@ export default function CircuitBoardBackground() {
       y: number;
       walls: { top: boolean, right: boolean, bottom: boolean, left: boolean };
       visited: boolean = false;
+      animationProgress: number = 0; // 0 to 1, controls wall fade-in
+      generationTime: number = 0; // When this cell was added to the maze
+      enteredFrom: 'top' | 'right' | 'bottom' | 'left' | null = null; // Direction cell was entered from
       
       constructor(row: number, col: number) {
         this.row = row;
@@ -71,37 +76,113 @@ export default function CircuitBoardBackground() {
       }
       
       // Draw the cell and its walls
-      draw(ctx: CanvasRenderingContext2D) {
+      draw(ctx: CanvasRenderingContext2D, currentTime: number) {
+        // Only draw if cell has been visited
+        if (!this.visited) return;
+        
         const x = this.x;
         const y = this.y;
         
-        ctx.strokeStyle = mazeColor;
-        ctx.lineWidth = 1.5;
+        // Update animation progress
+        if (this.animationProgress < 1 && this.generationTime > 0) {
+          const elapsed = currentTime - this.generationTime;
+          this.animationProgress = Math.min(1, elapsed / 100); // 100ms for wall growth
+        }
+        
+        // Color transition from bright lavender to dark blue (3 seconds)
+        const colorElapsed = currentTime - this.generationTime;
+        const colorProgress = Math.min(1, colorElapsed / 3000); // 3 second color transition
+        const r = 200 - (200 - 10) * colorProgress;  // Start at bright lavender red
+        const g = 150 - (150 - 36) * colorProgress;  // Lavender green
+        const b = 255 - (255 - 99) * colorProgress;  // Lavender blue
+        const opacity = 0.9 - (0.9 - 0.45) * colorProgress;
+        
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity * this.animationProgress})`;
+        ctx.lineWidth = 2 - 0.5 * colorProgress; // Start thicker, end thinner
+        
+        // Draw walls with growth animation
+        const drawWall = (wall: 'top' | 'right' | 'bottom' | 'left', startX: number, startY: number, endX: number, endY: number) => {
+          const progress = this.animationProgress;
+          
+          // If this is the first cell (no parent), grow from center
+          if (this.enteredFrom === null) {
+            const midX = (startX + endX) / 2;
+            const midY = (startY + endY) / 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(
+              midX - (midX - startX) * progress,
+              midY - (midY - startY) * progress
+            );
+            ctx.lineTo(
+              midX + (endX - midX) * progress,
+              midY + (endY - midY) * progress
+            );
+            ctx.stroke();
+            return;
+          }
+          
+          // Determine the connection point based on where we entered from
+          let connectionX = x + cellSize / 2;
+          let connectionY = y + cellSize / 2;
+          
+          if (this.enteredFrom === 'top') {
+            connectionY = y;
+          } else if (this.enteredFrom === 'bottom') {
+            connectionY = y + cellSize;
+          } else if (this.enteredFrom === 'left') {
+            connectionX = x;
+          } else if (this.enteredFrom === 'right') {
+            connectionX = x + cellSize;
+          }
+          
+          // Calculate the closest point on the wall to the connection point
+          let growthStartX = connectionX;
+          let growthStartY = connectionY;
+          
+          // For each wall, find where it should start growing from
+          if (wall === 'top') {
+            growthStartY = y;
+            growthStartX = Math.max(x, Math.min(x + cellSize, connectionX));
+          } else if (wall === 'bottom') {
+            growthStartY = y + cellSize;
+            growthStartX = Math.max(x, Math.min(x + cellSize, connectionX));
+          } else if (wall === 'left') {
+            growthStartX = x;
+            growthStartY = Math.max(y, Math.min(y + cellSize, connectionY));
+          } else if (wall === 'right') {
+            growthStartX = x + cellSize;
+            growthStartY = Math.max(y, Math.min(y + cellSize, connectionY));
+          }
+          
+          // Draw the wall growing from the growth point outward
+          ctx.beginPath();
+          
+          // Calculate the two end points relative to the growth start
+          const dx1 = startX - growthStartX;
+          const dy1 = startY - growthStartY;
+          const dx2 = endX - growthStartX;
+          const dy2 = endY - growthStartY;
+          
+          // Draw from growth point to both ends
+          ctx.moveTo(growthStartX + dx1 * progress, growthStartY + dy1 * progress);
+          ctx.lineTo(growthStartX, growthStartY);
+          ctx.lineTo(growthStartX + dx2 * progress, growthStartY + dy2 * progress);
+          ctx.stroke();
+        };
         
         // Draw walls
         if (this.walls.top) {
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + cellSize, y);
-          ctx.stroke();
+          drawWall('top', x, y, x + cellSize, y);
         }
         if (this.walls.right) {
-          ctx.beginPath();
-          ctx.moveTo(x + cellSize, y);
-          ctx.lineTo(x + cellSize, y + cellSize);
-          ctx.stroke();
+          drawWall('right', x + cellSize, y, x + cellSize, y + cellSize);
         }
         if (this.walls.bottom) {
-          ctx.beginPath();
-          ctx.moveTo(x, y + cellSize);
-          ctx.lineTo(x + cellSize, y + cellSize);
-          ctx.stroke();
+          drawWall('bottom', x, y + cellSize, x + cellSize, y + cellSize);
         }
         if (this.walls.left) {
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y + cellSize);
-          ctx.stroke();
+          drawWall('left', x, y, x, y + cellSize);
         }
       }
       
@@ -362,55 +443,192 @@ export default function CircuitBoardBackground() {
         Array(cols).fill(null).map((_, col) => new Cell(row, col))
       );
       
-      // Generate maze using recursive backtracking
-      generateMaze(0, 0);
+      // Reset generation state
+      mazeGenerationComplete = false;
+      
+      // Start maze generation from a random position
+      const startPositions = [
+        { row: Math.floor(rows / 2), col: Math.floor(cols / 2) }, // Center
+        { row: Math.floor(rows / 4), col: Math.floor(cols / 4) }, // Top-left quadrant
+        { row: Math.floor(rows * 3 / 4), col: Math.floor(cols / 4) }, // Bottom-left quadrant
+        { row: Math.floor(rows / 4), col: Math.floor(cols * 3 / 4) }, // Top-right quadrant
+        { row: Math.floor(rows * 3 / 4), col: Math.floor(cols * 3 / 4) }, // Bottom-right quadrant
+        { row: 0, col: Math.floor(cols / 2) }, // Top edge center
+        { row: rows - 1, col: Math.floor(cols / 2) }, // Bottom edge center
+        { row: Math.floor(rows / 2), col: 0 }, // Left edge center
+        { row: Math.floor(rows / 2), col: cols - 1 }, // Right edge center
+      ];
+      
+      const randomStart = startPositions[Math.floor(Math.random() * startPositions.length)];
+      const startCell = grid[randomStart.row][randomStart.col];
+      
+      // Pre-compute the entire maze structure invisibly
+      generateMazeStructure(startCell.row, startCell.col);
       
       // Clear existing paths
       mazePaths = [];
     }
     
-    // Generate maze using recursive backtracking
-    function generateMaze(row: number, col: number) {
-      // Mark current cell as visited
-      grid[row][col].visited = true;
+    // Generate the maze structure using BFS for more uniform growth
+    function generateMazeStructure(startRow: number, startCol: number) {
+      const queue: Cell[] = [];
+      const growthOrder: Cell[] = []; // Track order of cell visits
+      const allCells: Cell[] = []; // All cells to visit
       
-      // Define possible directions: [row offset, col offset, wall to remove in current, wall to remove in neighbor]
-      const directions = [
-        [-1, 0, 'top', 'bottom'],    // Top
-        [0, 1, 'right', 'left'],     // Right
-        [1, 0, 'bottom', 'top'],     // Bottom
-        [0, -1, 'left', 'right']     // Left
-      ] as [number, number, keyof Cell['walls'], keyof Cell['walls']][]; 
+      // Collect all cells
+      for (const row of grid) {
+        for (const cell of row) {
+          allCells.push(cell);
+        }
+      }
       
-      // Shuffle directions for randomness
-      shuffleArray(directions);
+      const startCell = grid[startRow][startCol];
+      startCell.visited = true;
+      queue.push(startCell);
+      growthOrder.push(startCell);
       
-      // Try each direction
-      for (const [rowOffset, colOffset, wallCurrent, wallNeighbor] of directions) {
-        const newRow = row + rowOffset;
-        const newCol = col + colOffset;
+      // BFS-based maze generation
+      while (growthOrder.length < allCells.length) {
+        // Pick a random visited cell that has unvisited neighbors
+        const visitedWithUnvisited: Cell[] = [];
         
-        // Check if the new position is valid and unvisited
-        if (
-          newRow >= 0 && newRow < grid.length &&
-          newCol >= 0 && newCol < grid[0].length &&
-          !grid[newRow][newCol].visited
-        ) {
-          // Remove walls between current cell and neighbor
-          grid[row][col].walls[wallCurrent] = false;
-          grid[newRow][newCol].walls[wallNeighbor] = false;
+        for (const cell of growthOrder) {
+          const directions = [
+            { row: -1, col: 0, wall: 'top', opposite: 'bottom' },
+            { row: 0, col: 1, wall: 'right', opposite: 'left' },
+            { row: 1, col: 0, wall: 'bottom', opposite: 'top' },
+            { row: 0, col: -1, wall: 'left', opposite: 'right' }
+          ] as const;
           
-          // Continue maze generation from the neighbor
-          generateMaze(newRow, newCol);
+          let hasUnvisited = false;
+          for (const dir of directions) {
+            const newRow = cell.row + dir.row;
+            const newCol = cell.col + dir.col;
+            if (
+              newRow >= 0 && newRow < grid.length &&
+              newCol >= 0 && newCol < grid[0].length &&
+              !grid[newRow][newCol].visited
+            ) {
+              hasUnvisited = true;
+              break;
+            }
+          }
+          
+          if (hasUnvisited) {
+            visitedWithUnvisited.push(cell);
+          }
+        }
+        
+        if (visitedWithUnvisited.length === 0) break;
+        
+        // Pick a random cell from those with unvisited neighbors
+        const current = visitedWithUnvisited[Math.floor(Math.random() * visitedWithUnvisited.length)];
+        
+        // Get all unvisited neighbors
+        const unvisited = [];
+        const directions = [
+          { row: -1, col: 0, wall: 'top', opposite: 'bottom' },
+          { row: 0, col: 1, wall: 'right', opposite: 'left' },
+          { row: 1, col: 0, wall: 'bottom', opposite: 'top' },
+          { row: 0, col: -1, wall: 'left', opposite: 'right' }
+        ] as const;
+        
+        for (const dir of directions) {
+          const newRow = current.row + dir.row;
+          const newCol = current.col + dir.col;
+          if (
+            newRow >= 0 && newRow < grid.length &&
+            newCol >= 0 && newCol < grid[0].length &&
+            !grid[newRow][newCol].visited
+          ) {
+            unvisited.push({ cell: grid[newRow][newCol], dir });
+          }
+        }
+        
+        if (unvisited.length > 0) {
+          const { cell: next, dir } = unvisited[Math.floor(Math.random() * unvisited.length)];
+          
+          // Remove walls
+          current.walls[dir.wall] = false;
+          next.walls[dir.opposite] = false;
+          
+          // Track parent relationship and growth order
+          next.enteredFrom = dir.opposite;
+          next.visited = true;
+          growthOrder.push(next);
+        }
+      }
+      
+      // Reset visited flags and set up animation timing based on distance from start
+      for (const row of grid) {
+        for (const cell of row) {
+          cell.visited = false;
+        }
+      }
+      
+      // BFS to calculate distances from start for proper animation timing
+      const distanceQueue: Array<{cell: Cell, distance: number}> = [];
+      startCell.generationTime = performance.now();
+      startCell.visited = true;
+      distanceQueue.push({cell: startCell, distance: 0});
+      
+      while (distanceQueue.length > 0) {
+        const {cell: current, distance} = distanceQueue.shift()!;
+        
+        // Check all neighbors that are connected (no wall between)
+        const directions = [
+          { row: -1, col: 0, wall: 'top' },
+          { row: 0, col: 1, wall: 'right' },
+          { row: 1, col: 0, wall: 'bottom' },
+          { row: 0, col: -1, wall: 'left' }
+        ] as const;
+        
+        for (const dir of directions) {
+          if (!current.walls[dir.wall]) { // Only if there's no wall
+            const newRow = current.row + dir.row;
+            const newCol = current.col + dir.col;
+            
+            if (
+              newRow >= 0 && newRow < grid.length &&
+              newCol >= 0 && newCol < grid[0].length &&
+              !grid[newRow][newCol].visited
+            ) {
+              const neighbor = grid[newRow][newCol];
+              neighbor.visited = true;
+              neighbor.generationTime = performance.now() + (distance + 1) * 100; // 100ms per level
+              distanceQueue.push({cell: neighbor, distance: distance + 1});
+            }
+          }
+        }
+      }
+      
+      // Reset visited flags for animation
+      for (const row of grid) {
+        for (const cell of row) {
+          cell.visited = false;
         }
       }
     }
     
-    // Helper function to shuffle an array in place
-    function shuffleArray<T>(array: T[]) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    // Step function for animated maze generation
+    function stepMazeGeneration(currentTime: number) {
+      if (mazeGenerationComplete) return;
+      
+      // Check all cells and mark them as visible if their time has come
+      let allVisible = true;
+      for (const row of grid) {
+        for (const cell of row) {
+          if (cell.generationTime > 0 && cell.generationTime <= currentTime && !cell.visited) {
+            cell.visited = true;
+          }
+          if (cell.generationTime > 0 && !cell.visited) {
+            allVisible = false;
+          }
+        }
+      }
+      
+      if (allVisible) {
+        mazeGenerationComplete = true;
       }
     }
     
@@ -453,34 +671,43 @@ export default function CircuitBoardBackground() {
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
+      // Step maze generation
+      if (!mazeGenerationComplete) {
+        stepMazeGeneration(timestamp);
+      }
+      
       // Draw maze grid
       for (const row of grid) {
         for (const cell of row) {
-          cell.draw(ctx);
+          cell.draw(ctx, timestamp);
         }
       }
       
-      // Create new pathfinding process occasionally
-      if (timestamp - lastPathCreation > 8000 && mazePaths.length < maxConcurrentPaths) { // Further increased delay to 8000ms for more intermittent spawning
-        createNewPathfindingProcess(timestamp);
-        lastPathCreation = timestamp;
-      }
       
-      // Update and draw each pathfinding process
-      for (let i = mazePaths.length - 1; i >= 0; i--) {
-        const path = mazePaths[i];
-        
-        // Progress the algorithm
-        if (!path.pathFound) {
-          path.step();
+      // Only start pathfinding after maze is complete
+      if (mazeGenerationComplete) {
+        // Create new pathfinding process occasionally
+        if (timestamp - lastPathCreation > 8000 && mazePaths.length < maxConcurrentPaths) {
+          createNewPathfindingProcess(timestamp);
+          lastPathCreation = timestamp;
         }
         
-        // Draw the visualization
-        path.draw(ctx, timestamp);
-        
-        // Remove completed paths that have been visible for a while
-        if (path.pathFound && path.pathProgress === 1 && timestamp - path.startTime > 20000) {
-          mazePaths.splice(i, 1);
+        // Update and draw each pathfinding process
+        for (let i = mazePaths.length - 1; i >= 0; i--) {
+          const path = mazePaths[i];
+          
+          // Progress the algorithm
+          if (!path.pathFound) {
+            path.step();
+          }
+          
+          // Draw the visualization
+          path.draw(ctx, timestamp);
+          
+          // Remove completed paths that have been visible for a while
+          if (path.pathFound && path.pathProgress === 1 && timestamp - path.startTime > 20000) {
+            mazePaths.splice(i, 1);
+          }
         }
       }
       
