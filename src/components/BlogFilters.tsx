@@ -150,6 +150,21 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
               </div>
               
               <div>
+                <label htmlFor="sort" className="block text-sm font-medium text-white/80 mb-2">
+                  Sort By
+                </label>
+                <select
+                  id="sort"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as "date" | "title")}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white focus:outline-none focus:border-white/40 transition-colors"
+                >
+                  <option value="date" className="bg-black">Date (Newest First)</option>
+                  <option value="title" className="bg-black">Title (A-Z)</option>
+                </select>
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-white/80 mb-2">
                   Tags
                 </label>
@@ -176,21 +191,6 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
                     Clear all tags
                   </button>
                 )}
-              </div>
-              
-              <div>
-                <label htmlFor="sort" className="block text-sm font-medium text-white/80 mb-2">
-                  Sort By
-                </label>
-                <select
-                  id="sort"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as "date" | "title")}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white focus:outline-none focus:border-white/40 transition-colors"
-                >
-                  <option value="date" className="bg-black">Date (Newest First)</option>
-                  <option value="title" className="bg-black">Title (A-Z)</option>
-                </select>
               </div>
             </div>
           </div>

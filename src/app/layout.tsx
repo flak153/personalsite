@@ -5,6 +5,7 @@ import { GeistSans, GeistMono } from "geist/font";
 import Navigation from "@/components/Navigation";
 import BackgroundWrapper from "@/components/BackgroundWrapper";
 import PrismLoader from "@/components/PrismLoader";
+import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 // Import the Prism theme for syntax highlighting
 import "prismjs/themes/prism-tomorrow.css"; // Basic theme
@@ -86,6 +87,7 @@ export default function RootLayout({
         <BackgroundWrapper />
         <Navigation />
         <PrismLoader />
+        <ScrollToTop />
         <main id="main-content" className="pt-20">
           {children}
         </main>
