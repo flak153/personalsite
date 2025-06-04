@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getBlogPosts } from '@/lib/blog';
 import { getFeaturedProjects } from '@/lib/projects';
+import TypewriterTagline from '@/components/TypewriterTagline';
 
 export default function Home() {
   const allPosts = getBlogPosts();
@@ -14,16 +15,14 @@ export default function Home() {
       
       {/* Hero Section with Text */}
       <section className="relative h-screen w-full flex items-center justify-center z-10" aria-labelledby="hero-heading">
-        <div className="text-center bg-black/30 backdrop-blur-lg rounded-xl p-10">
+        <div className="text-center bg-black/30 backdrop-blur-lg rounded-xl p-10 relative border-2 border-white/50 animate-pulse-border">
           <h1 id="hero-heading" className="text-4xl md:text-6xl font-bold mb-6 text-white font-[family-name:var(--font-geist-sans)] py-4">
             Mohammed &quot;Flak&quot; Ali
           </h1>
-          <p className="text-xl md:text-2xl text-white mb-8 font-[family-name:var(--font-geist-mono)] py-3">
-            Tech Blog & Personal Site
-          </p>
-          <div className="animate-bounce mt-10" role="img" aria-label="Scroll indicator">
-            <p className="text-white text-sm drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">Scroll to explore</p>
-            <div className="mx-auto w-6 h-6 border-b-2 border-r-2 border-white transform rotate-45 mt-2 drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]" aria-hidden="true"></div>
+          <TypewriterTagline />
+          <div className="animate-bounce mt-10 opacity-50 hover:opacity-80 transition-opacity duration-300" role="img" aria-label="Scroll indicator">
+            <p className="text-white/70 text-xs">Scroll to explore</p>
+            <div className="mx-auto w-4 h-4 border-b border-r border-white/60 transform rotate-45 mt-1" aria-hidden="true"></div>
           </div>
         </div>
       </section>

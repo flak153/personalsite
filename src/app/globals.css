@@ -227,3 +227,20 @@ canvas, .animation-layer {
   stroke: #6b7280 !important;
   stroke-width: 2px !important;
 }
+
+/* Simple pulsing border animation */
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px 1px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.animate-pulse-border {
+  animation: pulse-border 3s ease-in-out infinite;
+}
+
