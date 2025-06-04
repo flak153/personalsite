@@ -3,17 +3,18 @@
 import React, { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
 
-// Generate a unique ID for each diagram
-let diagramIdCounter = 0;
-const generateUniqueId = () => `mermaid-diagram-${diagramIdCounter++}`;
-
 interface MermaidDiagramProps {
   code: string; // The Mermaid code string, passed as a prop
 }
 
 const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code }) => {
   const mermaidRef = useRef<HTMLDivElement>(null);
-  const id = useRef(generateUniqueId()); // Stable unique ID for this instance
+  const idRef = useRef<string | null>(null);
+  
+  // Generate unique ID only once per component instance
+  if (!idRef.current) {
+    idRef.current = `mermaid-diagram-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  }
 
   useEffect(() => {
     mermaid.initialize({
@@ -39,16 +40,22 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code }) => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const renderDiagram = async () => {
-      if (mermaidRef.current && code) { // Use code prop here
+      if (mermaidRef.current && code && isMounted) {
         mermaidRef.current.innerHTML = ''; // Clear previous render
 
         const mermaidCode = code.trim();
-        const diagramSvgId = id.current + '-svg'; 
+        const diagramSvgId = idRef.current + '-svg';
 
         try {
           const { svg, bindFunctions } = await mermaid.render(diagramSvgId, mermaidCode);
-          if (mermaidRef.current) {
+          
+          // Check if svg contains actual diagram content
+          const hasContent = svg.includes('<g>') && !svg.includes('<g></g>');
+          
+          if (mermaidRef.current && isMounted && hasContent) {
             mermaidRef.current.innerHTML = svg;
             if (bindFunctions && typeof bindFunctions === 'function') {
               bindFunctions(mermaidRef.current);
@@ -56,7 +63,7 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code }) => {
           }
         } catch (error) {
           console.error(`Error rendering Mermaid diagram (ID: ${diagramSvgId}):`, error);
-          if (mermaidRef.current) {
+          if (mermaidRef.current && isMounted) {
             mermaidRef.current.innerHTML = `<pre>Error rendering diagram: ${error instanceof Error ? error.message : String(error)}\n${mermaidCode}</pre>`;
           }
         }
@@ -64,6 +71,10 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code }) => {
     };
 
     renderDiagram();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [code]); // Depend on code prop
 
   // The div that will contain the rendered SVG.
@@ -71,7 +82,7 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code }) => {
   // Instead, mermaid.render will populate this div with the SVG.
   return (
     <div className="my-8 p-6 bg-white rounded-lg shadow-lg border border-gray-200 overflow-x-auto">
-      <div ref={mermaidRef} id={id.current} className="mermaid-diagram-container" />
+      <div ref={mermaidRef} id={idRef.current} className="mermaid-diagram-container" />
     </div>
   );
 };

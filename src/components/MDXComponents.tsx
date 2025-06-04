@@ -6,6 +6,8 @@ import PlaceholderAnimation from './animations/PlaceholderAnimation';
 import GCEvolutionVisualization from './animations/GCEvolutionVisualization';
 import TricolorAbstractionVisualization from './animations/TricolorAbstractionVisualization';
 import MarkCompactVisualization from './animations/MarkCompactVisualization';
+import CLTConvergenceDemo from './animations/CLTConvergenceDemo';
+import FatTailedDistributionDemo from './animations/FatTailedDistributionDemo';
 import PGPTool from './PGPTool'; // Import PGPTool
 import DidVcExplorer from './DidVcExplorer'; // Import DidVcExplorer
 import DidVcExplorerEnhanced from './DidVcExplorerEnhanced'; // Import DidVcExplorerEnhanced
@@ -185,6 +187,7 @@ export const components = {
   TableOfContents,
   Callout,
   Mermaid: MermaidDiagram, // Added Mermaid component
+  MermaidDiagram, // Also export as MermaidDiagram
   PGPTool, // Add PGPTool to components
   DidVcExplorer, // Add DidVcExplorer to components
   DidVcExplorerEnhanced, // Add DidVcExplorerEnhanced to components
@@ -198,6 +201,8 @@ export const components = {
   GCEvolutionVisualization,
   TricolorAbstractionVisualization,
   MarkCompactVisualization,
+  CLTConvergenceDemo,
+  FatTailedDistributionDemo,
   
   MemoryManagementVisualizedAsApartmentBuilding: () => <ApartmentBuildingMemoryAnalogy />,
   CommonMemoryManagementErrorsAndTheirConsequences: () => <PlaceholderAnimation title="Common Memory Management Errors" />,
