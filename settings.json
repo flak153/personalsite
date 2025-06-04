@@ -1,4 +1,20 @@
 {
+  "hero": {
+    "taglines": [
+      "DevOps Specialist",
+      "Startup Veteran",
+      "CI/CD Lover",
+      "Statistics Enthusiast",
+      "Microservices Hater",
+      "Bengali Muslim"
+    ],
+    "typewriter": {
+      "typingSpeed": 100,
+      "deletionSpeed": 50,
+      "pauseAfterTyping": 2000,
+      "cursorBlinkSpeed": 530
+    }
+  },
   "animations": {
     "codeRain": {
       "enabled": false,
