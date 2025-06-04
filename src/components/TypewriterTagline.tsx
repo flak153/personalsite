@@ -6,7 +6,6 @@ import settings from '../../settings.json';
 export default function TypewriterTagline() {
   const [currentTaglineIndex, setCurrentTaglineIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
   const [showCursor, setShowCursor] = useState(true);
   
   const taglines = settings.hero.taglines;
