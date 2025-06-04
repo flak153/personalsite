@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { Metadata } from "next";
 import BlogContentWithTOC from "@/components/BlogContentWithTOC";
+import ReadingProgress from "@/components/ReadingProgress";
 
 // Get all blog files (except page.tsx)
 export function generateStaticParams() {
@@ -94,33 +95,36 @@ export default async function BlogPost({ params }: BlogPostProps) {
     const readTime = frontmatter.readTime || "";
     
     return (
-      <div className="pt-20 p-8 md:p-16 min-h-screen">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-8 p-6 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-white font-medium">{date}</span>
-                {readTime && (
-                  <>
-                    <span className="text-white/70">•</span>
-                    <span className="text-white text-sm">{readTime}</span>
-                  </>
+      <>
+        <ReadingProgress />
+        <div className="pt-20 p-8 md:p-16 min-h-screen">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8 p-6 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10">
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-white font-medium">{date}</span>
+                  {readTime && (
+                    <>
+                      <span className="text-white/70">•</span>
+                      <span className="text-white text-sm">{readTime}</span>
+                    </>
+                  )}
+                </div>
+                {category && (
+                  <span className="bg-white/20 px-3 py-1 rounded-full text-xs text-white font-medium">
+                    {category}
+                  </span>
                 )}
               </div>
-              {category && (
-                <span className="bg-white/20 px-3 py-1 rounded-full text-xs text-white font-medium">
-                  {category}
-                </span>
-              )}
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white font-[family-name:var(--font-geist-sans)] drop-shadow-[0_0_8px_rgba(0,0,0,0.6)]">
+                {title}
+              </h1>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white font-[family-name:var(--font-geist-sans)] drop-shadow-[0_0_8px_rgba(0,0,0,0.6)]">
-              {title}
-            </h1>
+            
+            <BlogContentWithTOC source={source} />
           </div>
-          
-          <BlogContentWithTOC source={source} />
         </div>
-      </div>
+      </>
     );
   } catch (error) {
     // Safe error handling that doesn't try to access potentially undefined properties
