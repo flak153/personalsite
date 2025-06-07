@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface FatTailedDistributionDemoProps {
   title?: string;
@@ -18,7 +18,7 @@ const FatTailedDistributionDemo: React.FC<FatTailedDistributionDemoProps> = ({
   const dataRef = useRef<number[]>([]);
 
   // Generate random values based on distribution
-  const generateValue = (dist: string): number => {
+  const generateValue = useCallback((dist: string): number => {
     switch (dist) {
       case "normal":
         // Box-Muller transform for normal distribution
@@ -40,10 +40,10 @@ const FatTailedDistributionDemo: React.FC<FatTailedDistributionDemoProps> = ({
       default:
         return 0;
     }
-  };
+  }, [paretoAlpha]);
 
   // Draw visualization
-  const draw = () => {
+  const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -255,7 +255,7 @@ const FatTailedDistributionDemo: React.FC<FatTailedDistributionDemoProps> = ({
     } else {
       ctx.fillText(`Pareto α>${paretoAlpha.toFixed(1)}: Slow convergence`, width / 2, height - 10);
     }
-  };
+  }, [distribution, sampleSize, paretoAlpha, generateValue]);
 
   useEffect(() => {
     // Reset data when distribution or sample size changes
@@ -265,7 +265,7 @@ const FatTailedDistributionDemo: React.FC<FatTailedDistributionDemoProps> = ({
     }, 100);
     
     return () => clearInterval(interval);
-  }, [distribution, sampleSize, paretoAlpha]);
+  }, [distribution, sampleSize, paretoAlpha, draw]);
 
   return (
     <div className="my-8 p-6 bg-black/40 backdrop-blur-sm rounded-lg border border-white/10">
@@ -287,7 +287,7 @@ const FatTailedDistributionDemo: React.FC<FatTailedDistributionDemoProps> = ({
             </label>
             <select 
               value={distribution}
-              onChange={(e) => setDistribution(e.target.value as any)}
+              onChange={(e) => setDistribution(e.target.value as "normal" | "cauchy" | "pareto")}
               className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded text-white"
             >
               <option value="normal">Normal (CLT works)</option>

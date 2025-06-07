@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface CLTConvergenceDemoProps {
   title?: string;
@@ -16,7 +16,7 @@ const CLTConvergenceDemo: React.FC<CLTConvergenceDemoProps> = ({
   const [sampleSize, setSampleSize] = useState(10);
   const [numSamples, setNumSamples] = useState(1000);
   const [isRunning, setIsRunning] = useState(false);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   // Generate random values based on distribution
   const generateValue = (dist: string): number => {
@@ -35,7 +35,7 @@ const CLTConvergenceDemo: React.FC<CLTConvergenceDemoProps> = ({
   };
 
   // Generate sample means
-  const generateSampleMeans = () => {
+  const generateSampleMeans = useCallback(() => {
     const means: number[] = [];
     for (let i = 0; i < numSamples; i++) {
       let sum = 0;
@@ -45,10 +45,10 @@ const CLTConvergenceDemo: React.FC<CLTConvergenceDemoProps> = ({
       means.push(sum / sampleSize);
     }
     return means;
-  };
+  }, [numSamples, sampleSize, distribution]);
 
   // Draw histogram
-  const drawHistogram = () => {
+  const drawHistogram = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -144,7 +144,7 @@ const CLTConvergenceDemo: React.FC<CLTConvergenceDemoProps> = ({
       ctx.fillStyle = "#4ECDC4";
       ctx.fillText("✓ Converging to normal", 10, 50);
     }
-  };
+  }, [distribution, sampleSize, numSamples, generateSampleMeans]);
 
   useEffect(() => {
     if (isRunning) {
@@ -162,7 +162,7 @@ const CLTConvergenceDemo: React.FC<CLTConvergenceDemoProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [distribution, sampleSize, numSamples, isRunning]);
+  }, [distribution, sampleSize, numSamples, isRunning, drawHistogram]);
 
   return (
     <div className="my-8 p-6 bg-black/40 backdrop-blur-sm rounded-lg border border-white/10">
@@ -184,7 +184,7 @@ const CLTConvergenceDemo: React.FC<CLTConvergenceDemoProps> = ({
             </label>
             <select 
               value={distribution}
-              onChange={(e) => setDistribution(e.target.value as any)}
+              onChange={(e) => setDistribution(e.target.value as "uniform" | "exponential" | "bimodal")}
               className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded text-white"
             >
               <option value="uniform">Uniform</option>

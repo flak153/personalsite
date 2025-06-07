@@ -1,5 +1,5 @@
 import React from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito, Inter, Poppins, Open_Sans, Lato } from "next/font/google";
 import { GeistSans, GeistMono } from "geist/font";
 import Navigation from "@/components/Navigation";
@@ -62,10 +62,14 @@ export const metadata: Metadata = {
   description: "Personal site and tech blog by Mohammed Ali",
   keywords: "Mohammed Ali, tech blog, software engineering, DevOps, backend systems, cloud architecture, startup",
   authors: [{ name: "Mohammed Ali" }],
-  viewport: "width=device-width, initial-scale=1",
   other: {
     // Add preconnect hint for better background loading performance
   }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
