@@ -150,14 +150,10 @@
 ## 🎨 Visual & UX Enhancements
 
 - [ ] **Hero Section Improvements:**
-    - [ ] Add dynamic tagline rotator cycling through specialties (DevOps Specialist, Startup Veteran, CI/CD Expert)
-    - [ ] Implement subtle parallax effects for background elements
 
 - [ ] **Content Presentation:**
     - [ ] Add reading progress indicators for blog posts
     - [ ] Implement dark/light mode toggle (CSS variables already set up)
-    - [x] Add smooth scroll-to-section indicators in navigation for homepage
-
 - [ ] **Interactive Elements:**
     - [ ] Add "copy to clipboard" feature for code snippets in blog posts
     - [ ] Implement keyboard shortcuts for navigation (J/K for next/prev blog post)
@@ -168,8 +164,6 @@
 - [ ] **Search Functionality:**
     - [ ] Add global search with fuzzy search for blog posts and projects
     - [ ] Implement search suggestions/autocomplete
-    - [x] Search filtering by tags and categories already implemented
-
 - [ ] **Content Features:**
     - [ ] Add RSS feed for blog
     - [ ] Implement newsletter subscription system
@@ -202,9 +196,6 @@
 
 - [ ] **Navigation Improvements:**
     - [ ] Add breadcrumbs for better navigation context
-    - [x] Table of contents already implemented in blog posts
-    - [x] Category and tag filtering already working in blog page
-
 - [ ] **Homepage Enhancements:**
     - [ ] Add "Currently Working On" section
     - [ ] Include GitHub activity feed or contribution graph

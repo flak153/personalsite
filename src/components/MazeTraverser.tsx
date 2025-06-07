@@ -31,6 +31,23 @@ interface Spark {
   color: string;
 }
 
+// Performance configuration
+let PERFORMANCE_CONFIG = {
+  maxSparks: 100,
+  shadowsEnabled: true, // Re-enable shadows for better visuals
+  reducedEffects: false,
+  arcUpdateInterval: 5, // Update arc segments every N frames
+  minOpacityThreshold: 0.1, // Don't draw arcs below this opacity
+  dynamicAdjustment: true,
+  qualityLevel: 'high', // 'high', 'medium', 'low'
+};
+
+// Performance monitoring
+let frameTimeHistory: number[] = [];
+const FRAME_TIME_HISTORY_SIZE = 30;
+const TARGET_FPS = 30;
+const TARGET_FRAME_TIME = 1000 / TARGET_FPS;
+
 class PathfindingProcess {
   startCell: Cell;
   endCell: Cell;
@@ -51,6 +68,7 @@ class PathfindingProcess {
   sparks: Spark[] = [];
   mainPathArcs: ElectricArc[] = [];
   deadEndCells: Set<Cell> = new Set();
+  frameCount: number = 0;
   
   constructor(startCell: Cell, endCell: Cell, startTime: number) {
     this.startCell = startCell;
@@ -293,10 +311,12 @@ class PathfindingProcess {
       this.electricArcs.push(arc);
     }
     
-    // Create more sparks for main path
-    const sparkCount = isMainPath ? 6 : 3;
-    this.createSparks(fromCenter.x, fromCenter.y, sparkCount);
-    this.createSparks(toCenter.x, toCenter.y, sparkCount);
+    // Create sparks with limit check
+    const sparkCount = isMainPath ? 3 : 1;
+    if (this.sparks.length < PERFORMANCE_CONFIG.maxSparks) {
+      this.createSparks(fromCenter.x, fromCenter.y, sparkCount);
+      this.createSparks(toCenter.x, toCenter.y, sparkCount);
+    }
   }
   
   createSparks(x: number, y: number, count: number) {
@@ -318,6 +338,7 @@ class PathfindingProcess {
     if (!this.active) return;
     
     const elapsed = timestamp - this.startTime;
+    this.frameCount++;
     
     // Update and draw electric arcs
     ctx.lineCap = "round";
@@ -357,9 +378,11 @@ class PathfindingProcess {
         continue;
       }
       
-      // Draw arc with fading
+      // Draw arc with fading - skip if too faint
       const opacity = arc.age < 1 ? 1 : 2 - arc.age;
-      this.drawElectricArc(ctx, arc, opacity * 0.7, false);
+      if (opacity > PERFORMANCE_CONFIG.minOpacityThreshold) {
+        this.drawElectricArc(ctx, arc, opacity * 0.7, false);
+      }
     }
     
     // Create pulsing sparks along the solution path
@@ -372,7 +395,15 @@ class PathfindingProcess {
       
       if (pulseIndex >= 0 && pulseIndex < this.path.length) {
         const pulseCell = this.path[pulseIndex].getCenter();
-        this.createSparks(pulseCell.x, pulseCell.y, 8);
+        
+        // Adjust spark count based on quality level
+        const sparkCount = PERFORMANCE_CONFIG.qualityLevel === 'high' ? 8 : 
+                          PERFORMANCE_CONFIG.qualityLevel === 'medium' ? 5 : 3;
+        
+        // Only create sparks if we have room
+        if (this.sparks.length < PERFORMANCE_CONFIG.maxSparks - sparkCount) {
+          this.createSparks(pulseCell.x, pulseCell.y, sparkCount);
+        }
       }
     }
     
@@ -388,8 +419,16 @@ class PathfindingProcess {
         continue;
       }
       
+      // Add glow effect to sparks
+      if (PERFORMANCE_CONFIG.qualityLevel !== 'low') {
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = spark.color;
+      }
+      
       ctx.fillStyle = spark.color.replace(/[\d.]+\)/, `${spark.life})`);
       ctx.fillRect(spark.x - 1, spark.y - 1, 2, 2);
+      
+      ctx.shadowBlur = 0;
     }
     
     // Draw electric nodes at start and end
@@ -404,42 +443,48 @@ class PathfindingProcess {
     // Animated electric effect
     const pulsePhase = (timestamp / 100) % 1;
     
-    // Draw multiple overlapping bolts for active paths
-    for (let bolt = 0; bolt < 2; bolt++) {
-      ctx.strokeStyle = `rgba(120, 180, 255, ${0.3 + pulsePhase * 0.2})`;
-      ctx.lineWidth = 1 + pulsePhase;
-      ctx.shadowBlur = 10 + pulsePhase * 5;
-      ctx.shadowColor = "rgba(120, 180, 255, 0.8)";
+    // Quality-based rendering
+    if (PERFORMANCE_CONFIG.qualityLevel === 'high') {
+      // Draw double bolts for better effect
+      for (let bolt = 0; bolt < 2; bolt++) {
+        ctx.strokeStyle = `rgba(120, 180, 255, ${0.3 + pulsePhase * 0.2})`;
+        ctx.lineWidth = 1.5 + pulsePhase * 0.5;
+        
+        if (PERFORMANCE_CONFIG.shadowsEnabled) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "rgba(120, 180, 255, 0.8)";
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(fromCenter.x, fromCenter.y);
+        
+        // Create jagged lightning path
+        const steps = 4;
+        const distance = Math.sqrt((toCenter.x - fromCenter.x) ** 2 + (toCenter.y - fromCenter.y) ** 2);
+        
+        for (let i = 1; i < steps; i++) {
+          const t = i / steps;
+          const baseX = fromCenter.x + (toCenter.x - fromCenter.x) * t;
+          const baseY = fromCenter.y + (toCenter.y - fromCenter.y) * t;
+          
+          const offset = (Math.random() - 0.5) * 7;
+          const perpX = -(toCenter.y - fromCenter.y) / distance;
+          const perpY = (toCenter.x - fromCenter.x) / distance;
+          
+          ctx.lineTo(baseX + perpX * offset, baseY + perpY * offset);
+        }
+        
+        ctx.lineTo(toCenter.x, toCenter.y);
+        ctx.stroke();
+      }
+    } else {
+      // Simplified version
+      ctx.strokeStyle = `rgba(120, 180, 255, ${0.4 + pulsePhase * 0.2})`;
+      ctx.lineWidth = 2;
       
       ctx.beginPath();
       ctx.moveTo(fromCenter.x, fromCenter.y);
-      
-      // Create jagged lightning path
-      const steps = 4;
-      const points = [fromCenter];
-      
-      for (let i = 1; i < steps; i++) {
-        const t = i / steps;
-        const baseX = fromCenter.x + (toCenter.x - fromCenter.x) * t;
-        const baseY = fromCenter.y + (toCenter.y - fromCenter.y) * t;
-        
-        const offset = (Math.random() - 0.5) * 8;
-        const perpX = -(toCenter.y - fromCenter.y) / Math.sqrt((toCenter.x - fromCenter.x) ** 2 + (toCenter.y - fromCenter.y) ** 2);
-        const perpY = (toCenter.x - fromCenter.x) / Math.sqrt((toCenter.x - fromCenter.x) ** 2 + (toCenter.y - fromCenter.y) ** 2);
-        
-        points.push({
-          x: baseX + perpX * offset,
-          y: baseY + perpY * offset
-        });
-      }
-      
-      points.push(toCenter);
-      
-      // Draw the path
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      
+      ctx.lineTo(toCenter.x, toCenter.y);
       ctx.stroke();
     }
     
@@ -454,99 +499,84 @@ class PathfindingProcess {
     const pulsePhase = (timestamp / 50) % 1;
     const intensity = 0.7 + pulsePhase * 0.3;
     
-    // Draw multiple layers for more intense effect
-    // Outer glow
-    ctx.strokeStyle = `rgba(255, 255, 255, ${intensity * 0.3})`;
-    ctx.lineWidth = 12;
-    ctx.shadowBlur = 40;
-    ctx.shadowColor = "rgba(100, 200, 255, 1)";
-    
-    ctx.beginPath();
-    ctx.moveTo(fromCenter.x, fromCenter.y);
-    
-    // Create slightly jagged path
-    const steps = 6;
-    const points = [fromCenter];
-    
-    for (let i = 1; i < steps; i++) {
-      const t = i / steps;
-      const baseX = fromCenter.x + (toCenter.x - fromCenter.x) * t;
-      const baseY = fromCenter.y + (toCenter.y - fromCenter.y) * t;
+    // Restore the beautiful multi-layer effect for the solution path
+    if (PERFORMANCE_CONFIG.qualityLevel === 'high') {
+      // Outer glow
+      ctx.strokeStyle = `rgba(255, 255, 255, ${intensity * 0.3})`;
+      ctx.lineWidth = 10;
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = "rgba(100, 200, 255, 1)";
       
-      const offset = (Math.random() - 0.5) * 4; // Less jagged than exploration
-      const perpX = -(toCenter.y - fromCenter.y) / Math.sqrt((toCenter.x - fromCenter.x) ** 2 + (toCenter.y - fromCenter.y) ** 2);
-      const perpY = (toCenter.x - fromCenter.x) / Math.sqrt((toCenter.x - fromCenter.x) ** 2 + (toCenter.y - fromCenter.y) ** 2);
+      ctx.beginPath();
+      ctx.moveTo(fromCenter.x, fromCenter.y);
       
-      points.push({
-        x: baseX + perpX * offset,
-        y: baseY + perpY * offset
-      });
+      // Create slightly jagged path
+      const steps = 5;
+      const distance = Math.sqrt((toCenter.x - fromCenter.x) ** 2 + (toCenter.y - fromCenter.y) ** 2);
+      
+      for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        const baseX = fromCenter.x + (toCenter.x - fromCenter.x) * t;
+        const baseY = fromCenter.y + (toCenter.y - fromCenter.y) * t;
+        
+        const offset = (Math.random() - 0.5) * 4;
+        const perpX = -(toCenter.y - fromCenter.y) / distance;
+        const perpY = (toCenter.x - fromCenter.x) / distance;
+        
+        ctx.lineTo(baseX + perpX * offset, baseY + perpY * offset);
+      }
+      
+      ctx.lineTo(toCenter.x, toCenter.y);
+      ctx.stroke();
+      
+      // Middle layer
+      ctx.strokeStyle = `rgba(100, 200, 255, ${intensity})`;
+      ctx.lineWidth = 5;
+      ctx.shadowBlur = 15;
+      ctx.stroke();
+      
+      // Inner core
+      ctx.strokeStyle = `rgba(255, 255, 255, ${intensity})`;
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 0;
+      ctx.stroke();
+    } else {
+      // Simplified version for lower quality
+      ctx.strokeStyle = `rgba(100, 200, 255, ${intensity})`;
+      ctx.lineWidth = 4;
+      
+      if (PERFORMANCE_CONFIG.shadowsEnabled) {
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "rgba(100, 200, 255, 0.8)";
+      }
+      
+      ctx.beginPath();
+      ctx.moveTo(fromCenter.x, fromCenter.y);
+      ctx.lineTo(toCenter.x, toCenter.y);
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0;
     }
-    
-    points.push(toCenter);
-    
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.stroke();
-    
-    // Middle layer
-    ctx.strokeStyle = `rgba(100, 200, 255, ${intensity})`;
-    ctx.lineWidth = 6;
-    ctx.shadowBlur = 20;
-    ctx.stroke();
-    
-    // Inner core
-    ctx.strokeStyle = `rgba(255, 255, 255, ${intensity})`;
-    ctx.lineWidth = 2;
-    ctx.shadowBlur = 0;
-    ctx.stroke();
   }
   
   drawElectricArc(ctx: CanvasRenderingContext2D, arc: ElectricArc, opacity: number, isMainPath: boolean) {
     const segments = arc.segments;
     
-    if (isMainPath) {
-      // Draw multiple layers for main path
-      // Outer glow
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.8})`;
-      ctx.lineWidth = 8;
-      ctx.shadowBlur = 30;
-      ctx.shadowColor = "rgba(100, 200, 255, 1)";
-      
-      ctx.beginPath();
-      ctx.moveTo(segments[0].x, segments[0].y);
-      for (let i = 1; i < segments.length; i++) {
-        ctx.lineTo(segments[i].x, segments[i].y);
-      }
-      ctx.stroke();
-      
-      // Middle layer
-      ctx.strokeStyle = `rgba(100, 200, 255, ${opacity})`;
-      ctx.lineWidth = 4;
-      ctx.shadowBlur = 15;
-      ctx.stroke();
-      
-      // Inner core
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.lineWidth = 2;
-      ctx.shadowBlur = 0;
-      ctx.stroke();
-    } else {
-      // Exploration arcs
-      ctx.strokeStyle = `rgba(150, 180, 255, ${opacity * 0.5})`;
-      ctx.lineWidth = 1;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "rgba(100, 200, 255, 0.8)";
-      
-      ctx.beginPath();
-      ctx.moveTo(segments[0].x, segments[0].y);
-      for (let i = 1; i < segments.length; i++) {
-        ctx.lineTo(segments[i].x, segments[i].y);
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+    // Skip very faint arcs
+    if (opacity < PERFORMANCE_CONFIG.minOpacityThreshold) return;
+    
+    // Simplified drawing for better performance
+    ctx.strokeStyle = isMainPath 
+      ? `rgba(100, 200, 255, ${opacity})`
+      : `rgba(150, 180, 255, ${opacity * 0.5})`;
+    ctx.lineWidth = isMainPath ? 3 : 1;
+    
+    ctx.beginPath();
+    ctx.moveTo(segments[0].x, segments[0].y);
+    for (let i = 1; i < segments.length; i++) {
+      ctx.lineTo(segments[i].x, segments[i].y);
     }
+    ctx.stroke();
   }
   
   regenerateArcSegments(arc: ElectricArc) {
@@ -570,81 +600,55 @@ class PathfindingProcess {
   
   drawElectricNode(ctx: CanvasRenderingContext2D, center: {x: number, y: number}, 
                    size: number, color: string, timestamp: number) {
-    const pulseScale = 1 + 0.2 * Math.sin(timestamp / 400);
-    const actualSize = size * 0.7 * pulseScale;
+    const pulseScale = 1 + 0.1 * Math.sin(timestamp / 400);
+    const actualSize = size * 0.6 * pulseScale;
     
-    // Electric core
-    const gradient = ctx.createRadialGradient(
-      center.x, center.y, 0,
-      center.x, center.y, actualSize
-    );
-    gradient.addColorStop(0, color.replace(/[\d.]+\)/, '1)'));
-    gradient.addColorStop(0.5, color);
-    gradient.addColorStop(1, color.replace(/[\d.]+\)/, '0)'));
-    
-    ctx.fillStyle = gradient;
+    // Simple colored circle instead of gradient for performance
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(center.x, center.y, actualSize, 0, Math.PI * 2);
     ctx.fill();
     
-    // Electric arcs emanating from node
-    if (Math.random() < 0.1) {
-      for (let i = 0; i < 3; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = actualSize + Math.random() * 20;
-        const endX = center.x + Math.cos(angle) * distance;
-        const endY = center.y + Math.sin(angle) * distance;
-        
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = color;
-        ctx.beginPath();
-        ctx.moveTo(center.x, center.y);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-      }
+    // Occasional simple sparks (reduced frequency)
+    if (this.frameCount % 20 === 0 && Math.random() < 0.3) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = actualSize + Math.random() * 15;
+      const endX = center.x + Math.cos(angle) * distance;
+      const endY = center.y + Math.sin(angle) * distance;
+      
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(center.x, center.y);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
     }
-    ctx.shadowBlur = 0;
   }
   
   drawGroundNode(ctx: CanvasRenderingContext2D, center: {x: number, y: number}, 
                  size: number, timestamp: number) {
-    const pulseScale = 1 + 0.08 * Math.sin(timestamp / 700);
+    const pulseScale = 1 + 0.05 * Math.sin(timestamp / 700);
     
-    // Moderate ghostly glow
-    const gradient = ctx.createRadialGradient(
-      center.x, center.y, 0,
-      center.x, center.y, size * 0.9 * pulseScale
-    );
-    gradient.addColorStop(0, "rgba(190, 190, 220, 0.25)");
-    gradient.addColorStop(0.5, "rgba(160, 160, 200, 0.15)");
-    gradient.addColorStop(1, "rgba(120, 120, 180, 0)");
-    
-    ctx.fillStyle = gradient;
+    // Simple faint circle for ground node
+    ctx.fillStyle = "rgba(190, 190, 220, 0.2)";
     ctx.beginPath();
-    ctx.arc(center.x, center.y, size * 0.9 * pulseScale, 0, Math.PI * 2);
+    ctx.arc(center.x, center.y, size * 0.8 * pulseScale, 0, Math.PI * 2);
     ctx.fill();
     
-    // Draw the "G" letter - medium size
-    ctx.font = `${size}px monospace`;
+    // Draw the "G" letter
+    ctx.font = `${size * 0.9}px monospace`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     
-    // Moderate ghostly appearance
-    const opacity = 0.45 + 0.15 * Math.sin(timestamp / 900);
+    const opacity = 0.4 + 0.1 * Math.sin(timestamp / 900);
     ctx.fillStyle = `rgba(220, 220, 240, ${opacity})`;
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = "rgba(190, 190, 220, 0.5)";
     
     ctx.fillText("G", center.x, center.y);
     
-    ctx.shadowBlur = 0;
-    
-    // Occasional ground sparks
-    if (Math.random() < 0.03) {
+    // Reduced frequency ground sparks
+    if (this.frameCount % 30 === 0 && Math.random() < 0.2) {
       const angle = Math.random() * Math.PI * 2;
-      const distance = size * 0.4 + Math.random() * size * 0.6;
+      const distance = size * 0.5 + Math.random() * size * 0.5;
       const sparkX = center.x + Math.cos(angle) * distance;
       const sparkY = center.y + Math.sin(angle) * distance;
       
@@ -730,7 +734,48 @@ const MazeTraverser = forwardRef<MazeTraverserRef, MazeTraverserProps>(({
     };
     window.addEventListener("resize", handleResize);
     
+    let lastFrameTime = 0;
+    
     const animate = (timestamp: number) => {
+      // Performance monitoring
+      if (lastFrameTime !== 0 && PERFORMANCE_CONFIG.dynamicAdjustment) {
+        const frameTime = timestamp - lastFrameTime;
+        frameTimeHistory.push(frameTime);
+        if (frameTimeHistory.length > FRAME_TIME_HISTORY_SIZE) {
+          frameTimeHistory.shift();
+        }
+        
+        // Check average frame time
+        if (frameTimeHistory.length >= 10) {
+          const avgFrameTime = frameTimeHistory.reduce((a, b) => a + b) / frameTimeHistory.length;
+          
+          // Adjust performance settings based on frame time
+          if (avgFrameTime > TARGET_FRAME_TIME * 1.5) {
+            // Performance is poor, reduce effects
+            PERFORMANCE_CONFIG.maxSparks = Math.max(30, PERFORMANCE_CONFIG.maxSparks - 10);
+            PERFORMANCE_CONFIG.minOpacityThreshold = Math.min(0.3, PERFORMANCE_CONFIG.minOpacityThreshold + 0.05);
+            // Downgrade quality level
+            if (PERFORMANCE_CONFIG.qualityLevel === 'high' && avgFrameTime > TARGET_FRAME_TIME * 2) {
+              PERFORMANCE_CONFIG.qualityLevel = 'medium';
+              PERFORMANCE_CONFIG.shadowsEnabled = false;
+            } else if (PERFORMANCE_CONFIG.qualityLevel === 'medium' && avgFrameTime > TARGET_FRAME_TIME * 2.5) {
+              PERFORMANCE_CONFIG.qualityLevel = 'low';
+            }
+          } else if (avgFrameTime < TARGET_FRAME_TIME * 0.8) {
+            // Performance is good, can increase effects slightly
+            PERFORMANCE_CONFIG.maxSparks = Math.min(150, PERFORMANCE_CONFIG.maxSparks + 5);
+            PERFORMANCE_CONFIG.minOpacityThreshold = Math.max(0.05, PERFORMANCE_CONFIG.minOpacityThreshold - 0.02);
+            // Upgrade quality level
+            if (PERFORMANCE_CONFIG.qualityLevel === 'low') {
+              PERFORMANCE_CONFIG.qualityLevel = 'medium';
+            } else if (PERFORMANCE_CONFIG.qualityLevel === 'medium' && avgFrameTime < TARGET_FRAME_TIME * 0.6) {
+              PERFORMANCE_CONFIG.qualityLevel = 'high';
+              PERFORMANCE_CONFIG.shadowsEnabled = true;
+            }
+          }
+        }
+      }
+      lastFrameTime = timestamp;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       if (timestamp - lastPathCreationRef.current > 2000 && pathsRef.current.length < maxConcurrentPaths) {
