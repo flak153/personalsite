@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
 
 export interface MazeBuilderRef {
   isComplete: boolean;
@@ -299,7 +299,7 @@ const MazeBuilder = forwardRef<MazeBuilderRef, MazeBuilderProps>(({ cellSize, on
     }
   };
   
-  const initializeMaze = () => {
+  const initializeMaze = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -326,7 +326,7 @@ const MazeBuilder = forwardRef<MazeBuilderRef, MazeBuilderProps>(({ cellSize, on
     
     const randomStart = startPositions[Math.floor(Math.random() * startPositions.length)];
     generateMazeStructure(randomStart.row, randomStart.col);
-  };
+  }, [cellSize]); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -401,7 +401,7 @@ const MazeBuilder = forwardRef<MazeBuilderRef, MazeBuilderProps>(({ cellSize, on
       }
       window.removeEventListener("resize", handleResize);
     };
-  }, [cellSize, onComplete]);
+  }, [cellSize, onComplete, initializeMaze]);
   
   return (
     <canvas 

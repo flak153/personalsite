@@ -12,13 +12,23 @@
     - **Concept:** Build a tool that allows users to create or explore generative art. This could involve parameters users can tweak to produce different visual outputs (e.g., Perlin noise fields, particle systems, geometric patterns).
     - **Tech:** Canvas API, WebGL, or P5.js.
 
-- [ ] **Decentralized Identity (DID) or Verifiable Credential (VC) Explorer:** (Status: In Progress)
-    - **Concept:** Create a tool that helps users understand or experiment with basic concepts of DIDs or VCs. This could be a simple DID generator/resolver or a tool to create and verify a basic VC.
-    - **Tech:** JavaScript libraries for DIDs/VCs (e.g., `did-jwt`, `ceramic-sdk`).
-
 - [ ] **Mini Network Protocol Simulator:**
     - **Concept:** A visual tool that simulates basic network interactions, like the TCP handshake, DNS resolution, or HTTP request/response flow.
     - **Tech:** Canvas for visualization, TypeScript for logic.
+
+# Unsupervised Learning Demos
+
+- [ ] **Snake Game AI:**
+    - **Concept:** Train a neural network to play the classic snake game. The AI would learn to survive and eat food without any explicit instructions on how to do so. This is a classic reinforcement learning problem, which is a type of unsupervised learning.
+    - **Tech:** TensorFlow.js or a similar library for the neural network, Canvas for the game itself.
+
+- [ ] **Clustering Visualization:**
+    - **Concept:** An interactive tool that shows how clustering algorithms (like K-Means or DBSCAN) group data points. Users could upload their own data or use sample datasets to see how the algorithm discovers patterns without any labels.
+    - **Tech:** D3.js or a similar library for visualization.
+
+- [ ] **Asteroids Game AI:**
+    - **Concept:** Train a neural network to play the classic Asteroids game. The AI would learn to shoot asteroids and avoid collisions. This is another example of reinforcement learning.
+    - **Tech:** TensorFlow.js or a similar library for the neural network, Canvas for the game itself.
 
 # Blog Post Ideas - Statistics Deep Dives
 
@@ -57,10 +67,6 @@
     - **Topics:** ARIMA models, STL decomposition, statistical process control
     - **Include:** Interactive anomaly detection on real datasets
 
-- [ ] **"The Central Limit Theorem in the Wild"**
-    - **Concept:** Deep exploration of CLT with surprising applications and limitations
-    - **Include:** Interactive demonstrations of convergence, fat-tailed distributions
-    - **Real-world:** Load balancing, request latencies, error rates
 
 # DevOps Showcase Ideas
 

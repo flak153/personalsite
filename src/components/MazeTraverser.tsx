@@ -32,7 +32,7 @@ interface Spark {
 }
 
 // Performance configuration
-let PERFORMANCE_CONFIG = {
+const PERFORMANCE_CONFIG = {
   maxSparks: 100,
   shadowsEnabled: true, // Re-enable shadows for better visuals
   reducedEffects: false,
@@ -43,7 +43,7 @@ let PERFORMANCE_CONFIG = {
 };
 
 // Performance monitoring
-let frameTimeHistory: number[] = [];
+const frameTimeHistory: number[] = [];
 const FRAME_TIME_HISTORY_SIZE = 30;
 const TARGET_FPS = 30;
 const TARGET_FRAME_TIME = 1000 / TARGET_FPS;
@@ -681,34 +681,34 @@ const MazeTraverser = forwardRef<MazeTraverserRef, MazeTraverserProps>(({
     }
   }));
   
-  const getRandomCell = (): Cell | null => {
-    if (!grid || grid.length === 0 || grid[0].length === 0) return null;
-    const row = Math.floor(Math.random() * grid.length);
-    const col = Math.floor(Math.random() * grid[0].length);
-    return grid[row][col];
-  };
-  
-  const createNewPathfindingProcess = (timestamp: number) => {
-    if (pathsRef.current.length >= maxConcurrentPaths) return;
-    
-    const startCell = getRandomCell();
-    if (!startCell) return;
-    
-    let endCell = getRandomCell();
-    if (!endCell) return;
-    
-    let distance = Math.abs(startCell.row - endCell.row) + Math.abs(startCell.col - endCell.col);
-    while (distance < Math.max(grid.length, grid[0].length) / 3) {
-      endCell = getRandomCell();
-      if (!endCell) return;
-      distance = Math.abs(startCell.row - endCell.row) + Math.abs(startCell.col - endCell.col);
-    }
-    
-    const newPath = new PathfindingProcess(startCell, endCell, timestamp);
-    pathsRef.current.push(newPath);
-  };
-  
   useEffect(() => {
+    const getRandomCell = (): Cell | null => {
+      if (!grid || grid.length === 0 || grid[0].length === 0) return null;
+      const row = Math.floor(Math.random() * grid.length);
+      const col = Math.floor(Math.random() * grid[0].length);
+      return grid[row][col];
+    };
+    
+    const createNewPathfindingProcess = (timestamp: number) => {
+      if (pathsRef.current.length >= maxConcurrentPaths) return;
+      
+      const startCell = getRandomCell();
+      if (!startCell) return;
+      
+      let endCell = getRandomCell();
+      if (!endCell) return;
+      
+      let distance = Math.abs(startCell.row - endCell.row) + Math.abs(startCell.col - endCell.col);
+      while (distance < Math.max(grid.length, grid[0].length) / 3) {
+        endCell = getRandomCell();
+        if (!endCell) return;
+        distance = Math.abs(startCell.row - endCell.row) + Math.abs(startCell.col - endCell.col);
+      }
+      
+      const newPath = new PathfindingProcess(startCell, endCell, timestamp);
+      pathsRef.current.push(newPath);
+    };
+    
     const canvas = canvasRef.current;
     if (!canvas || !enabled) return;
     
