@@ -284,7 +284,6 @@ export default function Navigation() {
               transition={{ delay: 0.3 + index * 0.05 }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              role="listitem"
             >
               {link.icon}
             </motion.a>
