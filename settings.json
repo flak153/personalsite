@@ -1,12 +1,26 @@
 {
   "hero": {
     "taglines": [
-      "DevOps Specialist",
-      "Startup Veteran",
-      "CI/CD Lover",
-      "Statistics Enthusiast",
-      "Microservices Hater",
-      "Bengali Muslim"
+      "Complexity Killer",
+      "Performance Fundamentalist",
+      "Hype Debugger",
+      "Abstraction Skeptic",
+      "Ship Fast, Scale Later",
+      "Code > Config",
+      "Monolith Maximalist",
+      "0→1 Engineer",
+      "MVP Whisperer",
+      "Technical Co-founder Mode",
+      "Pre-PMF Specialist",
+      "P-value Pedant",
+      "Bayesian at Heart",
+      "Bengali in Tech",
+      "NYC Native",
+      "First-Gen Engineer",
+      "YAGNI Enforcer",
+      "Garbage Collector",
+      "Pipeline Perfectionist",
+      "Latency Hunter"
     ],
     "typewriter": {
       "typingSpeed": 100,
