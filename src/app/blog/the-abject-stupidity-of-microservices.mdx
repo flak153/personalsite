@@ -1,0 +1,75 @@
+---
+title: "The Abject Stupidity of Microservices"
+date: "2025-06-08"
+tags: ["Architecture", "Microservices", "Rant"]
+excerpt: "A deep dive into why microservices are often a disastrous choice, creating complex engineering problems to solve human ones."
+readTime: "7 min read"
+category: "Software Engineering"
+---
+
+# The Abject Stupidity of Microservices
+
+I'm going to say what everyone is thinking but is too afraid to say: microservices are, more often than not, a solution in search of a problem. They are a cargo cult of complexity that has infected our industry, and it's time we talk about it.
+
+## The Monolith is Not Your Enemy
+
+Let's start with the monolith. The much-maligned, supposedly outdated monolith. What is a monolith? It's a single, unified codebase. It's a single deployment. It's a single point of failure, they say. But you know what else it is? It's simple. It's easy to understand. It's easy to test. It's easy to deploy.
+
+## The Microservice Mirage
+
+Now, let's look at the microservice mirage. What do you get? A dozen, a hundred, a thousand tiny services, each with its own codebase, its own deployment pipeline, its own database, its own everything. You've traded a single, simple system for a distributed system, and you've done it for what? So you can scale your "like" button independently of your "share" button? Give me a break.
+
+## The Distributed Monolith: The Worst of Both Worlds
+
+The most common outcome of a premature leap to microservices is the "distributed monolith." This isn't a step forward; it's a leap into a tar pit. You end up with a system where services are technically separate but practically intertwined.
+
+- **Synchronous Calls Everywhere**: Service A can't function without a real-time response from Service B, which in turn needs data from Service C. A single user request triggers a cascade of synchronous calls across the network. If one service is slow or down, the entire request fails. You've just reinvented the monolith, but with network latency and a hundred new points of failure.
+- **Shared Libraries and Models**: To "reduce duplication," teams create shared libraries for data models or business logic. Now, a change to that library requires updating, testing, and deploying multiple services in lockstep. Congratulations, you've just recreated monolithic coupling.
+- **Database-level Integration**: Services often end up sharing a database, or worse, calling each other's databases directly. This creates a tangled web of dependencies that makes it impossible to change anything without breaking something else.
+
+You've taken all the disadvantages of a monolith (tight coupling, coordinated deployments) and all the disadvantages of a distributed system (network unreliability, latency, complex debugging) and combined them into one glorious, unmaintainable mess.
+
+## An Engineering Problem to Organize Humans
+
+A primary driver for microservices adoption is often organizational, not technical. It's an attempt to apply Conway's Law in reverse: instead of the system architecture reflecting the communication structure of the organization, the organization is restructured in the hope that the architecture will follow. We create small, independent teams and then create small, "independent" services for them to work on.
+
+The result? We're creating an engineering problem to solve a human problem. Instead of improving communication and collaboration, we're building technical walls between teams. We're trading a social problem for a much more expensive and complex technical one.
+
+## The Crushing Complexity Tax
+
+The complexity tax of microservices is not a small line item; it's a mortgage on your entire engineering organization. The list of "necessary" tooling is endless:
+
+- **Service Discovery**: How do services find each other? You need a tool like Consul or etcd.
+- **Service Mesh**: How do you handle retries, circuit breaking, and security? You need a tool like Istio or Linkerd.
+- **Distributed Tracing**: How do you follow a request across a dozen services? You need a tool like Jaeger or Zipkin.
+- **Centralized Logging**: How do you make sense of logs from a hundred different places? You need an ELK stack or something similar.
+- **Configuration Management**: How do you manage configuration for all your services? You need a tool like Vault or Spring Cloud Config.
+- **Deployment Orchestration**: How do you deploy all these services? You need Kubernetes, and a team of specialists to manage it.
+
+Each of these is a complex system in its own right. You're not just building your product anymore; you're building a company to build a platform to build your product. And for what? So you can say you're doing microservices? It's madness.
+
+## The Developer Experience Nightmare
+
+Let's not forget the impact on the poor developers who have to work in this mess.
+
+- **Local Development is a Joke**: Want to run the system on your laptop? Good luck. You'll need to run 50 different services, a dozen databases, and a whole suite of infrastructure tools. Your laptop will sound like a jet engine, and you'll spend half your day just trying to get the system to a runnable state.
+- **Debugging is a Detective Story**: A simple bug can turn into a multi-day investigation. You have to trace a request through a dozen services, correlate logs from multiple systems, and try to reproduce a failure in a complex, non-deterministic environment.
+- **Cognitive Overhead is Sky-High**: To make a simple change, a developer needs to understand the interactions between multiple services, the intricacies of the service mesh, and the deployment pipeline for each service. The cognitive load is immense, and it slows everyone down.
+
+## When Do Microservices Make Sense?
+
+Are there cases where microservices make sense? Sure. If you're Google, or Netflix, or Amazon, and you have thousands of engineers working on a massive, complex system, then maybe, just maybe, microservices are the right choice. But for the vast majority of us, they are a premature optimization, a solution to a problem we don't have.
+
+## A Saner Path Forward
+
+So, what's the alternative? It's not about blindly sticking with a monolith forever. It's about starting simple, and only introducing complexity when it's absolutely necessary.
+
+1.  **Start with a "Majestic Monolith"**: Build a well-structured, modular monolith. Use clear boundaries and interfaces within your codebase. This gives you many of the organizational benefits of microservices without the operational overhead.
+2.  **Extract Services, Don't Build Them**: When, and only when, you have a clear, undeniable need, extract a service. This need should be driven by a real business requirement, like a part of the system that needs to scale independently at a vastly different rate.
+3.  **Focus on Data**: The hardest part of microservices is managing data. Before you split a service, have a clear plan for how you'll handle data consistency, transactions, and queries.
+
+## Conclusion: Think, Don't Trend-Chase
+
+Before you jump on the microservice bandwagon, take a long, hard look at your system, your team, and your business. Are you solving a real, technical problem, or are you just chasing a trend? Are you prepared to pay the steep complexity tax?
+
+Don't be a cargo cult programmer. Build simple, robust systems that solve real problems. And for the love of all that is holy, stop building distributed monoliths.

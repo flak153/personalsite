@@ -1,0 +1,196 @@
+---
+title: "A Complete History of JavaScript Frameworks in the Modern Age, from the Perspective of a Confused Backend Developer"
+date: "2025-06-08"
+tags: ["JavaScript", "Frontend", "Frameworks", "State Management"]
+excerpt: "A backend developer's yearly attempt to understand the chaotic world of JavaScript frameworks, state management, and meta-frameworks."
+readTime: "25 min read"
+category: "Web Development"
+---
+
+**Warning: this only exists because I have to come back to this and remind myself of what the fuck is going on about once a year, to understand the tradeoffs between all this crap.**
+
+Welcome, fellow backend traveler, to the ever-shifting landscape of front-end development. If you're like me, you dip your toes into this world every so often, only to find that the entire continent has rearranged itself. This post is my attempt to create a stable map, a reference point for the next time I'm forced to leave the comforting predictability of my server-side world.
+
+## The Age of jQuery: The Benevolent Dictator (2006)
+
+Before frameworks, there was chaos. We manipulated the Document Object Model (DOM) directly with vanilla JavaScript, a painful process made worse by the browser wars. Each browser had its own quirks and inconsistencies.
+
+**The Design Change**: John Resig created jQuery to abstract away these browser differences. It provided a simple, elegant API for DOM manipulation, event handling, and AJAX requests.
+
+**Why**: To make front-end development easier, more consistent, and less painful.
+
+**The Benefit**: A single, unified way to write JavaScript that worked across all major browsers. It was a massive productivity boost and became the de facto standard for years.
+
+## The First Wave of MVC: The Rise of Structure (2010-2011)
+
+As web applications grew more complex, jQuery's "spaghetti code" became a problem. We needed structure. The Model-View-Controller (MVC) pattern, popular in backend frameworks, made its way to the front end.
+
+### Backbone.js (2010)
+
+**The Design Change**: Backbone was one of the first to bring MVC to the client side. It was minimalist and unopinionated, providing just the bare essentials: Models, Views, Collections, and a Router.
+
+**Why**: To provide a lightweight structure for building single-page applications (SPAs) without imposing a rigid framework.
+
+**The Benefit**: It forced developers to think about organizing their code, separating data (Models) from the UI (Views). Its small size and flexibility made it a popular choice for early SPAs.
+
+### Ember.js (2011)
+
+**The Design Change**: Ember took the opposite approach to Backbone. It was a "batteries-included" framework that valued convention over configuration. It provided a complete solution, with a strong set of opinions on how to build an application.
+
+**Why**: To provide a stable, productive environment for building large, ambitious web applications. The Ember team believed that by making decisions for the developer, they could increase productivity and reduce boilerplate.
+
+**The Benefit**: A clear, consistent structure that made it easy for new developers to join a project and get up to speed quickly. It also introduced a powerful routing system and a strong data layer.
+
+### AngularJS (2010)
+
+**The Design Change**: AngularJS was a beast. It introduced powerful features like two-way data binding, dependency injection, and directives. Two-way data binding was the killer feature: changes in the UI would automatically update the model, and changes in the model would automatically update the UI.
+
+**Why**: To create a more declarative way of building UIs. Instead of manually updating the DOM, you would declare the relationship between your data and your UI, and the framework would handle the rest.
+
+**The Benefit**: Rapid development for complex forms and data-driven applications. It felt like magic at the time.
+
+## The Component Revolution: A New Way of Thinking (2013-2014)
+
+The first wave of MVC frameworks was a huge step forward, but they had their own problems. Two-way data binding could become a performance nightmare, and managing state was still a challenge.
+
+### React (2013)
+
+**The Design Change**: React, created by Facebook, introduced several radical new ideas:
+-   **The Virtual DOM**: Instead of updating the real DOM directly, React would create a lightweight, in-memory representation of the DOM. It would then "diff" the virtual DOM with the real DOM and only make the necessary changes.
+-   **One-Way Data Flow**: Data flows down from parent components to child components. This made applications easier to reason about and debug.
+-   **Components**: Everything is a component. This forced developers to think in terms of reusable, composable pieces.
+
+**Why**: To create a more performant and predictable way of building large, complex UIs. Facebook needed a way to manage the complexity of its own application, and React was the solution.
+
+**The Benefit**: A massive performance boost, a simpler mental model, and a thriving ecosystem of reusable components.
+
+### Vue.js (2014)
+
+**The Design Change**: Vue, created by Evan You, took the best ideas from Angular and React and combined them into a single, elegant package. It offered the approachability of AngularJS with the component-based architecture and performance of React.
+
+**Why**: To create a more progressive and approachable framework. You could use Vue to sprinkle a bit of interactivity onto a page, or you could use it to build a full-blown SPA.
+
+**The Benefit**: A gentle learning curve, excellent documentation, and a flexible architecture that could scale from small projects to large applications.
+
+## The State Management Saga: Where Does the Data Live?
+
+As applications grew, a new problem emerged: state management. When multiple components need to share and update the same piece of data, where does that data live? This led to a whole new category of libraries.
+
+### Flux (2014)
+
+**The Design Change**: Flux, also from Facebook, was more of a pattern than a library. It complemented React's one-way data flow with a strict, unidirectional data flow for your entire application: Action -> Dispatcher -> Store -> View.
+
+**Why**: To make state changes more predictable and easier to debug.
+
+**The Benefit**: A clear and explicit way to manage application state, which was a huge improvement over the chaos of two-way data binding.
+
+### Redux (2015)
+
+**The Design Change**: Redux took the core ideas of Flux and combined them with concepts from functional programming. It had a single, immutable state tree (the "store"), and all state changes were handled by pure functions called "reducers."
+
+**Why**: To create a predictable, testable, and debuggable state management solution.
+
+**The Benefit**: Time-travel debugging, hot reloading, and a rich ecosystem of middleware. It became the de facto standard for state management in React applications for many years.
+
+### MobX (2015)
+
+**The Design Change**: MobX took a different approach. It used observable data structures and decorators to automatically track changes and update the UI.
+
+**Why**: To provide a more "magical" and less boilerplate-heavy state management solution.
+
+**The Benefit**: A simpler API and less code to write. It was a popular choice for those who found Redux too verbose.
+
+### MobX-State-Tree (2017)
+
+**The Design Change**: MobX-State-Tree (MST) was built on top of MobX to provide more structure. It brought concepts like models, types, and actions, creating a more opinionated and robust way to manage state.
+
+**Why**: To combine the simplicity of MobX with the predictability and structure of Redux. It aimed to provide a "golden path" for state management in complex applications.
+
+**The Benefit**: A powerful and flexible state management solution with features like snapshots, patches, and middleware, while still being easier to work with than Redux for many developers.
+
+### The Modern State: Hooks, Context, and Stores
+
+Today, the state management landscape has evolved again.
+-   **React Hooks and Context API**: React's built-in `useState`, `useReducer`, and `useContext` hooks have made it possible to manage complex state without an external library.
+-   **Zustand, Jotai, etc.**: A new wave of simpler, more lightweight state management libraries has emerged, often leveraging the Context API under the hood.
+-   **Pinia**: The new official state management library for Vue, offering a simpler and more intuitive API than its predecessor, Vuex.
+
+## The Rise of Meta-Frameworks: Bringing the Backend to the Frontend
+
+As SPAs became the norm, we lost some of the benefits of traditional server-rendered applications, like fast initial page loads and good SEO. Meta-frameworks emerged to solve this problem.
+
+### Next.js (2016)
+
+**The Design Change**: Built on top of React, Next.js brought server-side rendering (SSR), static site generation (SSG), and file-based routing to the React ecosystem.
+
+**Why**: To make it easy to build fast, SEO-friendly React applications.
+
+**The Benefit**: A fantastic developer experience with a rich set of features out of the box. It has become the go-to choice for building production-ready React applications.
+
+### Nuxt.js (2016)
+
+**The Design Change**: What Next.js is to React, Nuxt.js is to Vue. It provides a similar set of features, including SSR, SSG, and file-based routing, but for the Vue ecosystem.
+
+**Why**: To provide a powerful and flexible meta-framework for building Vue applications.
+
+**The Benefit**: A great developer experience for Vue developers, with a strong focus on performance and developer productivity.
+
+### SvelteKit (2020)
+
+**The Design Change**: SvelteKit is the official meta-framework for Svelte. It provides a modern, flexible, and powerful way to build Svelte applications, with features like server-side rendering, routing, and serverless functions.
+
+**Why**: To provide a first-class, full-stack development experience for Svelte.
+
+**The Benefit**: A seamless development experience that combines the power of Svelte with the features of a modern meta-framework.
+
+## The Modern Era: The Compiler is the Framework (2016-Present)
+
+The latest wave of frameworks has taken a different approach. Instead of shipping a large runtime library to the browser, they do as much work as possible at build time.
+
+### Svelte (2016)
+
+**The Design Change**: Svelte is not a runtime framework; it's a compiler. It takes your component code and turns it into highly optimized, vanilla JavaScript.
+
+**Why**: To eliminate the overhead of a virtual DOM and a runtime library. The Svelte team believed that the best framework is no framework at all.
+
+**The Benefit**: Blazingly fast applications with a tiny bundle size. It also offers a simple, elegant syntax that is a joy to work with.
+
+### SolidJS (2018)
+
+**The Design Change**: SolidJS takes the fine-grained reactivity of early frameworks and combines it with a modern, React-like syntax. It doesn't use a virtual DOM; instead, it creates a reactive graph that updates the DOM directly when data changes.
+
+**Why**: To achieve the performance of Svelte with a more familiar, React-like developer experience.
+
+**The Benefit**: Some of the best performance benchmarks in the game, with a developer experience that is very comfortable for React developers.
+
+## The Edge and Beyond: The Future is Now (2021-Present)
+
+The very latest frameworks are pushing the boundaries even further, focusing on new architectural patterns and deployment models. And to answer the question you're probably thinking: yes, people are actually using these in production. While they're not as widespread as the big three, companies like Google, Vercel, and Cloudflare are investing in and using these new technologies.
+
+### Astro (2021)
+
+**The Design Change**: Astro introduced the concept of "islands architecture." Most of your site is static HTML, with small, interactive "islands" of JavaScript where needed.
+
+**Why**: To build content-rich websites that are fast by default. Astro's philosophy is to ship as little JavaScript as possible.
+
+**The Benefit**: Incredible performance for content-focused sites like blogs, marketing sites, and e-commerce stores.
+
+### Qwik (2021)
+
+**The Design Change**: Qwik is a "resumable" framework. It sends a tiny amount of JavaScript to the browser, and then streams the rest as the user interacts with the page. It can "resume" execution on the client without having to re-run all the application logic.
+
+**Why**: To achieve instant-on applications, no matter how complex. Qwik aims to solve the "time to interactive" problem.
+
+**The Benefit**: The potential for incredibly fast-loading applications, even on slow networks and devices.
+
+## So, What the Hell Do I Use?
+
+And that's the million-dollar question, isn't it? The honest answer is: it depends.
+
+-   **For a large, enterprise application with a big team?** Angular or Ember's opinionated nature might be a good fit.
+-   **For a startup that needs to move fast and has a lot of React developers?** Next.js is the default choice.
+-   **For a project where performance is absolutely critical?** SvelteKit or SolidStart (the SolidJS meta-framework) are great options.
+-   **For a content-heavy site that needs to be fast?** Astro is a fantastic choice.
+-   **If you're on the bleeding edge and want the fastest possible time-to-interactive?** Qwik is worth a look.
+
+As for me? I'll probably stick to my backend world, and I'll see you all again next year, when I'm sure the landscape will have changed all over again.
