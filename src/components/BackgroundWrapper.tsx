@@ -9,9 +9,5 @@ const CombinedBackground = dynamic(
 );
 
 export default function BackgroundWrapper() {
-  return (
-    <div className="fixed inset-0 z-0">
-      <CombinedBackground />
-    </div>
-  );
+  return <CombinedBackground />;
 }

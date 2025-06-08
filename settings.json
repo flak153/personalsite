@@ -82,10 +82,6 @@
     }
   },
   "animations": {
-    "codeRain": {
-      "enabled": false,
-      "description": "Matrix-style code rain background animation"
-    },
     "circuitBoard": {
       "enabled": true,
       "homePageOnly": false,

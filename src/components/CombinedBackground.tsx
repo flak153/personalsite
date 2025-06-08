@@ -12,10 +12,6 @@ const CircuitBoardBackground = dynamic(() => import("./CircuitBoardBackground"),
   loading: () => null
 });
 
-const BackgroundRain = dynamic(() => import("./BackgroundRain"), { 
-  ssr: false,
-  loading: () => null
-});
 
 export default function CombinedBackground() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -24,6 +20,20 @@ export default function CombinedBackground() {
   
   // Detect if we're on a route that needs intensive background
   const isHomePage = pathname === "/";
+  
+  // Debug logging
+  useEffect(() => {
+    console.log("CombinedBackground debug:", {
+      pathname,
+      isHomePage,
+      animationEnabled,
+      circuitBoardEnabled: settings.animations.circuitBoard.enabled,
+      homePageOnly: settings.animations.circuitBoard.homePageOnly,
+      shouldShowCircuitBoard: settings.animations.circuitBoard.enabled && 
+        animationEnabled &&
+        (!settings.animations.circuitBoard.homePageOnly || isHomePage)
+    });
+  }, [pathname, isHomePage, animationEnabled]);
   
   // Stagger initialization to improve perceived performance
   useEffect(() => {
@@ -62,31 +72,27 @@ export default function CombinedBackground() {
   }
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden">
-      {/* Static gradient background - always render as base layer */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{ background: settings.theme.backgroundGradient }}
-      />
+    <>
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        {/* Static gradient background - always render as base layer */}
+        <div 
+          className="absolute inset-0 z-0"
+          style={{ background: settings.theme.backgroundGradient }}
+        />
+        
+        
+        {/* Circuit board animation - controlled by settings and toggle */}
+        {settings.animations.circuitBoard.enabled && 
+         animationEnabled &&
+         (!settings.animations.circuitBoard.homePageOnly || isHomePage) && (
+          <div className="absolute inset-0 z-10 pointer-events-none opacity-40">
+            <CircuitBoardBackground />
+          </div>
+        )}
+      </div>
       
-      {/* Code rain animation - controlled by settings */}
-      {settings.animations.codeRain.enabled && (
-        <div className="absolute inset-0 z-10">
-          <BackgroundRain />
-        </div>
-      )}
-      
-      {/* Circuit board animation - controlled by settings and toggle */}
-      {settings.animations.circuitBoard.enabled && 
-       animationEnabled &&
-       (!settings.animations.circuitBoard.homePageOnly || isHomePage) && (
-        <div className="absolute inset-0 z-10 pointer-events-none opacity-40">
-          <CircuitBoardBackground />
-        </div>
-      )}
-      
-      {/* Background toggle control */}
+      {/* Background toggle control - outside the z-0 wrapper */}
       <BackgroundToggle onToggle={setAnimationEnabled} />
-    </div>
+    </>
   );
 }
