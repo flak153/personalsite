@@ -8,6 +8,8 @@ import TricolorAbstractionVisualization from './animations/TricolorAbstractionVi
 import MarkCompactVisualization from './animations/MarkCompactVisualization';
 import CLTConvergenceDemo from './animations/CLTConvergenceDemo';
 import FatTailedDistributionDemo from './animations/FatTailedDistributionDemo';
+import IrisClassificationDemo from './animations/IrisClassificationDemo';
+import ModelComparisonDemo from './animations/ModelComparisonDemo';
 import PGPTool from './PGPTool'; // Import PGPTool
 import DidVcExplorer from './DidVcExplorer'; // Import DidVcExplorer
 import DidVcExplorerEnhanced from './DidVcExplorerEnhanced'; // Import DidVcExplorerEnhanced
@@ -203,6 +205,8 @@ export const components = {
   MarkCompactVisualization,
   CLTConvergenceDemo,
   FatTailedDistributionDemo,
+  IrisClassificationDemo,
+  ModelComparisonDemo,
   
   MemoryManagementVisualizedAsApartmentBuilding: () => <ApartmentBuildingMemoryAnalogy />,
   CommonMemoryManagementErrorsAndTheirConsequences: () => <PlaceholderAnimation title="Common Memory Management Errors" />,

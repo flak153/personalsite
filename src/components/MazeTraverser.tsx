@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef, useState } from "react";
 import type { Cell } from "./MazeBuilder";
 
 export interface MazeTraverserRef {
@@ -69,8 +69,15 @@ class PathfindingProcess {
   mainPathArcs: ElectricArc[] = [];
   deadEndCells: Set<Cell> = new Set();
   frameCount: number = 0;
+  baseProbability: number;
+  minProbability: number;
+  priorityDecayFactor: number;
   
-  constructor(startCell: Cell, endCell: Cell, startTime: number) {
+  constructor(startCell: Cell, endCell: Cell, startTime: number, config: {
+    baseProbability: number;
+    minProbability: number;
+    priorityDecayFactor: number;
+  }) {
     this.startCell = startCell;
     this.endCell = endCell;
     this.startTime = startTime;
@@ -78,6 +85,9 @@ class PathfindingProcess {
     this.costSoFar.set(startCell, 0);
     this.animationSpeed = Math.random() * 0.03 + 0.007;
     this.algorithmType = 'astar'; // Always use A* with Manhattan distance
+    this.baseProbability = config.baseProbability;
+    this.minProbability = config.minProbability;
+    this.priorityDecayFactor = config.priorityDecayFactor;
   }
   
   step(grid: Cell[][]) {
@@ -102,12 +112,11 @@ class PathfindingProcess {
     
     for (let i = 0; i < cellsToProcess.length; i++) {
       // Higher priority cells (lower index) have higher chance of expanding
-      // Best paths have 8% chance, decreasing based on priority
-      const baseProbability = 0.08;
-      const priorityFactor = Math.exp(-i * 0.3); // Exponential decay
-      const expansionChance = baseProbability * priorityFactor;
+      // Best paths have configured base probability, decreasing based on priority
+      const priorityFactor = Math.exp(-i * this.priorityDecayFactor); // Exponential decay
+      const expansionChance = this.baseProbability * priorityFactor;
       
-      if (Math.random() < Math.max(expansionChance, 0.02)) {
+      if (Math.random() < Math.max(expansionChance, this.minProbability)) {
         const {cell: current, index} = cellsToProcess[i];
         processedIndices.push(index);
         
@@ -674,6 +683,13 @@ const MazeTraverser = forwardRef<MazeTraverserRef, MazeTraverserProps>(({
   const animationFrameRef = useRef<number>(0);
   const lastPathCreationRef = useRef(0);
   
+  // Default pathfinding config - can be overridden by settings
+  const [pathfindingConfig] = useState({
+    baseProbability: 0.25,  // Matching the settings.json value
+    minProbability: 0.01,   // Matching the settings.json value
+    priorityDecayFactor: 0.3
+  });
+  
   useImperativeHandle(ref, () => ({
     reset: () => {
       pathsRef.current = [];
@@ -705,7 +721,7 @@ const MazeTraverser = forwardRef<MazeTraverserRef, MazeTraverserProps>(({
         distance = Math.abs(startCell.row - endCell.row) + Math.abs(startCell.col - endCell.col);
       }
       
-      const newPath = new PathfindingProcess(startCell, endCell, timestamp);
+      const newPath = new PathfindingProcess(startCell, endCell, timestamp, pathfindingConfig);
       pathsRef.current.push(newPath);
     };
     
@@ -809,7 +825,7 @@ const MazeTraverser = forwardRef<MazeTraverserRef, MazeTraverserProps>(({
       }
       window.removeEventListener("resize", handleResize);
     };
-  }, [grid, cellSize, maxConcurrentPaths, enabled]);
+  }, [grid, cellSize, maxConcurrentPaths, enabled, pathfindingConfig]);
   
   return (
     <canvas 

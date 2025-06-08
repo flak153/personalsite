@@ -24,6 +24,12 @@
       "enabled": true,
       "homePageOnly": false,
       "description": "Circuit board pattern animation"
+    },
+    "mazePathfinding": {
+      "baseProbability": 0.25,
+      "minProbability": 0.01,
+      "priorityDecayFactor": 0.3,
+      "description": "Controls maze traversal exploration behavior. baseProbability is the chance of exploring the best path, minProbability is the minimum chance for any path, priorityDecayFactor controls how quickly probability decreases for lower priority paths."
     }
   },
   "theme": {
