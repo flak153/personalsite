@@ -14,6 +14,7 @@
     "@digitalcredentials/ed25519-signature-2020": "^7.0.0",
     "@digitalcredentials/jsonld-signatures": "^12.0.1",
     "@digitalcredentials/vc": "^10.0.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/three": "^0.174.0",
     "did-resolver": "^4.1.0",
     "dids": "^5.0.3",

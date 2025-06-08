@@ -12,6 +12,7 @@ import IrisClassificationDemo from './animations/IrisClassificationDemo';
 import ModelComparisonDemo from './animations/ModelComparisonDemo';
 import PGPTool from './PGPTool'; // Import PGPTool
 import DidVcExplorer from './DidVcExplorer'; // Import DidVcExplorer
+import AsteroidsGame from './AsteroidsGameNew'; // Import AsteroidsGame
 import DidVcExplorerEnhanced from './DidVcExplorerEnhanced'; // Import DidVcExplorerEnhanced
 import DidVcExplorerMultiMethod from './DidVcExplorerMultiMethod'; // Import DidVcExplorerMultiMethod
 import DidVcExplorerEnhancedV2 from './DidVcExplorerEnhancedV2'; // Import DidVcExplorerEnhancedV2
@@ -195,6 +196,7 @@ export const components = {
   DidVcExplorerEnhanced, // Add DidVcExplorerEnhanced to components
   DidVcExplorerMultiMethod, // Add DidVcExplorerMultiMethod to components
   DidVcExplorerEnhancedV2, // Add DidVcExplorerEnhancedV2 to components
+  AsteroidsGame, // Add AsteroidsGame to components
   ResourceLegend,
   ResourceTypeIcon,
   

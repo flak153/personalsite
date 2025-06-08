@@ -1,0 +1,48 @@
+---
+title: "AI Asteroids: Self-Learning Game"
+description: "A neural network learns to play Asteroids using TensorFlow.js"
+tech: ["React", "TypeScript", "TensorFlow.js", "Canvas API"]
+date: "2025-01-06"
+featured: true
+---
+
+import AsteroidsGame from "@/components/AsteroidsGameNew";
+
+# AI Asteroids: Self-Learning Game
+
+Watch as a neural network learns to play the classic Asteroids game in real-time using TensorFlow.js.
+
+<AsteroidsGame />
+
+## How It Works
+
+This implementation uses a neural network that learns through reinforcement learning:
+
+1. **Neural Network Architecture**: The AI uses a simple feedforward neural network with:
+   - Input layer: Game state (ship position, asteroid positions, velocities)
+   - Hidden layers: Two dense layers with ReLU activation
+   - Output layer: Actions (thrust, rotate left, rotate right, shoot)
+
+2. **Reinforcement Learning**: The AI learns by:
+   - Receiving rewards for destroying asteroids and surviving
+   - Receiving penalties for collisions
+   - Using experience replay to improve over time
+
+3. **Training Process**: 
+   - The network starts with random actions
+   - Gradually learns patterns and strategies
+   - Improves performance through multiple generations
+
+## Features
+
+- **Real-time Learning**: Watch the AI improve as it plays
+- **Manual Control**: Switch between AI and manual control
+- **Training Visualization**: See the neural network's decision-making process
+- **Performance Metrics**: Track score, survival time, and learning progress
+
+## Technologies Used
+
+- **TensorFlow.js**: For neural network implementation
+- **React**: For UI and game state management
+- **Canvas API**: For rendering the game
+- **TypeScript**: For type-safe development
