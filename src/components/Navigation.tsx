@@ -327,11 +327,11 @@ export default function Navigation() {
         {renderFullBar()}
       </motion.nav>
 
-      {/* Floating Pill Navigation */}
+      {/* Desktop Floating Pill Navigation */}
       <AnimatePresence>
         {showFloatingPill && (
           <motion.nav
-            className="fixed top-1/2 -translate-y-1/2 right-8 z-50 flex flex-col gap-3"
+            className="fixed top-1/2 -translate-y-1/2 right-8 z-50 hidden md:flex flex-col gap-3"
             initial={{ opacity: 0, x: 100 }}
             animate={{ 
               opacity: 1, 
@@ -421,6 +421,93 @@ export default function Navigation() {
                         )}
                       </Link>
                     </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Navigation */}
+      <AnimatePresence>
+        {showFloatingPill && (
+          <motion.nav
+            className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{
+              type: "spring",
+              stiffness: 200,
+              damping: 25,
+            }}
+          >
+            <div className="backdrop-blur-lg bg-black/30 border-t border-white/10"
+                 style={{ 
+                   boxShadow: "0 -4px 30px rgba(200, 177, 245, 0.15)",
+                   background: "linear-gradient(to top, rgba(10, 36, 99, 0.3), rgba(0, 0, 0, 0.2))"
+                 }}>
+              <div className="flex justify-around items-center px-4 py-2">
+                {navItems.map((item) => {
+                  const current = isCurrentPage(item.href);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="relative flex flex-col items-center justify-center p-2 min-w-[64px]"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        createParticles(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                      }}
+                    >
+                      <motion.div
+                        className="relative"
+                        whileTap={{ scale: 0.9 }}
+                        animate={{
+                          y: current ? -2 : 0,
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <span className={`block transition-colors ${current ? 'text-lavender-bright' : 'text-white/70'}`}>
+                          {item.icon}
+                        </span>
+                        
+                        {/* Active glow */}
+                        {current && (
+                          <motion.div
+                            className="absolute inset-0 -z-10"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            <div className="absolute inset-0 bg-lavender-bright/30 blur-xl rounded-full" />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                      
+                      <motion.span 
+                        className={`text-xs mt-1 transition-all ${current ? 'text-lavender-bright font-medium' : 'text-white/60'}`}
+                        animate={{
+                          opacity: current ? 1 : 0.8,
+                          scale: current ? 1 : 0.95,
+                        }}
+                      >
+                        {item.name}
+                      </motion.span>
+                      
+                      {/* Active indicator dot */}
+                      {current && (
+                        <motion.div
+                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-lavender-bright rounded-full"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 0.2 }}
+                          style={{ 
+                            boxShadow: "0 0 6px rgba(200, 177, 245, 0.8)" 
+                          }}
+                        />
+                      )}
+                    </Link>
                   );
                 })}
               </div>

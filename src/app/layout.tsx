@@ -92,7 +92,7 @@ export default function RootLayout({
         <Navigation />
         <PrismLoader />
         <ScrollToTop />
-        <main id="main-content" className="pt-20">
+        <main id="main-content" className="pt-20 pb-20 md:pb-0">
           {children}
         </main>
       </body>
