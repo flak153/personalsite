@@ -6,9 +6,9 @@ export default function Blog() {
   const posts = getBlogPosts();
   
   return (
-    <div className="pt-20 p-8 md:p-16 min-h-screen">
+    <div className="pt-20 md:pt-20 p-8 md:p-16 min-h-screen">
       <BlogTimeline />
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto pt-16 md:pt-0">
         <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white font-[family-name:var(--font-geist-sans)] drop-shadow-[0_0_8px_rgba(0,0,0,0.6)]">
           Blog
         </h1>

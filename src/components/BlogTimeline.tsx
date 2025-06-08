@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function BlogTimeline() {
   const [yearData, setYearData] = useState<{ year: number; count: number }[]>([]);
   const [activeYear, setActiveYear] = useState<number | null>(null);
+  const [navbarHidden, setNavbarHidden] = useState(false);
 
   useEffect(() => {
     const updateTimeline = () => {
@@ -49,6 +50,11 @@ export default function BlogTimeline() {
 
   useEffect(() => {
     const handleScroll = () => {
+      // Check if navbar is hidden (same logic as Navigation component)
+      const scrollY = window.scrollY;
+      setNavbarHidden(scrollY > 200);
+      
+      // Original timeline logic
       const postElements = document.querySelectorAll(".lg\\:col-span-3 .border.border-white\\/40");
       const viewportHeight = window.innerHeight;
       const viewportCenter = viewportHeight / 2;
@@ -90,13 +96,57 @@ export default function BlogTimeline() {
   if (yearData.length === 0) return null;
 
   return (
-    <div className="fixed left-8 top-1/2 -translate-y-1/2 z-10">
-      <div className="relative">
-        {/* Year nodes */}
+    <>
+      {/* Mobile: Horizontal timeline at top */}
+      <div className={`fixed left-0 right-0 z-10 md:hidden bg-black/20 backdrop-blur-sm border-b border-white/10 transition-all duration-300 ${
+        navbarHidden ? "top-0" : "top-20"
+      }`}>
+        <div className="overflow-x-auto">
+          <div className="flex gap-4 px-4 py-3">
+            {yearData.map(({ year, count }) => (
+              <button
+                key={year}
+                onClick={() => {
+                  // Find all posts and locate the first one from this year
+                  const postElements = document.querySelectorAll(".lg\\:col-span-3 .border.border-white\\/40");
+                  
+                  for (const element of postElements) {
+                    const dateElement = element.querySelector(".text-white\\/90");
+                    if (dateElement) {
+                      const dateText = dateElement.textContent?.trim();
+                      if (dateText) {
+                        const postYear = new Date(dateText).getFullYear();
+                        if (postYear === year) {
+                          // Scroll to this post
+                          element.scrollIntoView({ behavior: "smooth", block: "center" });
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full transition-all whitespace-nowrap ${
+                  activeYear === year 
+                    ? "bg-white/20 border border-white/80 text-white" 
+                    : "bg-transparent border border-white/40 text-white/60 hover:border-yellow-300 hover:bg-yellow-400/20"
+                }`}
+              >
+                <span className="text-sm font-medium">{year}</span>
+                <span className="text-xs">({count})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: Vertical timeline on left */}
+      <div className="fixed left-8 top-1/2 -translate-y-1/2 z-10 hidden md:block">
         <div className="relative">
-          {yearData.map(({ year, count }, index) => (
-            <div key={year} className="relative">
-              <div className="relative flex items-center gap-3 group mb-6">
+          {/* Year nodes */}
+          <div className="relative">
+            {yearData.map(({ year, count }, index) => (
+              <div key={year} className="relative">
+                <div className="relative flex items-center gap-3 group mb-6">
                 {/* Circle node */}
                 <button
                   onClick={() => {
@@ -157,5 +207,6 @@ export default function BlogTimeline() {
         </div>
       </div>
     </div>
+    </>
   );
 }
