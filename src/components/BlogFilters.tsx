@@ -1,24 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { BlogPost } from "@/lib/blog";
+import type Fuse from "fuse.js";
 
 interface BlogFiltersProps {
   posts: BlogPost[];
 }
 
 export default function BlogFilters({ posts }: BlogFiltersProps) {
+  const [hasMounted, setHasMounted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortBy, setSortBy] = useState<"date" | "title">("date");
-  
+  const [suggestions, setSuggestions] = useState<BlogPost[]>([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const fuseRef = useRef<Fuse<BlogPost> | null>(null);
+  const fuseJsRef = useRef<typeof Fuse | null>(null);
+
+  useEffect(() => {
+    setHasMounted(true);
+    const loadFuse = async () => {
+      const Fuse = (await import("fuse.js")).default;
+      fuseJsRef.current = Fuse;
+      fuseRef.current = new Fuse(posts, {
+        keys: ["title", "excerpt", "tags"],
+        includeScore: true,
+        threshold: 0.4,
+      });
+    };
+    loadFuse();
+  }, [posts]);
+
   const categories = useMemo(() => {
     const cats = new Set(posts.map(post => post.category));
-    return ["all", ...Array.from(cats)].filter(cat => cat); // Filter out empty categories
+    return ["all", ...Array.from(cats)].filter(cat => cat);
   }, [posts]);
-  
+
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
     posts.forEach(post => {
@@ -26,42 +47,45 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
     });
     return Array.from(tagSet).sort();
   }, [posts]);
-  
+
   const filteredPosts = useMemo(() => {
     let filtered = posts;
-    
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(post => post.category === selectedCategory);
+
+    if (searchTerm && fuseRef.current) {
+      const results = fuseRef.current.search(searchTerm);
+      filtered = results.map(result => result.item);
+    } else {
+      // Apply category and tag filters only when not searching
+      if (selectedCategory !== "all") {
+        filtered = filtered.filter(post => post.category === selectedCategory);
+      }
+      if (selectedTags.length > 0) {
+        filtered = filtered.filter(post =>
+          selectedTags.some(tag => post.tags.includes(tag))
+        );
+      }
     }
-    
-    // Filter by tags (posts must have at least one selected tag)
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(post => 
-        selectedTags.some(tag => post.tags.includes(tag))
-      );
-    }
-    
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(post => 
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
+
     // Sort posts
-    filtered = [...filtered].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (sortBy === "date") {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
-      } else {
-        return a.title.localeCompare(b.title);
       }
+      return a.title.localeCompare(b.title);
     });
-    
-    return filtered;
   }, [posts, selectedCategory, selectedTags, searchTerm, sortBy]);
-  
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    if (term.length > 1 && fuseRef.current) {
+      const results = fuseRef.current.search(term).slice(0, 5);
+      setSuggestions(results.map(result => result.item));
+    } else {
+      setSuggestions([]);
+    }
+  };
+
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
       prev.includes(tag) 
@@ -70,6 +94,10 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
     );
   };
   
+  if (!hasMounted) {
+    return null;
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <div className="lg:col-span-3 space-y-8">
@@ -117,7 +145,7 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
             <h3 className="text-xl font-semibold mb-4 text-white">Filters</h3>
             
             <div className="space-y-4">
-              <div>
+              <div className="relative">
                 <label htmlFor="search" className="block text-sm font-medium text-white/80 mb-2">
                   Search
                 </label>
@@ -125,10 +153,26 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
                   type="text"
                   id="search"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 100)}
                   placeholder="Search posts..."
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition-colors"
+                  autoComplete="off"
                 />
+                {isSearchFocused && suggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-black/80 backdrop-blur-md border border-white/20 rounded-md shadow-lg">
+                    <ul>
+                      {suggestions.map(post => (
+                        <li key={post.slug}>
+                          <Link href={`/blog/${post.slug}`} className="block px-4 py-2 text-white/80 hover:bg-white/10">
+                            {post.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               
               <div>

@@ -26,10 +26,6 @@
     - **Concept:** An interactive tool that shows how clustering algorithms (like K-Means or DBSCAN) group data points. Users could upload their own data or use sample datasets to see how the algorithm discovers patterns without any labels.
     - **Tech:** D3.js or a similar library for visualization.
 
-- [ ] **Asteroids Game AI:**
-    - **Concept:** Train a neural network to play the classic Asteroids game. The AI would learn to shoot asteroids and avoid collisions. This is another example of reinforcement learning.
-    - **Tech:** TensorFlow.js or a similar library for the neural network, Canvas for the game itself.
-
 # Blog Post Ideas - Statistics Deep Dives
 
 - [ ] **"The Statistical Paradoxes Every Engineer Should Know"**
@@ -158,23 +154,17 @@
 - [ ] **Hero Section Improvements:**
 
 - [ ] **Content Presentation:**
-    - [ ] Add reading progress indicators for blog posts
     - [ ] Implement dark/light mode toggle (CSS variables already set up)
 - [ ] **Interactive Elements:**
     - [ ] Add "copy to clipboard" feature for code snippets in blog posts
     - [ ] Implement keyboard shortcuts for navigation (J/K for next/prev blog post)
-    - [ ] Add hover preview cards for blog posts and projects
 
 ## 🚀 Performance & Technical
 
-- [ ] **Search Functionality:**
-    - [ ] Add global search with fuzzy search for blog posts and projects
-    - [ ] Implement search suggestions/autocomplete
 - [ ] **Content Features:**
     - [ ] Add RSS feed for blog
     - [ ] Implement newsletter subscription system
     - [ ] Add "Related Posts" section at bottom of blog posts
-    - [ ] Create sitemap for better SEO
 
 - [ ] **Analytics & Engagement:**
     - [ ] Add view counts (reading time already exists)
