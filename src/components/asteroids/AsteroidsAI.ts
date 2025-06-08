@@ -138,7 +138,7 @@ export class AsteroidsAI {
   }
 
   async getAction(state: GameState, isTraining: boolean, episodeReward: number): Promise<boolean[]> {
-    if (!this.model || this.model.isDisposed || this.isTraining) {
+    if (!this.model || this.isTraining) {
       return [false, false, false, false];
     }
     
@@ -170,7 +170,7 @@ export class AsteroidsAI {
 
 
   async getActionWithActivations(state: GameState, isTraining: boolean, episodeReward: number): Promise<{ actions: boolean[]; activations: NetworkActivations }> {
-    if (!this.model || this.model.isDisposed || this.isTraining) {
+    if (!this.model || this.isTraining) {
       return {
         actions: [false, false, false, false],
         activations: {
