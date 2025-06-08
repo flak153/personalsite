@@ -350,7 +350,8 @@ const MazeBuilder = forwardRef<MazeBuilderRef, MazeBuilderProps>(({ cellSize, on
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         setCanvasSize();
-        initializeMaze();
+        // Don't reinitialize the maze on resize - just update canvas size
+        // This prevents the maze from rebuilding on mobile viewport changes
       }, 200);
     };
     window.addEventListener("resize", handleResize);
