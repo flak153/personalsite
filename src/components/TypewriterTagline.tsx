@@ -75,15 +75,15 @@ export default function TypewriterTagline() {
   }, [currentTaglineIndex, taglines, typingSpeed, deletionSpeed, pauseAfterTyping]);
 
   return (
-    <div className="relative h-[36px] md:h-[40px] mb-8 overflow-hidden">
+    <div className="relative min-h-[36px] md:min-h-[40px] mb-8">
       <p 
-        className="text-xl md:text-2xl text-white font-[family-name:var(--font-geist-mono)]"
+        className="text-xl md:text-2xl text-white font-[family-name:var(--font-geist-mono)] leading-relaxed"
         aria-live="polite"
         aria-label={`Current role: ${taglines[currentTaglineIndex]}`}
       >
-        <span className="relative">
+        <span className="relative inline-block max-w-[90vw] md:max-w-none">
           {/* Main text */}
-          <span className="relative">
+          <span className="relative break-words">
             {displayText}
             {/* Cursor */}
             <span 
