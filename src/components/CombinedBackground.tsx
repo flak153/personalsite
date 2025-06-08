@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import settings from "../../settings.json";
+import BackgroundToggle from "./BackgroundToggle";
 
 // Dynamically import components to reduce initial load time
 const CircuitBoardBackground = dynamic(() => import("./CircuitBoardBackground"), { 
@@ -18,6 +19,7 @@ const BackgroundRain = dynamic(() => import("./BackgroundRain"), {
 
 export default function CombinedBackground() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [animationEnabled, setAnimationEnabled] = useState(true);
   const pathname = usePathname();
   
   // Detect if we're on a route that needs intensive background
@@ -74,13 +76,17 @@ export default function CombinedBackground() {
         </div>
       )}
       
-      {/* Circuit board animation - controlled by settings */}
+      {/* Circuit board animation - controlled by settings and toggle */}
       {settings.animations.circuitBoard.enabled && 
+       animationEnabled &&
        (!settings.animations.circuitBoard.homePageOnly || isHomePage) && (
         <div className="absolute inset-0 z-10 pointer-events-none opacity-40">
           <CircuitBoardBackground />
         </div>
       )}
+      
+      {/* Background toggle control */}
+      <BackgroundToggle onToggle={setAnimationEnabled} />
     </div>
   );
 }
