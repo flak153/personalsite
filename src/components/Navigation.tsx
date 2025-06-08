@@ -293,14 +293,32 @@ export default function Navigation() {
 
       {/* Mobile menu button */}
       <motion.button
-        className="md:hidden text-white p-2"
+        className="md:hidden relative p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all"
         onClick={() => setIsOpen(!isOpen)}
         whileTap={{ scale: 0.95 }}
+        style={{
+          boxShadow: isOpen ? "0 0 20px rgba(200, 177, 245, 0.4)" : "none"
+        }}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-            d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"} />
-        </svg>
+        <motion.div
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+              d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"} />
+          </svg>
+        </motion.div>
+        {isOpen && (
+          <motion.div
+            className="absolute inset-0 rounded-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-lavender-bright/20 rounded-lg animate-pulse" />
+          </motion.div>
+        )}
       </motion.button>
     </div>
   );
@@ -431,7 +449,7 @@ export default function Navigation() {
 
       {/* Mobile Bottom Navigation */}
       <AnimatePresence>
-        {showFloatingPill && (
+        {showFloatingPill && !isOpen && (
           <motion.nav
             className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
             initial={{ opacity: 0, y: 100 }}
@@ -520,50 +538,140 @@ export default function Navigation() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-40 md:hidden"
+            className="fixed inset-0 z-[60] md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="absolute inset-0 bg-black/50"
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             />
             <motion.div
-              className="absolute right-0 top-0 h-full w-64 bg-black/90 backdrop-blur-xl p-8"
+              className="absolute right-0 top-0 h-full w-72 backdrop-blur-xl p-8 border-l border-white/10"
+              style={{
+                background: "linear-gradient(135deg, rgba(10, 36, 99, 0.95), rgba(154, 3, 30, 0.95))",
+                boxShadow: "-10px 0 40px rgba(200, 177, 245, 0.2)",
+              }}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 20 }}
             >
-              <div className="flex flex-col gap-6">
-                {navItems.map((item) => {
+              {/* Close button */}
+              <motion.button
+                className="absolute top-6 right-6 text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all"
+                onClick={() => setIsOpen(false)}
+                whileTap={{ scale: 0.95 }}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </motion.button>
+
+              <div className="flex flex-col gap-8 mt-16">
+                <div className="text-center mb-4">
+                  <motion.h2 
+                    className="text-3xl font-bold text-white"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    style={{
+                      textShadow: "0 0 20px rgba(200, 177, 245, 0.4)"
+                    }}
+                  >
+                    Menu
+                  </motion.h2>
+                  <motion.div 
+                    className="h-1 w-20 bg-lavender-bright mx-auto mt-2 rounded-full"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      boxShadow: "0 0 10px rgba(200, 177, 245, 0.6)"
+                    }}
+                  />
+                </div>
+
+                {navItems.map((item, index) => {
                   const current = isCurrentPage(item.href);
                   return (
-                    <Link
+                    <motion.div
                       key={item.name}
-                      href={item.href}
-                      className={`text-white font-medium text-lg flex items-center gap-3 ${current ? 'text-lavender-bright' : ''}`}
-                      onClick={() => setIsOpen(false)}
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + index * 0.05 }}
                     >
-                      {item.icon} {item.name}
-                    </Link>
+                      <Link
+                        href={item.href}
+                        className="group relative flex items-center gap-4 px-4 py-3 rounded-lg transition-all"
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          createParticles(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                          setIsOpen(false);
+                        }}
+                      >
+                        <motion.div
+                          className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          whileHover={{ scale: 1.02 }}
+                        />
+                        
+                        <span className={`relative z-10 ${current ? 'text-lavender-bright' : 'text-white/90'} transition-colors group-hover:text-white`}>
+                          {item.icon}
+                        </span>
+                        
+                        <span className={`relative z-10 text-lg font-medium ${current ? 'text-lavender-bright' : 'text-white/90'} transition-colors group-hover:text-white`}>
+                          {item.name}
+                        </span>
+                        
+                        {current && (
+                          <motion.div
+                            className="absolute right-4 w-2 h-2 bg-lavender-bright rounded-full"
+                            animate={{
+                              scale: [1, 1.2, 1],
+                              opacity: [0.8, 1, 0.8],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                            style={{
+                              boxShadow: "0 0 8px rgba(200, 177, 245, 0.8)"
+                            }}
+                          />
+                        )}
+                      </Link>
+                    </motion.div>
                   );
                 })}
                 
-                <div className="flex gap-4 pt-6 border-t border-white/20">
-                  {socialLinks.map((link) => (
-                    <a
+                <motion.div 
+                  className="flex gap-4 pt-8 mt-auto border-t border-white/20 justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {socialLinks.map((link, index) => (
+                    <motion.a
                       key={link.name}
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white hover:text-lavender-bright transition-colors"
+                      className="text-white/80 hover:text-lavender-bright transition-all p-3 rounded-lg hover:bg-white/10"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5 + index * 0.05 }}
                     >
                       {link.icon}
-                    </a>
+                    </motion.a>
                   ))}
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </motion.div>
