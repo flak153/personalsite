@@ -271,7 +271,7 @@ export default function Navigation() {
           );
         })}
 
-        <div className="flex gap-4 ml-4">
+        <div className="flex gap-4 ml-4" role="list" aria-label="Social media links">
           {socialLinks.map((link, index) => (
             <motion.a
               key={link.name}
@@ -284,6 +284,7 @@ export default function Navigation() {
               transition={{ delay: 0.3 + index * 0.05 }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
+              role="listitem"
             >
               {link.icon}
             </motion.a>
@@ -293,6 +294,7 @@ export default function Navigation() {
 
       {/* Mobile menu button */}
       <motion.button
+        aria-label="Open menu"
         className="md:hidden relative p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all"
         onClick={() => setIsOpen(!isOpen)}
         whileTap={{ scale: 0.95 }}
@@ -378,6 +380,7 @@ export default function Navigation() {
                     >
                       <Link
                         href={item.href}
+                        aria-label={item.name}
                         className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 transition-all"
                         onMouseEnter={() => setHoveredItem(item.name)}
                         onMouseLeave={() => setHoveredItem(null)}
@@ -473,6 +476,7 @@ export default function Navigation() {
                     <Link
                       key={item.name}
                       href={item.href}
+                      aria-label={item.name}
                       className="relative flex flex-col items-center justify-center p-2 min-w-[64px]"
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
@@ -563,6 +567,7 @@ export default function Navigation() {
             >
               {/* Close button */}
               <motion.button
+                aria-label="Close menu"
                 className="absolute top-6 right-6 text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all"
                 onClick={() => setIsOpen(false)}
                 whileTap={{ scale: 0.95 }}

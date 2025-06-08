@@ -38,6 +38,7 @@ export default function BackgroundToggle({ onToggle }: BackgroundToggleProps) {
   return (
     <div className="fixed bottom-6 left-6 z-50">
       <motion.button
+        aria-label={`Toggle background animation (currently ${isEnabled ? 'on' : 'off'})`}
         onClick={handleToggle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
