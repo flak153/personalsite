@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "prebuild": "npm run lint:fix",
-    "postbuild": "node scripts/generate-sitemap.mjs"
+    "prebuild": "npm run lint:fix"
   },
   "dependencies": {
     "@digitalcredentials/ed25519-signature-2020": "^7.0.0",
