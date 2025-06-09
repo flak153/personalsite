@@ -16,6 +16,9 @@ import AsteroidsGame from './AsteroidsGameNew'; // Import AsteroidsGame
 import DidVcExplorerEnhanced from './DidVcExplorerEnhanced'; // Import DidVcExplorerEnhanced
 import DidVcExplorerMultiMethod from './DidVcExplorerMultiMethod'; // Import DidVcExplorerMultiMethod
 import DidVcExplorerEnhancedV2 from './DidVcExplorerEnhancedV2'; // Import DidVcExplorerEnhancedV2
+import { ShrinkingVisualization } from './animations/ShrinkingVisualization';
+import { TestSpaceExploration } from './animations/TestSpaceExploration';
+import { PropertyVsExampleComparison } from './animations/PropertyVsExampleComparison';
 import dynamic from 'next/dynamic';
 import { bouncingBallAnimation } from "@/app/blog/canvas-demos/bouncingBall";
 import { physicsDemoAnimation } from "@/app/blog/canvas-demos/physicsDemo";
@@ -209,6 +212,9 @@ export const components = {
   FatTailedDistributionDemo,
   IrisClassificationDemo,
   ModelComparisonDemo,
+  ShrinkingVisualization,
+  TestSpaceExploration,
+  PropertyVsExampleComparison,
   
   MemoryManagementVisualizedAsApartmentBuilding: () => <ApartmentBuildingMemoryAnalogy />,
   CommonMemoryManagementErrorsAndTheirConsequences: () => <PlaceholderAnimation title="Common Memory Management Errors" />,
