@@ -28,7 +28,7 @@ export default function ProjectsSection({ featuredProjects }: ProjectsSectionPro
         </div>
         <div className="grid gap-6 md:grid-cols-3" role="list" aria-label="Featured projects">
           {featuredProjects.map((project) => (
-            <article key={project.slug} className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm h-full flex flex-col" role="listitem">
+            <article key={project.slug} className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm h-full flex flex-col hover:scale-105" role="listitem">
               {project.imageUrl && (
                 <Image 
                   src={project.imageUrl} 
@@ -36,7 +36,6 @@ export default function ProjectsSection({ featuredProjects }: ProjectsSectionPro
                   width={400} 
                   height={160} 
                   className="rounded-md mb-4 h-40 w-full object-cover" 
-                  unoptimized 
                 />
               )}
               <h3 className="text-xl font-bold mb-2 text-white hover:text-yellow-200 transition-colors">

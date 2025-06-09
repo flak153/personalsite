@@ -30,9 +30,10 @@ export default function BlogSection({ featuredPost, recentPosts, allPosts }: Blo
         <div className="space-y-6">
           {/* Featured post */}
           {featuredPost && (
-            <article className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/20 backdrop-blur-sm">
+            <article className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/20 backdrop-blur-sm hover:scale-105">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center space-x-2">
+                  <span className="bg-white/20 px-3 py-1 rounded-full text-xs text-white">Featured</span>
                   <time className="text-white/90 font-medium" dateTime={featuredPost.date}>{featuredPost.date}</time>
                   {featuredPost.readTime && <span className="text-white/50" aria-hidden="true">•</span>}
                   {featuredPost.readTime && <span className="text-white/70 text-sm">{featuredPost.readTime}</span>}
@@ -65,7 +66,7 @@ export default function BlogSection({ featuredPost, recentPosts, allPosts }: Blo
           {recentPosts.length > 0 && (
             <div className="grid gap-6 md:grid-cols-3" role="list" aria-label="Recent blog posts">
               {recentPosts.map((post) => (
-                <article key={post.slug} className="border border-white/40 rounded-lg p-4 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm" role="listitem">
+                <article key={post.slug} className="border border-white/40 rounded-lg p-4 hover:border-white hover:shadow-lg transition-all bg-black/10 backdrop-blur-sm hover:scale-105" role="listitem">
                   <div className="flex justify-between items-center mb-2">
                     <time className="text-white/70 text-sm" dateTime={post.date}>{post.date}</time>
                     {post.category && <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs text-white" role="img" aria-label={`Category: ${post.category}`}>{post.category}</span>}
