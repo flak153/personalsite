@@ -219,3 +219,22 @@
 - [ ] **Expandable/Collapsible Sections:** A component that allows you to hide long code blocks or detailed explanations behind a "Show/Hide" button.
 - [ ] **Info Cards for Key Terms:** A component that displays a term and its definition in a visually distinct card, perhaps with a hover effect or a link to a glossary.
 - [ ] **Comparison Tables:** A stylized table component designed specifically for comparing features, pros and cons, or different technologies.
+
+# Holy Grail GC Blog Post - Visual TODOs (Prioritized)
+
+## High Priority
+- [ ] **Before/After C4 Latency Comparison Graph (Line 900)** - Shows dramatic pause time reduction from seconds to sub-millisecond
+- [ ] **Heap Scan and Pointer Healing Diagram (Line 698)** - Core C4 innovation visualization
+- [ ] **Colored Pointers Conceptual Diagram (Line 991)** - Fundamental concept for modern GCs
+
+## Medium Priority  
+- [ ] **Tail Latencies Impact Graph (Line 409)** - Shows why C4 was needed (99.9th percentile spikes)
+- [ ] **Heap Cards and Dirty Card Marking (Line 524)** - Supporting mechanism visualization
+- [ ] **Regions with Remembered Sets (Line 526)** - Inter-region reference tracking
+
+## Lower Priority
+- [ ] **C4's Influence Across Languages (Line 996)** - Legacy visualization
+- [ ] **JIT Safepoint Pseudocode (Line 770)** - Technical implementation detail
+- [ ] **CPU/RAM/Memory Usage Diagram (Line 21)** - Basic concepts
+- [ ] **Memory Allocation/Deallocation Animation (Line 39)** - Foundational concept
+- [ ] **Manual vs Automatic Memory Management (Line 175)** - Comparison diagram

@@ -7,9 +7,10 @@ import type Fuse from "fuse.js";
 
 interface BlogFiltersProps {
   posts: BlogPost[];
+  onFilteredPostsChange?: (posts: BlogPost[]) => void;
 }
 
-export default function BlogFilters({ posts }: BlogFiltersProps) {
+export default function BlogFilters({ posts, onFilteredPostsChange }: BlogFiltersProps) {
   const [hasMounted, setHasMounted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -67,13 +68,22 @@ export default function BlogFilters({ posts }: BlogFiltersProps) {
     }
 
     // Sort posts
-    return [...filtered].sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
       if (sortBy === "date") {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       }
       return a.title.localeCompare(b.title);
     });
+    
+    return sorted;
   }, [posts, selectedCategory, selectedTags, searchTerm, sortBy]);
+
+  // Notify parent component when filtered posts change
+  useEffect(() => {
+    if (onFilteredPostsChange) {
+      onFilteredPostsChange(filteredPosts);
+    }
+  }, [filteredPosts, onFilteredPostsChange]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
