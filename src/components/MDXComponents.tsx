@@ -27,6 +27,7 @@ import { interactiveDrawingAnimation } from "@/app/blog/canvas-demos/interactive
 import { starfieldAnimation } from "@/app/blog/canvas-demos/starfield";
 import ResourceLegend from './ResourceLegend';
 import ResourceTypeIcon from './ResourceTypeIcon';
+import InteractiveDecisionTree from './InteractiveDecisionTree';
 
 // Dynamically import MermaidDiagram to avoid SSR issues
 const MermaidDiagram = dynamic(
@@ -202,6 +203,7 @@ export const components = {
   AsteroidsGame, // Add AsteroidsGame to components
   ResourceLegend,
   ResourceTypeIcon,
+  InteractiveDecisionTree,
   
   ApartmentBuildingMemoryAnalogy,
   PlaceholderAnimation,
