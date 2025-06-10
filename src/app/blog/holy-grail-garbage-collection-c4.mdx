@@ -42,7 +42,7 @@ While these operations sound simple, coordinating them correctly and efficiently
 When memory isn't managed correctly, a host of problems can arise, often subtle at first but potentially devastating in the long run:
 
 *   **Memory Leaks:** The program allocates memory but fails to deallocate it after it's no longer needed. Over time, available memory dwindles, leading to slowdowns and eventual crashes.
-    {/* CODE_EXAMPLE_IDEA: Simple C/C++ loop: `while(true) { malloc(1024); // no free }` to illustrate a basic memory leak. */}
+    {/* IMPLEMENTED: Simple C/C++ loop illustrating a basic memory leak */}
     <Mermaid code={`
     flowchart LR
         A["Start: 20% Used"] --> B["40% Used"]
@@ -56,9 +56,36 @@ When memory isn't managed correctly, a host of problems can arise, often subtle 
         style D fill:#FF6B6B,stroke:#DC143C
         style E fill:#FF0000,color:#FFFFFF,stroke:#8B0000
     `} />
+    ```c
+    // Memory Leak Example in C
+    #include <stdlib.h>
+    
+    void memory_leak_example() {
+        while (1) {
+            // Allocate 1KB of memory
+            void* leaked_memory = malloc(1024);
+            
+            // Memory is allocated but never freed
+            // Each iteration loses 1KB of memory
+            // Eventually the program will run out of memory
+        }
+    }
+    
+    // Another common leak pattern
+    void subtle_leak_example() {
+        for (int i = 0; i < 1000; i++) {
+            char* buffer = (char*)malloc(256);
+            // Do some work with buffer...
+            
+            // Oops! Forgot to free(buffer);
+            // This memory is now leaked
+        }
+        // After loop: 256KB of memory leaked!
+    }
+    ```
 
 *   **Dangling Pointers/References:** The program attempts to use memory that has already been deallocated. This can lead to data corruption, crashes, or security vulnerabilities as the program might be reading or writing to memory now used by another part of the system or even another program.
-    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); *ptr = 10; // undefined behavior` to show a dangling pointer. */}
+    {/* IMPLEMENTED: C/C++ dangling pointer example */}
     <Mermaid code={`
     flowchart LR
         A["Pointer → Memory"] --> B["Memory Freed 🗑️"]
@@ -70,9 +97,54 @@ When memory isn't managed correctly, a host of problems can arise, often subtle 
         style C fill:#FF6B6B,stroke:#DC143C
         style D fill:#FF0000,color:#FFFFFF,stroke:#8B0000
     `} />
+    ```c
+    // Dangling Pointer Example in C
+    #include <stdio.h>
+    #include <stdlib.h>
+    
+    void dangling_pointer_example() {
+        // Allocate memory for an integer
+        int* ptr = (int*)malloc(sizeof(int));
+        *ptr = 42;
+        printf("Value: %d\n", *ptr);  // Output: 42
+        
+        // Free the memory
+        free(ptr);
+        // ptr now points to deallocated memory (dangling pointer)
+        
+        // DANGER: Using the pointer after free
+        *ptr = 10;  // Undefined behavior!
+        printf("Value: %d\n", *ptr);  // May crash, corrupt data, or "work"
+        
+        // The memory might be:
+        // - Reused by another allocation
+        // - Filled with garbage values
+        // - Protected, causing a segmentation fault
+    }
+    
+    // Real-world scenario
+    struct Node {
+        int data;
+        struct Node* next;
+    };
+    
+    void use_after_free_bug() {
+        struct Node* head = (struct Node*)malloc(sizeof(struct Node));
+        head->data = 1;
+        head->next = NULL;
+        
+        struct Node* current = head;
+        free(head);
+        
+        // Bug: accessing freed memory
+        if (current->data == 1) {  // Undefined behavior!
+            printf("This might work... or crash\n");
+        }
+    }
+    ```
 
 *   **Double Frees:** The program attempts to deallocate the same block of memory multiple times. This can corrupt the memory manager's internal data structures, leading to unpredictable behavior or crashes.
-    {/* CODE_EXAMPLE_IDEA: C/C++ snippet: `int* ptr = malloc(sizeof(int)); free(ptr); free(ptr); // undefined behavior` to illustrate a double free. */}
+    {/* IMPLEMENTED: C/C++ double free example */}
     <Mermaid code={`
     flowchart LR
         A["Memory Block"] --> B["First Free ✅"]
@@ -84,6 +156,53 @@ When memory isn't managed correctly, a host of problems can arise, often subtle 
         style C fill:#FF6B6B,stroke:#DC143C
         style D fill:#FF0000,color:#FFFFFF,stroke:#8B0000
     `} />
+    ```c
+    // Double Free Example in C
+    #include <stdlib.h>
+    #include <stdio.h>
+    
+    void double_free_example() {
+        // Allocate memory
+        int* ptr = (int*)malloc(sizeof(int));
+        *ptr = 100;
+        
+        // First free - this is fine
+        free(ptr);
+        
+        // Second free - UNDEFINED BEHAVIOR!
+        free(ptr);  // Double free error
+        
+        // This corrupts the memory allocator's internal structures
+        // Can lead to crashes, security vulnerabilities, or silent corruption
+    }
+    
+    // Common scenario leading to double free
+    void conditional_double_free(int condition1, int condition2) {
+        char* buffer = (char*)malloc(1024);
+        
+        if (condition1) {
+            // Some processing...
+            free(buffer);
+        }
+        
+        // ... more code ...
+        
+        if (condition2) {
+            // Developer forgot buffer might already be freed
+            free(buffer);  // Double free if both conditions were true!
+        }
+    }
+    
+    // Better practice: Set pointer to NULL after free
+    void safe_free_pattern() {
+        int* ptr = (int*)malloc(sizeof(int));
+        
+        free(ptr);
+        ptr = NULL;  // Prevent use after free
+        
+        free(ptr);  // This is now safe (free(NULL) is a no-op)
+    }
+    ```
 
 *   **Fragmentation:** Over time, repeated allocation and deallocation can leave memory dotted with many small, unusable free blocks between allocated blocks, even if the total free memory is substantial. This makes it hard to allocate larger contiguous blocks.
     <Mermaid code={`
@@ -260,7 +379,7 @@ The fundamental thought process was: "If we can keep track of how many parts of 
 *   **The Problems Uncovered (Cons & Challenges):**
     *   **Overhead of Count Updates:** This turned out to be a significant performance bottleneck. *Every* operation that creates, copies, or destroys a reference (assignments, parameter passing, returning from functions, variables going out of scope) requires one or more atomic updates to reference counts. In programs with frequent pointer manipulations, this constant overhead can noticeably slow down the application. Making these updates thread-safe in concurrent environments adds further complexity and cost.
     *   **The Achilles' Heel - Circular References:** Simple reference counting cannot reclaim objects involved in a reference cycle. If Object A points to Object B, and Object B points back to Object A, their reference counts will each be at least 1 (due to the mutual reference). If all *external* references to this A-B pair are removed, they become unreachable garbage, but their counts remain positive, so they are never reclaimed. This leads to memory leaks, undermining one of the primary goals of automatic memory management.
-    {/* CODE_EXAMPLE_IDEA: A simple Python or Swift snippet showing how reference counts change with assignments and how a cycle is formed and not collected by basic RC. Python's `sys.getrefcount()` could be mentioned. */}
+    {/* IMPLEMENTED: Python example showing reference cycle formation and collection issue with basic RC */}
     *   **Space Overhead:** Storing a reference count for every single object in the system consumes extra memory. While usually small per object, this can add up in systems with many small objects.
     *   **Cascading Deallocations & Potential Pauses:** While reclamation is generally incremental, if freeing a single object (e.g., the head of a large data structure) causes a long chain of other objects to also have their counts drop to zero, this cascade of deallocations and destructor calls can still lead to a noticeable, albeit usually shorter, pause.
 
@@ -525,7 +644,7 @@ To efficiently manage the information from write barriers, GCs often use auxilia
 {/* VISUAL_IDEA: Diagram showing two heap regions (or generations). An object in Region A points to an object in Region B. The remembered set for Region B lists the pointer from Region A. */}
 
 By using these techniques, C4 can build an accurate graph of live objects without lengthy "stop-the-world" pauses, allowing application threads to continue making progress.
-{/* VISUAL_IDEA: Sequence diagram: App Thread running & modifying objects. GC Marking Thread concurrent. Illustrate Write Barrier: App modifies pointer -> Write Barrier logs change -> GC sees change. (This one is already present but good to keep in mind for consistency if other visuals are added) */}
+{/* IMPLEMENTED: Sequence diagram: App Thread running & modifying objects. GC Marking Thread concurrent. Illustrate Write Barrier: App modifies pointer -> Write Barrier logs change -> GC sees change. */}
 <Mermaid code={`
 sequenceDiagram
     participant AppThread as Application Thread
@@ -545,7 +664,7 @@ C4 achieves concurrent compaction using **read barriers** and **load reference b
 
 #### The Read Barrier: C4's Master Key
 A read barrier intercepts every object reference read, ensuring the application always sees the correct object version/location, even if it's moving.
-{/* VISUAL_IDEA: Sequence diagram: App Thread attempts read -> Read Barrier intercepts -> Checks forwarding -> Returns object from new/old location (healing pointer if moved). (Already present) */}
+{/* IMPLEMENTED: Sequence diagram: App Thread attempts read -> Read Barrier intercepts -> Checks forwarding -> Returns object from new/old location (healing pointer if moved). */}
 <Mermaid code={`
 sequenceDiagram
     participant AppThread as Application Thread
@@ -786,7 +905,7 @@ To achieve its goal of continuous concurrency and avoid disruptive stop-the-worl
     This dynamic adjustment and distribution of incremental work are key to maintaining a balance between application throughput and continuous GC progress, preventing the accumulation of large amounts of GC work that would necessitate a long pause.
 
 By meticulously combining these strategies—highly concurrent core algorithms protected by sophisticated barriers, and the decomposition of all GC work into fine-grained, cooperatively scheduled incremental units—C4 aims to keep GC-induced interruptions so brief and well-distributed that they become virtually imperceptible to even the most latency-sensitive applications, regardless of heap size.
-{/* VISUAL_IDEA: Sequence/Timing diagram: App Thread A runs -> Hits Safe Point & Yields -> GC Thread runs small Work Unit -> App Thread A resumes quickly. Show multiple app threads and GC threads working in an interleaved fashion. (Already present) */}
+{/* IMPLEMENTED: Sequence/Timing diagram: App Thread A runs -> Hits Safe Point & Yields -> GC Thread runs small Work Unit -> App Thread A resumes quickly. Show multiple app threads and GC threads working in an interleaved fashion. */}
 <Mermaid code={`
 sequenceDiagram
     participant AppA as App Thread A
@@ -900,7 +1019,7 @@ Essentially, any large-scale, latency-sensitive Java application that was previo
 {/* VISUAL_IDEA: A simple "Before C4 / After C4" comparison for a latency-sensitive app. Before: graph with spiky high latencies. After: graph with consistently low latencies. */}
 
 ## Section 5: C4's Legacy: Shaping Modern Garbage Collection
-{/* VISUAL_IDEA: Timeline/flowchart: Ref Counting -> Mark-Sweep -> Mark-Compact -> Generational -> CMS -> G1 -> C4 -> ZGC/Shenandoah, highlighting C4's key contributions (e.g., concurrent compaction, barrier mechanisms) and how they flow into ZGC/Shenandoah. (Already present) */}
+{/* IMPLEMENTED: Timeline/flowchart: Ref Counting -> Mark-Sweep -> Mark-Compact -> Generational -> CMS -> G1 -> C4 -> ZGC/Shenandoah, highlighting C4's key contributions (e.g., concurrent compaction, barrier mechanisms) and how they flow into ZGC/Shenandoah. */}
 <Mermaid code={`
 graph TD
     RC[Reference Counting] --> MS[Mark-Sweep]
