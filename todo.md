@@ -213,3 +213,9 @@
     - [ ] Remember visitor preferences (theme, reading position)
     - [ ] Add "surprise me" button showing random blog post
     - [ ] Create custom 404 page with personality
+
+# New Component Ideas
+- [ ] **Interactive Code Snippets:** A component that displays a code block with buttons to toggle between different versions (e.g., "Before" and "After" a refactoring, or "JavaScript" and "Python" examples).
+- [ ] **Expandable/Collapsible Sections:** A component that allows you to hide long code blocks or detailed explanations behind a "Show/Hide" button.
+- [ ] **Info Cards for Key Terms:** A component that displays a term and its definition in a visually distinct card, perhaps with a hover effect or a link to a glossary.
+- [ ] **Comparison Tables:** A stylized table component designed specifically for comparing features, pros and cons, or different technologies.

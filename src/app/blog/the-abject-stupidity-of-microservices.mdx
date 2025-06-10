@@ -15,6 +15,10 @@ I'm going to say what everyone is thinking but is too afraid to say: microservic
 
 Let's start with the monolith. The much-maligned, supposedly outdated monolith. What is a monolith? It's a single, unified codebase. It's a single deployment. It's a single point of failure, they say. But you know what else it is? It's simple. It's easy to understand. It's easy to test. It's easy to deploy.
 
+<Callout type="info">
+The monolith is not your enemy. It's a simple, effective architecture that's easy to work with.
+</Callout>
+
 ## The Microservice Mirage
 
 Now, let's look at the microservice mirage. What do you get? A dozen, a hundred, a thousand tiny services, each with its own codebase, its own deployment pipeline, its own database, its own everything. You've traded a single, simple system for a distributed system, and you've done it for what? So you can scale your "like" button independently of your "share" button? Give me a break.
@@ -29,11 +33,17 @@ The most common outcome of a premature leap to microservices is the "distributed
 
 You've taken all the disadvantages of a monolith (tight coupling, coordinated deployments) and all the disadvantages of a distributed system (network unreliability, latency, complex debugging) and combined them into one glorious, unmaintainable mess.
 
+<Callout type="danger">
+The "distributed monolith" is the worst of both worlds. You get all the complexity of a distributed system with all the tight coupling of a monolith, resulting in an unmaintainable mess.
+</Callout>
+
 ## An Engineering Problem to Organize Humans
 
 A primary driver for microservices adoption is often organizational, not technical. It's an attempt to apply Conway's Law in reverse: instead of the system architecture reflecting the communication structure of the organization, the organization is restructured in the hope that the architecture will follow. We create small, independent teams and then create small, "independent" services for them to work on.
 
+<Callout type="insight">
 The result? We're creating an engineering problem to solve a human problem. Instead of improving communication and collaboration, we're building technical walls between teams. We're trading a social problem for a much more expensive and complex technical one.
+</Callout>
 
 ## The Crushing Complexity Tax
 
@@ -46,7 +56,9 @@ The complexity tax of microservices is not a small line item; it's a mortgage on
 - **Configuration Management**: How do you manage configuration for all your services? You need a tool like Vault or Spring Cloud Config.
 - **Deployment Orchestration**: How do you deploy all these services? You need Kubernetes, and a team of specialists to manage it.
 
+<Callout type="warning">
 Each of these is a complex system in its own right. You're not just building your product anymore; you're building a company to build a platform to build your product. And for what? So you can say you're doing microservices? It's madness.
+</Callout>
 
 ## The Developer Experience Nightmare
 

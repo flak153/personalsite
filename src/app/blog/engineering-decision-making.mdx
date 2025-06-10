@@ -15,7 +15,9 @@ The goal of a senior engineer is not to find a mythical "perfect" solution, but 
 
 ## The Core Trade-off: Speed vs. Quality
 
+<Callout type="insight">
 The most common trade-off is speed versus quality, but this is often a false dichotomy. The real decision is about **short-term velocity vs. long-term velocity**.
+</Callout>
 
 **The Decision:** "Do we ship this feature with minimal tests and a hardcoded value to meet a critical deadline?"
 
@@ -38,10 +40,18 @@ Every major architectural choice is an exercise in managing trade-offs.
 *   **The Trade-off:** We are choosing between the simplicity of a single system and the organizational autonomy of independent services.
 *   **The Thought Process:** Are we a small team that needs to move quickly and cohesively? A monolith is likely the right choice. Are we a large organization with multiple teams that need to work in parallel without blocking each other? Microservices might be necessary, but we must also accept the immense operational complexity (networking, observability, data consistency) that comes with them.
 
+<Callout type="info">
+The core trade-off between monoliths and microservices is simplicity versus autonomy. A monolith is simpler to build, test, and deploy, while microservices offer greater team autonomy at the cost of operational complexity.
+</Callout>
+
 ### SQL vs. NoSQL: Consistency vs. Flexibility
 *   **The Decision:** Do we use a traditional relational database (like PostgreSQL) or a NoSQL database (like MongoDB)?
 *   **The Trade-off:** We are choosing between guaranteed data consistency and schema flexibility.
 *   **The Thought Process:** Is our data highly structured and relational, with a critical need for transactional integrity (e.g., a financial system)? SQL is the safer, more robust choice. Is our data unstructured or semi-structured, with a need for rapid iteration and a flexible schema (e.g., a user-generated content platform)? NoSQL might provide more initial velocity, but we must be prepared for the long-term challenge of managing inconsistent data.
+
+<Callout type="info">
+The choice between SQL and NoSQL boils down to a trade-off between data consistency and schema flexibility. SQL databases excel at enforcing structure and integrity, while NoSQL databases offer greater flexibility for unstructured or rapidly evolving data.
+</Callout>
 
 ### Immediacy vs. Extensibility: The Evolving API
 *   **The Decision:** When creating a new API endpoint, do we return the simplest possible object, or do we design a more complex, extensible structure from the start?
@@ -53,7 +63,15 @@ Every major architectural choice is an exercise in managing trade-offs.
 *   **The Trade-off:** We are choosing between the potential for innovation and higher productivity versus the stability and predictability of the known solution.
 *   **The Thought Process:** This isn't just a technical decision; it's a risk assessment. A senior engineer investigates: What is the library's maintenance history and community size? Is it backed by a reputable company or a single developer? How thorough is the documentation? What would be the cost of migrating away from this dependency if it's abandoned or a critical flaw is found? Adopting a new dependency is taking on a new long-term liability, and the benefits must clearly outweigh that risk.
 
+<Callout type="warning">
+Adopting a new dependency is not just a technical choice; it's a long-term commitment. You are taking on a new liability, and you must be prepared for the risks of abandonment, security vulnerabilities, and maintenance overhead.
+</Callout>
+
 ## A Framework for Deliberate Decision-Making
+
+<Callout type="insight">
+This framework is not about finding the "right" answer, but about understanding the questions you need to ask to make a well-informed decision.
+</Callout>
 
 The hallmark of a senior engineer is not knowing all the answers, but asking the right questions. Here is a framework for interrogating any significant engineering decision.
 
