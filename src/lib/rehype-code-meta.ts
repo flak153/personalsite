@@ -1,8 +1,16 @@
 import { visit } from 'unist-util-visit';
+import type { Node } from 'unist';
+
+interface ElementNode extends Node {
+  type: 'element';
+  tagName?: string;
+  children?: ElementNode[];
+  properties?: Record<string, string>;
+}
 
 export function rehypeCodeMeta() {
-  return (tree: any) => {
-    visit(tree, 'element', (node: any) => {
+  return (tree: Node) => {
+    visit(tree, 'element', (node: ElementNode) => {
       // Look for pre > code structure
       if (node.tagName === 'pre' && node.children?.[0]?.tagName === 'code') {
         const codeNode = node.children[0];

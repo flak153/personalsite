@@ -294,7 +294,7 @@ export const components = {
         codeElement = props.children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
       } else if (typeof props.children.type === 'function' && props.children.type.name === 'code') {
         codeElement = props.children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
-      } else if (props.children.props?.className?.includes('language-')) {
+      } else if ((props.children as React.ReactElement<{ className?: string }>).props?.className?.includes('language-')) {
         // Direct code element with language class
         codeElement = props.children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
       }
@@ -333,7 +333,7 @@ export const components = {
         const extractText = (node: React.ReactNode): string => {
           if (typeof node === 'string') return node;
           if (React.isValidElement(node)) {
-            return React.Children.toArray(node.props.children).map(extractText).join('');
+            return React.Children.toArray((node as React.ReactElement<{children?: React.ReactNode}>).props.children).map(extractText).join('');
           }
           if (Array.isArray(node)) {
             return node.map(extractText).join('');
@@ -348,7 +348,7 @@ export const components = {
         const extractText = (node: React.ReactNode): string => {
           if (typeof node === 'string') return node;
           if (React.isValidElement(node)) {
-            return React.Children.toArray(node.props.children).map(extractText).join('');
+            return React.Children.toArray((node as React.ReactElement<{children?: React.ReactNode}>).props.children).map(extractText).join('');
           }
           return '';
         };

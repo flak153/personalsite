@@ -62,7 +62,22 @@ export default function CodeBlock({
   // Copy code to clipboard
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(codeText);
+      let textToCopy = codeText;
+      
+      // For diff language, remove the +/- prefixes when copying
+      if (language === 'diff') {
+        textToCopy = codeLines
+          .map(line => {
+            // Remove leading + or - (but keep lines that start with ++ or -- as they're part of diff headers)
+            if (line.match(/^[+-](?![+-])/)) {
+              return line.substring(1);
+            }
+            return line;
+          })
+          .join('\n');
+      }
+      
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -103,7 +118,6 @@ export default function CodeBlock({
 
   // Split code into lines for processing
   const codeLines = codeText.split("\n");
-  const highlightedLines = highlightedHtml.split("\n");
   const shouldBeCollapsible = collapsible && codeLines.length > 20;
   
   // Render lines with highlighting

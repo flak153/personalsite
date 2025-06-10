@@ -1,8 +1,17 @@
 import { visit } from 'unist-util-visit';
+import type { Node } from 'unist';
+
+interface CodeNode extends Node {
+  type: 'code';
+  meta?: string;
+  data?: {
+    hProperties?: Record<string, string>;
+  };
+}
 
 export function remarkCodeMeta() {
-  return (tree: any) => {
-    visit(tree, 'code', (node: any) => {
+  return (tree: Node) => {
+    visit(tree, 'code', (node: CodeNode) => {
       if (!node.meta) return;
       
       // Initialize data and hProperties
