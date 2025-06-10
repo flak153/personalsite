@@ -843,7 +843,8 @@ Once objects within a collection set have been relocated and forwarding pointers
 *   **Idempotency and Convergence:** The reference updating process must be idempotent—applying an update multiple times should have the same effect as applying it once. This is crucial in a concurrent environment where different threads or GC phases might encounter the same stale pointer. The overall goal is convergence: eventually, all frequently accessed pointers are healed, and even infrequently accessed ones will be corrected when used.
 
 The ultimate aim is that, over time, all active references converge to point directly to the new (to-space) locations. This makes the forwarding pointers in the from-space regions gradually obsolete. Once a from-space region contains no more live objects (all have been successfully evacuated) and the GC determines that no more relevant pointers refer into it (or all such pointers are reliably handled by forwarding until they are healed), that from-space region can be fully reclaimed and made available for future allocations.
-{/* VISUAL_IDEA: High-level diagram: "Heap Scan -> Identify Stale Pointer (to From-Space) -> Consult Forwarding Pointer -> Update to New Location (To-Space)". Could show a heap region with pointers, some stale, some healed. */}
+
+<HeapScanPointerHealing />
 
 ### 3.4. Load Reference Barriers (LRB): Ensuring Fresh Pointers
 While read barriers handle the dereferencing of pointers (i.e., accessing the object's fields or array elements through a pointer), **Load Reference Barriers (LRBs)** address a subtly different but related issue: ensuring that when a pointer *itself* is loaded from heap memory into a local variable or CPU register, it is the most current (to-space) version if the object it refers to has been relocated.
@@ -1016,7 +1017,8 @@ The impact of C4 was most profound in domains where Java's productivity was desi
 *   **Online Gaming:** Massively Multiplayer Online Games (MMOGs) with large server-side state, where GC pauses could lead to noticeable lag or disconnects for players.
 
 Essentially, any large-scale, latency-sensitive Java application that was previously constrained by GC pauses or forced to use smaller, less efficient heap configurations found a transformative solution in C4. It unlocked the ability to use Java in demanding environments where it was previously considered unsuitable.
-{/* VISUAL_IDEA: A simple "Before C4 / After C4" comparison for a latency-sensitive app. Before: graph with spiky high latencies. After: graph with consistently low latencies. */}
+
+<BeforeAfterC4Comparison />
 
 ## Section 5: C4's Legacy: Shaping Modern Garbage Collection
 {/* IMPLEMENTED: Timeline/flowchart: Ref Counting -> Mark-Sweep -> Mark-Compact -> Generational -> CMS -> G1 -> C4 -> ZGC/Shenandoah, highlighting C4's key contributions (e.g., concurrent compaction, barrier mechanisms) and how they flow into ZGC/Shenandoah. */}

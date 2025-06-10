@@ -10,6 +10,8 @@ import CLTConvergenceDemo from './animations/CLTConvergenceDemo';
 import FatTailedDistributionDemo from './animations/FatTailedDistributionDemo';
 import IrisClassificationDemo from './animations/IrisClassificationDemo';
 import ModelComparisonDemo from './animations/ModelComparisonDemo';
+import BeforeAfterC4Comparison from './animations/BeforeAfterC4Comparison';
+import HeapScanPointerHealing from './animations/HeapScanPointerHealing';
 import PGPTool from './PGPTool'; // Import PGPTool
 import DidVcExplorer from './DidVcExplorer'; // Import DidVcExplorer
 import AsteroidsGame from './AsteroidsGameNew'; // Import AsteroidsGame
@@ -215,6 +217,8 @@ export const components = {
   FatTailedDistributionDemo,
   IrisClassificationDemo,
   ModelComparisonDemo,
+  BeforeAfterC4Comparison,
+  HeapScanPointerHealing,
   ShrinkingVisualization,
   TestSpaceExploration,
   PropertyVsExampleComparison,
