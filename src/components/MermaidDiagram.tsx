@@ -52,10 +52,7 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code }) => {
         try {
           const { svg, bindFunctions } = await mermaid.render(diagramSvgId, mermaidCode);
           
-          // Check if svg contains actual diagram content
-          const hasContent = svg.includes('<g>') && !svg.includes('<g></g>');
-          
-          if (mermaidRef.current && isMounted && hasContent) {
+          if (mermaidRef.current && isMounted) {
             mermaidRef.current.innerHTML = svg;
             if (bindFunctions && typeof bindFunctions === 'function') {
               bindFunctions(mermaidRef.current);
