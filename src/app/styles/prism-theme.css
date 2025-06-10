@@ -24,6 +24,7 @@
   --line-number-bg: #1e1e1e;
   --line-highlight-bg: #343434;
   --line-highlight-border: #ffcc00;
+  --inline-code-yellow: #d4a76a;
 }
 
 pre[class*="language-"],
@@ -38,6 +39,7 @@ code[class*="language-"] {
   line-height: 1.5;
   tab-size: 2;
   hyphens: none;
+  background: none;
 }
 
 pre[class*="language-"] {
@@ -54,8 +56,14 @@ pre[class*="language-"] {
   padding: .2em .4em;
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.3);
-  color: #ffcc00;
+  color: var(--inline-code-yellow);
   white-space: normal;
+}
+
+/* Code inside pre should have no background */
+pre[class*="language-"] code[class*="language-"] {
+  background: none;
+  padding: 0;
 }
 
 /* Token colors */
@@ -222,4 +230,42 @@ pre[class*="language-"]::-webkit-scrollbar-thumb {
 
 pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Diff language support */
+.token.deleted {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ff6b6b;
+}
+
+.token.inserted {
+  background-color: rgba(0, 255, 0, 0.1);
+  color: #51cf66;
+}
+
+.token.coord {
+  color: #a9a9a9;
+}
+
+/* Line highlighting improvements */
+.line-highlight {
+  background: rgba(255, 204, 0, 0.05);
+  border-left: 3px solid var(--inline-code-yellow);
+}
+
+/* Better contrast for comments */
+.token.comment {
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* Improved operator visibility */
+.token.operator {
+  color: #ff79c6;
+}
+
+/* Better class name visibility */
+.token.class-name {
+  color: #8be9fd;
+  font-weight: 600;
 }

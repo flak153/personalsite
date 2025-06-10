@@ -21,19 +21,7 @@ export default function CombinedBackground() {
   // Detect if we're on a route that needs intensive background
   const isHomePage = pathname === "/";
   
-  // Debug logging
-  useEffect(() => {
-    console.log("CombinedBackground debug:", {
-      pathname,
-      isHomePage,
-      animationEnabled,
-      circuitBoardEnabled: settings.animations.circuitBoard.enabled,
-      homePageOnly: settings.animations.circuitBoard.homePageOnly,
-      shouldShowCircuitBoard: settings.animations.circuitBoard.enabled && 
-        animationEnabled &&
-        (!settings.animations.circuitBoard.homePageOnly || isHomePage)
-    });
-  }, [pathname, isHomePage, animationEnabled]);
+  // Removed debug logging
   
   // Stagger initialization to improve perceived performance
   useEffect(() => {

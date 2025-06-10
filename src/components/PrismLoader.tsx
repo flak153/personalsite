@@ -2,16 +2,7 @@
 
 import { useEffect } from "react";
 
-// Define a global Prism type to avoid TypeScript errors
-declare global {
-  interface Window {
-    Prism: {
-      highlightAll: () => void;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      languages: Record<string, any>;
-    };
-  }
-}
+// Prism types are declared in src/types/global.d.ts
 
 export default function PrismLoader() {
   useEffect(() => {
@@ -40,6 +31,15 @@ export default function PrismLoader() {
         await import("prismjs/components/prism-json");   // JSON
         await import("prismjs/components/prism-rust");   // Rust
         await import("prismjs/components/prism-go");     // Go
+        
+        // Additional language support
+        await import("prismjs/components/prism-yaml");   // YAML
+        await import("prismjs/components/prism-docker"); // Docker
+        await import("prismjs/components/prism-sql");    // SQL
+        await import("prismjs/components/prism-graphql"); // GraphQL
+        await import("prismjs/components/prism-markdown"); // Markdown
+        await import("prismjs/components/prism-diff");   // Diff
+        await import("prismjs/components/prism-git");    // Git
         
         // Manually register the TSX language since there might be dependency issues
         if (typeof window !== 'undefined' && window.Prism && window.Prism.languages.typescript && window.Prism.languages.jsx) {

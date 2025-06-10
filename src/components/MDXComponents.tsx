@@ -28,6 +28,7 @@ import { starfieldAnimation } from "@/app/blog/canvas-demos/starfield";
 import ResourceLegend from './ResourceLegend';
 import ResourceTypeIcon from './ResourceTypeIcon';
 import InteractiveDecisionTree from './InteractiveDecisionTree';
+import CodeBlock from './CodeBlock';
 
 // Dynamically import MermaidDiagram to avoid SSR issues
 const MermaidDiagram = dynamic(
@@ -283,9 +284,91 @@ export const components = {
       </li>
     );
   },
-  pre: (props: React.HTMLAttributes<HTMLPreElement>) => {
-    // Simplified pre component: only applies styling, no special Mermaid handling.
-    // Mermaid diagrams will be handled by the <Mermaid code={...} /> component.
+  pre: (props: React.HTMLAttributes<HTMLPreElement> & { fileName?: string; highlightLines?: string }) => {
+    // Check if children is already a code element
+    let codeElement: React.ReactElement<{ className?: string; children?: React.ReactNode }> | undefined;
+    
+    if (React.isValidElement(props.children)) {
+      // Check if it's a code element
+      if (typeof props.children.type === 'string' && props.children.type === 'code') {
+        codeElement = props.children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+      } else if (typeof props.children.type === 'function' && props.children.type.name === 'code') {
+        codeElement = props.children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+      } else if (props.children.props?.className?.includes('language-')) {
+        // Direct code element with language class
+        codeElement = props.children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+      }
+    } else {
+      // Try to find code element in children array
+      const childrenArray = React.Children.toArray(props.children);
+      codeElement = childrenArray.find(
+        child => React.isValidElement(child) && 
+        (child.type === 'code' || (typeof child.type === 'function' && child.type.name === 'code'))
+      ) as React.ReactElement<{ className?: string; children?: React.ReactNode }> | undefined;
+    }
+    
+    if (codeElement && codeElement.props.className?.includes('language-')) {
+      // Parse highlight lines if provided (e.g., {1,3-5})
+      const highlightLines: number[] = [];
+      if (props.highlightLines) {
+        const ranges = props.highlightLines.split(',');
+        ranges.forEach(range => {
+          if (range.includes('-')) {
+            const [start, end] = range.split('-').map(n => parseInt(n.trim()));
+            for (let i = start; i <= end; i++) {
+              highlightLines.push(i);
+            }
+          } else {
+            highlightLines.push(parseInt(range.trim()));
+          }
+        });
+      }
+      
+      // Extract the raw text content from potentially highlighted code
+      let codeContent = '';
+      
+      // If children is already syntax highlighted (contains spans), extract text
+      if (React.isValidElement(codeElement.props.children)) {
+        // This means it's already been processed by Prism
+        const extractText = (node: React.ReactNode): string => {
+          if (typeof node === 'string') return node;
+          if (React.isValidElement(node)) {
+            return React.Children.toArray(node.props.children).map(extractText).join('');
+          }
+          if (Array.isArray(node)) {
+            return node.map(extractText).join('');
+          }
+          return '';
+        };
+        codeContent = extractText(codeElement.props.children);
+      } else if (typeof codeElement.props.children === 'string') {
+        codeContent = codeElement.props.children;
+      } else if (Array.isArray(codeElement.props.children)) {
+        // Handle array of mixed content
+        const extractText = (node: React.ReactNode): string => {
+          if (typeof node === 'string') return node;
+          if (React.isValidElement(node)) {
+            return React.Children.toArray(node.props.children).map(extractText).join('');
+          }
+          return '';
+        };
+        codeContent = codeElement.props.children.map(extractText).join('');
+      }
+      
+      return (
+        <CodeBlock
+          className={codeElement.props.className}
+          fileName={props.fileName}
+          highlightLines={highlightLines}
+          showLineNumbers={true}
+          collapsible={true}
+        >
+          {codeContent}
+        </CodeBlock>
+      );
+    }
+    
+    // Fallback for non-code pre elements
     return (
       <div className="my-8 rounded-lg overflow-hidden shadow-lg max-w-4xl border border-gray-700/50">
         <pre {...props} className={`${props.className || ''} shadow-inner`} />
@@ -293,21 +376,12 @@ export const components = {
     );
   },
   code: (props: React.HTMLAttributes<HTMLElement>) => {
-    if (props.className) {
-      const language = props.className.replace('language-', '');
-      return (
-        <>
-          {language && (
-            <div className="bg-gray-800 px-4 py-2 text-sm text-blue-300 font-mono font-bold rounded-t-lg border-b border-gray-700 flex justify-between items-center">
-              <span>{language}</span>
-              <span className="text-xs text-gray-400">code snippet</span>
-            </div>
-          )}
-          <code {...props} className={`${props.className} font-mono text-base`} />
-        </>
-      );
+    // Inline code only - block code is handled by pre
+    if (!props.className?.includes('language-')) {
+      return <code className="bg-black/30 px-2 py-1 rounded font-mono text-yellow-300/70 font-bold" {...props} />;
     }
-    return <code className="bg-black/30 px-2 py-1 rounded font-mono text-yellow-300 font-bold" {...props} />;
+    // Return as-is for block code (will be processed by pre)
+    return <code {...props} />;
   },
   a: ({ href, children }: { href?: string; children: React.ReactNode }) => (
     <a 

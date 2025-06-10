@@ -4,21 +4,11 @@ import { useState, useEffect } from "react";
 import { serialize } from "next-mdx-remote/serialize";
 import { MDXRemote } from "next-mdx-remote";
 import { components } from "./MDXComponents";
-import rehypePrism from "rehype-prism-plus";
+import { remarkCodeMeta } from "@/lib/remark-code-meta";
+import { rehypeCodeMeta } from "@/lib/rehype-code-meta";
+// Removed rehype-prism-plus - now handled by CodeBlock component
 
-// Fix global Prism type mismatch for MDXContent
-// The Prism property must always have both highlightAll and languages
-// Unify the type declaration
-
-declare global {
-  interface Window {
-    Prism: {
-      highlightAll: () => void;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      languages: Record<string, any>;
-    };
-  }
-}
+// Prism types are declared in src/types/global.d.ts
 
 interface MDXContentProps {
   source: string;
@@ -38,22 +28,8 @@ export default function MDXContent({ source }: MDXContentProps) {
         const serialized = await serialize(source, {
           parseFrontmatter: true,
           mdxOptions: {
-            rehypePlugins: [
-              [rehypePrism, { 
-                showLineNumbers: true,
-                ignoreMissing: true, // Don't throw errors for missing language definitions
-                aliases: {
-                  // Common language aliases
-                  js: 'javascript',
-                  py: 'python',
-                  rb: 'ruby',
-                  ts: 'typescript',
-                  sh: 'bash',
-                  zsh: 'bash',
-                  'c++': 'cpp'
-                }
-              }]
-            ]
+            remarkPlugins: [remarkCodeMeta],
+            rehypePlugins: [rehypeCodeMeta],
           }
         });
         setMdxSource(serialized);
