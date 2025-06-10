@@ -118,7 +118,7 @@ export default function CodeBlock({
 
   // Split code into lines for processing
   const codeLines = codeText.split("\n");
-  const shouldBeCollapsible = collapsible && codeLines.length > 20;
+  const shouldBeCollapsible = collapsible && codeLines.length > 14;
   
   // Render lines with highlighting
   const renderCodeWithLineNumbers = () => {

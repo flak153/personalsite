@@ -362,6 +362,7 @@ export const components = {
           highlightLines={highlightLines}
           showLineNumbers={true}
           collapsible={true}
+          startCollapsed={true}
         >
           {codeContent}
         </CodeBlock>
