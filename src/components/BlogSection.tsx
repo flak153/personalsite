@@ -33,7 +33,6 @@ export default function BlogSection({ featuredPost, recentPosts, allPosts }: Blo
             <article className="border border-white/40 rounded-lg p-6 hover:border-white hover:shadow-lg transition-all bg-black/20 backdrop-blur-sm hover:scale-105">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="bg-white/20 px-3 py-1 rounded-full text-xs text-white">Featured</span>
                   <time className="text-white/90 font-medium" dateTime={featuredPost.date}>{featuredPost.date}</time>
                   {featuredPost.readTime && <span className="text-white/50" aria-hidden="true">•</span>}
                   {featuredPost.readTime && <span className="text-white/70 text-sm">{featuredPost.readTime}</span>}
