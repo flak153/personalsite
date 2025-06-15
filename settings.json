@@ -19,7 +19,7 @@
       "First-Gen Engineer",
       "YAGNI Enforcer",
       "Garbage Collector",
-      "Pipeline Perfectionist",
+      "CI/CD Pipeline Perfectionist",
       "Latency Hunter",
       "Bronx Built",
       "Can Cook, Can't Bake",
@@ -82,6 +82,10 @@
     }
   },
   "animations": {
+    "codeRain": {
+      "enabled": false,
+      "description": "Matrix-style code rain background animation"
+    },
     "circuitBoard": {
       "enabled": true,
       "homePageOnly": false,

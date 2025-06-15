@@ -85,11 +85,6 @@
     - **Include:** Interactive deployment simulators, traffic routing visualizations
     - **Real examples:** Database migrations, stateful services, rollback strategies
 
-- [ ] **"GitOps: Infrastructure as Code in Practice"**
-    - **Concept:** Complete GitOps workflow from commit to production
-    - **Tools:** ArgoCD, Flux, Terraform, Ansible comparisons
-    - **Include:** Live demo with GitHub Actions, security considerations
-
 - [ ] **"Observability: Building a Culture of Debugging"**
     - **Concept:** Three pillars (logs, metrics, traces) with practical implementation
     - **Stack:** Prometheus, Grafana, OpenTelemetry, ELK
@@ -109,11 +104,6 @@
     - **Concept:** Pipeline profiling, parallelization, caching strategies
     - **Include:** Build time analyzer, dependency graph visualizer
     - **Metrics:** Lead time, deployment frequency, MTTR, change failure rate
-
-- [ ] **"Chaos Engineering: Breaking Things on Purpose"**
-    - **Concept:** Implementing chaos engineering from scratch
-    - **Tools:** Chaos Monkey, Litmus, Gremlin alternatives
-    - **Include:** Failure scenario designer, blast radius calculator
 
 ## DevOps Projects & Tools (Personal Website Friendly)
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ApartmentBuildingMemoryAnalogy from './animations/ApartmentBuildingMemoryAnalogy';
 import PlaceholderAnimation from './animations/PlaceholderAnimation';
 import GCEvolutionVisualization from './animations/GCEvolutionVisualization';
@@ -30,6 +30,8 @@ import { starfieldAnimation } from "@/app/blog/canvas-demos/starfield";
 import ResourceLegend from './ResourceLegend';
 import ResourceTypeIcon from './ResourceTypeIcon';
 import InteractiveDecisionTree from './InteractiveDecisionTree';
+import DatabaseDecisionTree from './DatabaseDecisionTree';
+import DatabasePerformanceComparison from './animations/DatabasePerformanceComparison';
 import CodeBlock from './CodeBlock';
 
 // Dynamically import MermaidDiagram to avoid SSR issues
@@ -168,11 +170,19 @@ const TableOfContents = ({ headings }: { headings: Array<{ title: string, link: 
 
 const Callout = ({ 
   children, 
-  type = "info" 
+  type = "info",
+  collapsible = false,
+  defaultOpen = false,
+  title
 }: { 
   children: React.ReactNode; 
-  type?: "info" | "warning" | "insight" | "danger" | string 
+  type?: "info" | "warning" | "insight" | "danger" | string;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+  title?: string;
 }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
   const colors: Record<string, { bg: string; border: string; icon: string }> = {
     info: { bg: "bg-blue-900/20", border: "border-blue-700", icon: "💡" },
     warning: { bg: "bg-yellow-900/20", border: "border-yellow-700", icon: "⚠️" },
@@ -180,11 +190,173 @@ const Callout = ({
     danger: { bg: "bg-red-900/20", border: "border-red-700", icon: "🚨" }
   };
   const style = colors[type] || colors["info"];
+  
+  if (!collapsible) {
+    return (
+      <div className={`my-6 p-4 ${style.bg} border-l-4 ${style.border} rounded-r-md`}>
+        <div className="flex items-start">
+          <div className="mr-2 text-xl">{style.icon}</div>
+          <div>{children}</div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Extract title from children if not provided
+  let extractedTitle = title;
+  let content = children;
+  
+  if (!title && React.isValidElement(children)) {
+    const childrenArray = React.Children.toArray(children);
+    if (childrenArray.length > 0) {
+      const firstChild = childrenArray[0];
+      if (React.isValidElement(firstChild) && firstChild.props.children) {
+        const firstChildContent = firstChild.props.children;
+        if (typeof firstChildContent === 'string' && firstChildContent.includes('**')) {
+          // Extract bolded text as title
+          const match = firstChildContent.match(/\*\*(.*?)\*\*/);
+          if (match) {
+            extractedTitle = match[1];
+            // Keep all content for expansion
+            content = children;
+          }
+        }
+      }
+    }
+  }
+  
   return (
-    <div className={`my-6 p-4 ${style.bg} border-l-4 ${style.border} rounded-r-md`}>
-      <div className="flex items-start">
-        <div className="mr-2 text-xl">{style.icon}</div>
-        <div>{children}</div>
+    <div className={`my-6 ${style.bg} border-l-4 ${style.border} rounded-r-md overflow-hidden transition-all duration-300`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors text-left`}
+      >
+        <div className="flex items-center gap-2">
+          <div className="text-xl">{style.icon}</div>
+          <div className="font-medium text-white">
+            {extractedTitle || "Click to expand"}
+          </div>
+        </div>
+        <div className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+          ▼
+        </div>
+      </button>
+      
+      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="px-4 pb-4 pt-0">
+          {content}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface TableColumn {
+  header: string;
+  key: string;
+  align?: "left" | "center" | "right";
+}
+
+interface TableRow {
+  [key: string]: React.ReactNode;
+}
+
+const Table = ({
+  columns,
+  data,
+  caption,
+  variant = "default"
+}: {
+  columns: TableColumn[];
+  data: TableRow[];
+  caption?: string;
+  variant?: "default" | "striped" | "bordered";
+}) => {
+  const getAlignment = (align?: string) => {
+    switch (align) {
+      case "center": return "text-center";
+      case "right": return "text-right";
+      default: return "text-left";
+    }
+  };
+
+  const variants = {
+    default: {
+      wrapper: "bg-gradient-to-b from-gray-800/40 to-gray-800/60 backdrop-blur-sm border border-gray-700 shadow-lg",
+      header: "bg-gray-700/50 border-b-2 border-yellow-500/30",
+      headerText: "text-yellow-400",
+      row: "hover:bg-yellow-500/10 transition-all duration-200",
+      cell: "text-gray-200",
+      divider: "divide-y divide-gray-700/50"
+    },
+    striped: {
+      wrapper: "bg-gray-800/50 backdrop-blur-sm border border-gray-700 shadow-2xl",
+      header: "bg-gradient-to-r from-blue-800/40 to-purple-800/40 border-b-2 border-blue-500/40",
+      headerText: "text-blue-300",
+      row: "odd:bg-white/[0.03] even:bg-white/[0.06] hover:bg-blue-500/15 transition-all duration-200",
+      cell: "text-gray-200",
+      divider: ""
+    },
+    bordered: {
+      wrapper: "bg-gray-800/60 backdrop-blur-sm border-2 border-yellow-500/40 shadow-yellow-500/20 shadow-xl",
+      header: "bg-yellow-800/30 border-b-2 border-yellow-500/50",
+      headerText: "text-yellow-300",
+      row: "hover:bg-yellow-500/15 hover:shadow-lg transition-all duration-200",
+      cell: "text-gray-200 border-r border-gray-700/50 last:border-r-0",
+      divider: "divide-y-2 divide-gray-700/50"
+    }
+  };
+
+  const style = variants[variant] || variants.default;
+
+  return (
+    <div className="my-8 overflow-x-auto rounded-xl">
+      <div className="inline-block min-w-full align-middle">
+        <div className="overflow-hidden rounded-xl shadow-xl">
+          <table className={`min-w-full ${style.wrapper}`}>
+            {caption && (
+              <caption className="px-6 py-3 text-sm text-gray-400 bg-black/60 border-b border-gray-800">
+                {caption}
+              </caption>
+            )}
+            <thead className={style.header}>
+              <tr>
+                {columns.map((col, idx) => (
+                  <th 
+                    key={idx} 
+                    className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${style.headerText} ${getAlignment(col.align)}`}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      {col.header}
+                      <span className="opacity-20 text-lg">↓</span>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className={style.divider}>
+              {data.map((row, rowIdx) => (
+                <tr key={rowIdx} className={`${style.row} group`}>
+                  {columns.map((col, colIdx) => (
+                    <td 
+                      key={colIdx} 
+                      className={`px-6 py-4 text-sm ${style.cell} ${getAlignment(col.align)} ${
+                        colIdx === 0 ? 'font-medium text-white' : ''
+                      }`}
+                    >
+                      <div className="relative">
+                        {row[col.key]}
+                        {colIdx === 0 && (
+                          <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-4 bg-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full" />
+                        )}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -196,6 +368,7 @@ export const components = {
   Script,
   TableOfContents,
   Callout,
+  Table,
   Mermaid: MermaidDiagram, // Added Mermaid component
   MermaidDiagram, // Also export as MermaidDiagram
   PGPTool, // Add PGPTool to components
@@ -207,6 +380,8 @@ export const components = {
   ResourceLegend,
   ResourceTypeIcon,
   InteractiveDecisionTree,
+  DatabaseDecisionTree,
+  DatabasePerformanceComparison,
   
   ApartmentBuildingMemoryAnalogy,
   PlaceholderAnimation,
