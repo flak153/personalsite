@@ -210,15 +210,18 @@ const Callout = ({
     const childrenArray = React.Children.toArray(children);
     if (childrenArray.length > 0) {
       const firstChild = childrenArray[0];
-      if (React.isValidElement(firstChild) && firstChild.props.children) {
-        const firstChildContent = firstChild.props.children;
-        if (typeof firstChildContent === 'string' && firstChildContent.includes('**')) {
-          // Extract bolded text as title
-          const match = firstChildContent.match(/\*\*(.*?)\*\*/);
-          if (match) {
-            extractedTitle = match[1];
-            // Keep all content for expansion
-            content = children;
+      if (React.isValidElement(firstChild)) {
+        const props = firstChild.props as { children?: React.ReactNode };
+        if (props.children) {
+          const firstChildContent = props.children;
+          if (typeof firstChildContent === 'string' && firstChildContent.includes('**')) {
+            // Extract bolded text as title
+            const match = firstChildContent.match(/\*\*(.*?)\*\*/);
+            if (match) {
+              extractedTitle = match[1];
+              // Keep all content for expansion
+              content = children;
+            }
           }
         }
       }
