@@ -9,6 +9,7 @@ export interface BlogPost {
   category: string; // Keep for backwards compatibility
   tags: string[]; // New: array of tags
   readTime: string;
+  draft?: boolean; // Optional draft flag
 }
 
 export function getBlogPosts(): BlogPost[] {
@@ -35,6 +36,7 @@ export function getBlogPosts(): BlogPost[] {
     let category = "General"; // Default category
     let tags: string[] = [];
     let readTime = "";
+    let draft = false; // Default to published
     
     if (match) {
       const frontmatter = match[1];
@@ -59,6 +61,7 @@ export function getBlogPosts(): BlogPost[] {
           }
         }
         if (key.trim() === "readTime") readTime = value;
+        if (key.trim() === "draft") draft = value === "true";
       });
     }
     
@@ -76,15 +79,18 @@ export function getBlogPosts(): BlogPost[] {
       }
     }
 
-    posts.push({
-      slug,
-      title,
-      excerpt,
-      date: parsedDate.toISOString().split('T')[0], // Store date in YYYY-MM-DD format
-      category,
-      tags,
-      readTime
-    });
+    // Only add non-draft posts
+    if (!draft) {
+      posts.push({
+        slug,
+        title,
+        excerpt,
+        date: parsedDate.toISOString().split('T')[0], // Store date in YYYY-MM-DD format
+        category,
+        tags,
+        readTime
+      });
+    }
   }
   
   // Sort by date (most recent first)
