@@ -31,6 +31,9 @@ import ResourceLegend from './ResourceLegend';
 import ResourceTypeIcon from './ResourceTypeIcon';
 import InteractiveDecisionTree from './InteractiveDecisionTree';
 import DatabaseDecisionTree from './DatabaseDecisionTree';
+import DecisionTree from './DecisionTree';
+import EngineeringDecisionTree from './EngineeringDecisionTree';
+import DatabaseSelectionTree from './DatabaseSelectionTree';
 import DatabasePerformanceComparison from './animations/DatabasePerformanceComparison';
 import CodeBlock from './CodeBlock';
 
@@ -384,6 +387,9 @@ export const components = {
   ResourceTypeIcon,
   InteractiveDecisionTree,
   DatabaseDecisionTree,
+  DecisionTree,
+  EngineeringDecisionTree,
+  DatabaseSelectionTree,
   DatabasePerformanceComparison,
   
   ApartmentBuildingMemoryAnalogy,
