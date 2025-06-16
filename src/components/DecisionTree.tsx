@@ -147,7 +147,7 @@ export default function DecisionTree({
     setCurrentNodeId(startId);
   };
   
-  const renderSection = (section: Outcome["sections"][0]) => {
+  const renderSection = (section: NonNullable<Outcome["sections"]>[0]) => {
     const variant = section.variant || "neutral";
     const styles = variantStyles[variant];
     

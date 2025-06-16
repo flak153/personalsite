@@ -22,7 +22,8 @@ export const databaseDecisionTreeData: Record<string, TreeNode> = {
       { label: "Key-based lookups with predictable queries", nextId: "keyBased", impact: "NoSQL territory" },
       { label: "Complex queries with JOINs and transactions", nextId: "relational", impact: "SQL databases excel here" },
       { label: "Time-series or sequential data", nextId: "timeSeries", impact: "Specialized solutions available" },
-      { label: "Full-text search and analytics", nextId: "searchAnalytics", impact: "Search-optimized stores" }
+      { label: "Full-text search and analytics", nextId: "searchAnalytics", impact: "Search-optimized stores" },
+      { label: "Graph relationships and connected data", nextId: "graphDatabases", impact: "Neo4j leads this space" }
     ]
   },
   
@@ -121,6 +122,18 @@ export const databaseDecisionTreeData: Record<string, TreeNode> = {
       { label: "Full-text search with relevance scoring", nextId: "elasticsearchRecommendation" },
       { label: "Real-time analytics on large datasets", nextId: "clickhouseAnalyticsRecommendation" },
       { label: "Log analysis and observability", nextId: "opensearchRecommendation" }
+    ]
+  },
+  
+  graphDatabases: {
+    id: "graphDatabases",
+    type: "decision" as const,
+    question: "What type of graph workload do you have?",
+    description: "Graph databases excel at relationship-heavy queries like social networks, recommendations, and knowledge graphs.",
+    options: [
+      { label: "Complex graph traversals and analytics", nextId: "neo4jRecommendation", impact: "Industry standard" },
+      { label: "Simple relationships with SQL", nextId: "postgresRecommendation", impact: "PostgreSQL can handle it" },
+      { label: "Massive scale graph processing", nextId: "neo4jRecommendation", impact: "Need specialized tools" }
     ]
   },
   
@@ -991,7 +1004,7 @@ export const databaseDecisionTreeData: Record<string, TreeNode> = {
         variant: "neutral" as const,
         content: {
           primary: ["PostgreSQL"],
-          alternatives: ["MySQL", "MariaDB", "CockroachDB (when you outgrow Postgres)"]
+          alternatives: ["MySQL", "MariaDB", "CockroachDB (distributed)", "Neon (serverless)"]
         }
       },
       {
@@ -1621,5 +1634,171 @@ export const databaseDecisionTreeData: Record<string, TreeNode> = {
       }
     ],
     footer: "For log analysis and observability, OpenSearch provides enterprise features without license concerns."
+  },
+
+  foundationdbRecommendation: {
+    id: "foundationdbRecommendation",
+    type: "outcome" as const,
+    title: "FoundationDB - The Database Construction Kit",
+    description: "FoundationDB is Apple's distributed key-value store that provides ACID transactions at scale. It's the foundation layer for building other databases.",
+    sections: [
+      {
+        title: "Why FoundationDB is Unique",
+        type: "grid" as const,
+        variant: "success" as const,
+        content: [
+          "ACID transactions at any scale",
+          "Ordered key-value API",
+          "Multi-model via layers",
+          "Deterministic testing"
+        ],
+        icon: "🏗️"
+      },
+      {
+        title: "Core Capabilities",
+        type: "list" as const,
+        variant: "success" as const,
+        content: [
+          "Serializable isolation - Strongest consistency guarantee",
+          "Multi-key transactions - ACID across any keys",
+          "Automatic sharding - Transparent data distribution",
+          "Self-healing - Automatic failure recovery",
+          "Simulation testing - Deterministic failure testing",
+          "Layer concept - Build any data model on top"
+        ],
+        icon: "✓"
+      },
+      {
+        title: "Who Uses FoundationDB",
+        type: "grid" as const,
+        variant: "info" as const,
+        content: [
+          "Apple - Powers iCloud",
+          "Snowflake - Metadata layer",
+          "Wavefront - Time-series layer",
+          "FoundationDB Record Layer"
+        ],
+        icon: "🏢"
+      },
+      {
+        title: "When to Use FoundationDB",
+        type: "list" as const,
+        variant: "info" as const,
+        content: [
+          "Building a custom database or storage system",
+          "Need ACID transactions with massive scale",
+          "Require strict serializable isolation",
+          "Want to build domain-specific data models"
+        ],
+        icon: "🎯"
+      },
+      {
+        title: "The Layer Concept",
+        type: "text" as const,
+        variant: "info" as const,
+        content: "FoundationDB provides a minimal ordered key-value API. 'Layers' built on top provide higher-level data models: Document Layer (MongoDB compatible), Record Layer (Protocol Buffers), SQL Layer, and more. This separation enables innovation at the data model level while keeping the storage engine rock-solid."
+      },
+      {
+        title: "Production Considerations",
+        type: "list" as const,
+        variant: "warning" as const,
+        content: [
+          "Low-level API requires building abstractions",
+          "Limited to 10MB transactions",
+          "5-second transaction time limit",
+          "Requires careful key design"
+        ],
+        icon: "⚠️"
+      },
+      {
+        title: "Why Apple Chose FoundationDB",
+        type: "text" as const,
+        variant: "neutral" as const,
+        content: "Apple acquired FoundationDB in 2015 to power iCloud. The deterministic simulation testing was key - it can simulate years of failure scenarios in minutes. This gives Apple confidence in storing billions of users' data. The simple API also allowed them to build exactly what they needed on top."
+      }
+    ],
+    footer: "FoundationDB: When you need to build a database, not just use one. The foundation that powers some of the world's largest systems."
+  },
+
+  neo4jRecommendation: {
+    id: "neo4jRecommendation",
+    type: "outcome" as const,
+    title: "Neo4j - The Graph Database Leader",
+    description: "Neo4j is the world's leading graph database, purpose-built for connected data and complex relationship queries.",
+    sections: [
+      {
+        title: "Why Neo4j Dominates Graphs",
+        type: "grid" as const,
+        variant: "success" as const,
+        content: [
+          "Native graph storage",
+          "Cypher query language",
+          "ACID transactions",
+          "Graph algorithms library"
+        ],
+        icon: "🕸️"
+      },
+      {
+        title: "Perfect Use Cases",
+        type: "list" as const,
+        variant: "success" as const,
+        content: [
+          "Social Networks - Friend relationships and recommendations",
+          "Fraud Detection - Complex pattern matching",
+          "Knowledge Graphs - Connected information",
+          "Recommendation Engines - Collaborative filtering",
+          "Network & IT Operations - Dependency mapping",
+          "Identity & Access Management - Permission hierarchies"
+        ],
+        icon: "🎯"
+      },
+      {
+        title: "Key Advantages",
+        type: "list" as const,
+        variant: "info" as const,
+        content: [
+          "Index-free adjacency - O(1) relationship traversal",
+          "Cypher - Intuitive graph query language",
+          "Graph algorithms - PageRank, community detection, etc.",
+          "Visualization tools - See your data connections",
+          "ACID compliance - Full transaction support"
+        ],
+        icon: "✓"
+      },
+      {
+        title: "When NOT to Use Neo4j",
+        type: "list" as const,
+        variant: "warning" as const,
+        content: [
+          "Simple tabular data without relationships",
+          "High-volume time-series data",
+          "Large binary object storage",
+          "When eventual consistency is acceptable"
+        ],
+        icon: "⚠️"
+      },
+      {
+        title: "Who's Using Neo4j",
+        type: "pills" as const,
+        variant: "neutral" as const,
+        content: {
+          primary: ["eBay", "Walmart", "LinkedIn", "Airbnb"],
+          alternatives: ["NASA", "UBS", "Cisco", "HP"]
+        }
+      },
+      {
+        title: "Cypher Example",
+        type: "text" as const,
+        variant: "info" as const,
+        content: "MATCH (user:User)-[:FRIEND]->(friend)-[:LIKES]->(restaurant) WHERE user.name = 'Alice' AND NOT (user)-[:VISITED]->(restaurant) RETURN restaurant.name, COUNT(friend) AS recommendations ORDER BY recommendations DESC"
+      },
+      {
+        title: "Scaling Considerations",
+        type: "text" as const,
+        variant: "warning" as const,
+        content: "Neo4j scales vertically well but horizontal scaling requires Neo4j Enterprise with causal clustering. For massive graphs (billions of edges), consider graph processing frameworks like Apache Spark GraphX or Pregel for batch analytics alongside Neo4j for real-time queries."
+      }
+    ],
+    footer: "Neo4j: When your queries start with 'find all friends of friends who...', you need a graph database."
   }
 };
