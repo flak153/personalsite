@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { BLOG_CATEGORIES, BLOG_TAGS } from "@/lib/blog-metadata";
 
 export interface BlogPost {
   slug: string;
@@ -10,6 +11,23 @@ export interface BlogPost {
   tags: string[]; // New: array of tags
   readTime: string;
   draft?: boolean; // Optional draft flag
+}
+
+// Helper function to resolve constant references to their values
+function resolveConstantValue(value: string): string {
+  // Check if it's a BLOG_CATEGORIES reference
+  if (value.startsWith("BLOG_CATEGORIES.")) {
+    const key = value.replace("BLOG_CATEGORIES.", "") as keyof typeof BLOG_CATEGORIES;
+    return BLOG_CATEGORIES[key] || value;
+  }
+  
+  // Check if it's a BLOG_TAGS reference
+  if (value.startsWith("BLOG_TAGS.")) {
+    const key = value.replace("BLOG_TAGS.", "") as keyof typeof BLOG_TAGS;
+    return BLOG_TAGS[key] || value;
+  }
+  
+  return value;
 }
 
 export function getBlogPosts(): BlogPost[] {
@@ -49,15 +67,21 @@ export function getBlogPosts(): BlogPost[] {
         if (key.trim() === "title") title = value;
         if (key.trim() === "excerpt") excerpt = value;
         if (key.trim() === "date") date = value;
-        if (key.trim() === "category") category = value;
+        if (key.trim() === "category") category = resolveConstantValue(value);
         if (key.trim() === "tags") {
           // Parse tags - support both array format and comma-separated
           if (value.startsWith("[") && value.endsWith("]")) {
             // Array format: [tag1, tag2, tag3]
-            tags = value.slice(1, -1).split(",").map(t => t.trim().replace(/^['"]|['"]$/g, ''));
+            tags = value.slice(1, -1).split(",").map(t => {
+              const trimmed = t.trim().replace(/^['"]|['"]$/g, '');
+              return resolveConstantValue(trimmed);
+            });
           } else {
             // Comma-separated format: tag1, tag2, tag3
-            tags = value.split(",").map(t => t.trim());
+            tags = value.split(",").map(t => {
+              const trimmed = t.trim();
+              return resolveConstantValue(trimmed);
+            });
           }
         }
         if (key.trim() === "readTime") readTime = value;

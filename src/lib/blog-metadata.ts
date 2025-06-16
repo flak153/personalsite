@@ -1,8 +1,8 @@
 export const BLOG_CATEGORIES = {
   SOFTWARE_ENGINEERING: "Software Engineering",
   WEB_DEVELOPMENT: "Web Development",
-  DATABASE_ENGINEERING: "Database Engineering",
-  DATA_AI: "Data & AI",
+  DATABASE_ENGINEERING: "Databases",
+  DATA_AI: "Data Science & AI",
   DEVOPS_SECURITY: "DevOps & Security",
   SYSTEM_ARCHITECTURE: "System Architecture",
   COMPUTER_SCIENCE: "Computer Science",
